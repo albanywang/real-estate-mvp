@@ -1,0 +1,50 @@
+┌─────────────────┐       ┌─────────────────┐
+│      User       │       │    Property     │
+├─────────────────┤       ├─────────────────┤
+│ id              │       │ id              │
+│ email           │       │ title           │
+│ password_hash   │       │ description     │
+│ first_name      │       │ price           │
+│ last_name       │       │ bedrooms        │
+│ phone           │       │ bathrooms       │
+│ created_at      │       │ area            │
+│ updated_at      │       │ address         │
+├─────────────────┤       │ city            │
+│ create()        │       │ state           │
+│ findByEmail()   │       │ zip_code        │
+│ findById()      │       │ property_type   │
+│ update()        │       │ listing_type    │
+│ comparePassword()│      │ location        │
+│ getSavedProperties()│   │ created_at      │
+│ toggleSavedProperty()│  │ updated_at      │
+└────────┬────────┘       ├─────────────────┤
+         │                │ create()        │
+         │                │ getAll()        │
+         │                │ getById()       │
+         │                │ update()        │
+         │                │ delete()        │
+         │                │ getNearby()     │
+         │                └────────┬────────┘
+         │                         │
+         │                         │
+         │                         │
+         │     ┌─────────────────┐ │
+         │     │PropertyImage    │ │
+         │     ├─────────────────┤ │
+         │     │ id              │ │
+         │     │ property_id     │◄┘
+         │     │ image_url       │
+         │     │ is_primary      │
+         │     │ created_at      │
+         │     └─────────────────┘
+         │
+         │
+         │
+    ┌────▼───────────┐
+    │SavedProperty   │
+    ├────────────────┤
+    │ id             │
+    │ user_id        │
+    │ property_id    │
+    │ created_at     │
+    └────────────────┘

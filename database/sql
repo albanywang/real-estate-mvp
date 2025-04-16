@@ -1,0 +1,29 @@
+-- View all properties
+SELECT * FROM properties LIMIT 10;
+
+-- View properties with their images
+SELECT p.property_id, p.title, p.price, pi.image_url 
+FROM properties p
+JOIN property_images pi ON p.property_id = pi.property_id
+WHERE pi.is_primary = true
+LIMIT 10;
+
+-- View properties with their features
+SELECT p.property_id, p.title, string_agg(f.name, ', ') as features
+FROM properties p
+JOIN property_features pf ON p.property_id = pf.property_id
+JOIN features f ON pf.feature_id = f.feature_id
+GROUP BY p.property_id, p.title
+LIMIT 10;
+
+-- View properties on a map (spatial query)
+SELECT property_id, title, price, 
+  ST_X(location) as longitude, 
+  ST_Y(location) as latitude
+FROM properties
+WHERE ST_DWithin(
+  location,
+  ST_SetSRID(ST_MakePoint(-122.4194, 37.7749), 4326),
+  5000  -- 5km radius
+)
+LIMIT 10;
