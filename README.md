@@ -1,4 +1,5 @@
 # real-estate-mvp
+real estate like zillow sample project structure for your real estate website MVP using React + Leaflet.js (frontend), Node.js + Express + PostgreSQL/PostGIS (backend), and OpenStreetMap for map tiles
 
 Frontend (React + Leaflet.js)
 /client
