@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealEstate Finder - Find Your Dream Home</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Your original CSS styles */
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --light-bg: #f8f9fa;
+      --dark-text: #2c3e50;
+      --light-text: #ecf0f1;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--light-bg);
+      color: var(--dark-text);
+      padding: 0;
+      margin: 0;
+    }
+    
+    header {
+      background-color: var(--primary-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .logo {
+      color: var(--light-text);
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 10px;
+      color: var(--accent-color);
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+    }
+    
+    nav li {
+      margin-left: 1.5rem;
+    }
+    
+    nav a {
+      color: var(--light-text);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+    
+    nav a:hover {
+      color: var(--secondary-color);
+    }
+    
+    main {
+      display: flex;
+      height: calc(100vh - 67px);
+      overflow: hidden;
+      padding: 10px; /* Add padding around the entire container */
+      box-sizing: border-box;
+      background-color: #f5f7fa;
+      justify-content: center; /* Center the content horizontally */
+    }
+    
+    .filters {
+      width: 350px;
+      min-width: 350px;
+      background-color: white;
+      padding: 3px;
+      margin-right: 20px; /* Add space between filter and map */
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+      z-index: 10;
+    }
+    
+    /* Set all text to not scale with container */
+    .filters h2,
+    .filters label,
+    .filters input,
+    .filters select,
+    .filters button {
+      font-size: 0.9rem; /* Consistent font size */
+      line-height: 1.4;
+    }    
+
+    .filters h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+    
+      /* Style checkboxes container */
+      .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+      }
+
+      .checkbox-item input {
+        width: auto;
+        margin-right: 5px;
+      }
+
+      /* Style search button */
+      button.search-btn {
+        height: 2.75rem; /* Match input/select height */
+      }
+
+    .filter-group {
+      margin-bottom: 1.2rem;
+      width: 100%;
+    }
+    
+    .filter-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Control dropdown size specifically */
+    .filter-group select {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem; /* Slightly smaller font */
+      height: 2.75rem; /* Fixed height for dropdowns */
+      background-position: right 0.75rem center; /* Position the dropdown arrow */
+      appearance: none; /* Remove default styling */
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: 1rem;
+      cursor: pointer;
+    }
+
+    
+    .price-range {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .price-range input {
+      flex: 1;
+      min-width: 0; /* Allow inputs to shrink if needed */
+    }
+    
+    /* Control text inputs */
+    .filter-group input[type="text"],
+    .filter-group input[type="number"] {
+      width: 100%;
+      height: 2.75rem; /* Match select height */
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .filter-group .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 0.5rem;
+    }
+    
+    .filter-group .checkbox-item {
+      display: flex;
+      align-items: center;
+      margin-right: 1rem;
+    }
+    
+    .filter-group .checkbox-item input {
+      width: auto;
+      margin-right: 5px;
+    }
+    
+    button.search-btn {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      width: 100%;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button.search-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    .map-container {
+      flex: 1;
+      position: relative;
+      border-radius: 10px; /* Rounded corners to match filter panel */
+      overflow: hidden; /* Keep the map inside the rounded corners */
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Matching shadow */
+    }
+    
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    
+    .property-list {
+      width: 350px;
+      background-color: white;
+      overflow-y: auto;
+      margin-left: 20px; /* Space between map and property list */
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Matching shadow */
+    }
+    
+    .property-card {
+      padding: 1rem;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .property-card:hover {
+      background-color: var(--light-bg);
+    }
+    
+    .property-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+    }
+    
+    .property-price {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+    
+    .property-address {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .property-features {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .property-feature {
+      display: flex;
+      align-items: center;
+    }
+    
+    .property-feature i {
+      margin-right: 5px;
+      color: var(--secondary-color);
+    }
+    
+    .property-description {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    
+    .leaflet-popup-content {
+      min-width: 200px;
+    }
+    
+    .map-popup {
+      text-align: center;
+    }
+    
+    .map-popup img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .map-popup h3 {
+      margin: 0 0 5px;
+      color: var(--accent-color);
+    }
+    
+    .map-popup p {
+      margin: 0 0 5px;
+    }
+    
+    .map-popup .view-btn {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .mobile-filters-toggle {
+      display: none;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 999;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 30px;
+      box-shadow: var(--box-shadow);
+      cursor: pointer;
+    }
+    
+    /* Login Popup Styles */
+    .login-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    
+    .login-popup-content {
+      background: white;
+      padding: 25px;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 420px;
+      position: relative;
+      box-shadow: var(--box-shadow);
+      animation: popup-fade-in 0.3s ease-out;
+    }
+    
+    @keyframes popup-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .login-popup-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+    }
+    
+    .login-popup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .login-popup-header h2 {
+      font-size: 24px;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+    
+    .login-popup-tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    
+    .login-popup-tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .login-popup-tab.active {
+      border-bottom: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+    
+    .login-popup-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .login-popup-form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .login-popup-form-group label {
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .login-popup-form-group input {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+    }
+    
+    .login-popup-form-group input:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .login-popup-forgot {
+      text-align: center;
+      margin: 10px 0;
+    }
+    
+    .login-popup-forgot a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .login-popup-submit {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .login-popup-submit:hover {
+      background-color: #c0392b;
+    }
+    
+    .login-popup-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #999;
+      font-size: 14px;
+    }
+    
+    .login-popup-divider::before,
+    .login-popup-divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .login-popup-divider::before {
+      margin-right: 10px;
+    }
+    
+    .login-popup-divider::after {
+      margin-left: 10px;
+    }
+    
+    .login-popup-social {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .login-popup-social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .login-popup-social-btn:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .login-popup-social-btn i {
+      margin-right: 10px;
+    }
+    
+    .login-popup-social-btn.google i {
+      color: #DB4437;
+    }
+    
+    .login-popup-social-btn.facebook i {
+      color: #4267B2;
+    }
+    
+    .login-popup-social-btn.apple i {
+      color: #000;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      main {
+        padding: 15px;
+      }
+      
+      .filters {
+        width: 300px;
+        min-width: 300px;
+        margin-right: 15px;
+      }
+      
+      .property-list {
+        width: 300px;
+        margin-left: 15px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+      }
+      
+      .filters {
+        width: 100%;
+        min-width: 100%;
+        height: 0;
+        overflow: hidden;
+        padding: 0;
+        margin-right: 0;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        transition: height 0.3s, padding 0.3s;
+      }
+      
+      .filters.active {
+        height: 500px;
+        padding: 1.5rem;
+      }
+      
+      .map-container {
+        height: 500px;
+        width: 100%;
+      }
+      
+      .property-list {
+        width: 100%;
+        border-left: none;
+      }
+      
+      .mobile-filters-toggle {
+        display: block;
+      }
+      
+      .login-popup-content {
+        width: 95%;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    
+    // Login Popup Component
+    const LoginPopup = ({ isOpen, onClose }) => {
+      const [activeTab, setActiveTab] = useState('signin');
+      const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        name: '',
+        confirmPassword: ''
+      });
+      
+      // If popup is not open, return null (but don't cause a render error)
+      if (!isOpen) return null;
+      
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      };
+      
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (activeTab === 'signin') {
+          // Handle sign in
+          console.log('Sign in with:', formData.email, formData.password);
+          // You would add authentication logic here
+        } else {
+          // Handle registration
+          if (formData.password !== formData.confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+          }
+          console.log('Register with:', formData.name, formData.email, formData.password);
+          // You would add registration logic here
+        }
+        
+        // For demo, just close the popup
+        onClose();
+      };
+      
+      const handleOverlayClick = (e) => {
+        if (e.target.className === 'login-popup-overlay') {
+          onClose();
+        }
+      };
+      
+      // Effect for event listener
+      useEffect(() => {
+        const handleEscKey = (e) => {
+          if (e.key === 'Escape') onClose();
+        };
+        
+        document.addEventListener('keydown', handleEscKey);
+        return () => document.removeEventListener('keydown', handleEscKey);
+      }, [onClose]);
+      
+      return (
+        <div className="login-popup-overlay" onClick={handleOverlayClick}>
+          <div className="login-popup-content">
+            <button className="login-popup-close" onClick={onClose}>×</button>
+            
+            <div className="login-popup-header">
+              <h2>Welcome to RealEstate Finder</h2>
+            </div>
+            
+            <div className="login-popup-tabs">
+              <div 
+                className={`login-popup-tab ${activeTab === 'signin' ? 'active' : ''}`}
+                onClick={() => setActiveTab('signin')}
+              >
+                Sign in
+              </div>
+              <div 
+                className={`login-popup-tab ${activeTab === 'register' ? 'active' : ''}`}
+                onClick={() => setActiveTab('register')}
+              >
+                New account
+              </div>
+            </div>
+            
+            <form className="login-popup-form" onSubmit={handleSubmit}>
+              {activeTab === 'register' && (
+                <div className="login-popup-form-group">
+                  <label htmlFor="name">Full Name</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required={activeTab === 'register'}
+                  />
+                </div>
+              )}
+              
+              <div className="login-popup-form-group">
+                <label htmlFor="email">Email</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              
+              <div className="login-popup-form-group">
+                <label htmlFor="password">Password</label>
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={activeTab === 'signin' ? "Enter your password" : "Create a password"}
+                  required
+                />
+              </div>
+              
+              {activeTab === 'register' && (
+                <div className="login-popup-form-group">
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    required={activeTab === 'register'}
+                  />
+                </div>
+              )}
+              
+              {activeTab === 'signin' && (
+                <div className="login-popup-forgot">
+                  <a href="#">Forgot your password?</a>
+                </div>
+              )}
+              
+              <button type="submit" className="login-popup-submit">
+                {activeTab === 'signin' ? 'Sign in' : 'Create account'}
+              </button>
+              
+              <div className="login-popup-divider">Or connect with</div>
+              
+              <div className="login-popup-social">
+                <button type="button" className="login-popup-social-btn google">
+                  <i className="fab fa-google"></i> Continue with Google
+                </button>
+                <button type="button" className="login-popup-social-btn facebook">
+                  <i className="fab fa-facebook-f"></i> Continue with Facebook
+                </button>
+                <button type="button" className="login-popup-social-btn apple">
+                  <i className="fab fa-apple"></i> Continue with Apple
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+    
+    // Sample property data to be replaced with API calls
+    const sampleProperties = [
+      {
+        id: 1,
+        title: "Modern Downtown Apartment",
+        price: 425000,
+        address: "123 Main St, Downtown",
+        bedrooms: 2,
+        bathrooms: 2,
+        squareFeet: 1200,
+        description: "Beautiful modern apartment in the heart of downtown with amazing city views and access to all amenities.",
+        images: ["/api/placeholder/400/300"],
+        location: [40.7128, -74.0060],
+        propertyType: "apartment",
+        yearBuilt: 2015
+      },
+      {
+        id: 2,
+        title: "Suburban Family Home",
+        price: 650000,
+        address: "456 Oak Dr, Westside",
+        bedrooms: 4,
+        bathrooms: 3,
+        squareFeet: 2400,
+        description: "Spacious family home in a quiet suburban neighborhood with a large backyard and newly renovated kitchen.",
+        images: ["/api/placeholder/400/300"],
+        location: [40.7282, -74.0776],
+        propertyType: "house",
+        yearBuilt: 2008
+      },
+      {
+        id: 3,
+        title: "Luxury Penthouse",
+        price: 1250000,
+        address: "789 Skyview Ave, Eastside",
+        bedrooms: 3,
+        bathrooms: 3.5,
+        squareFeet: 3000,
+        description: "Exclusive penthouse with panoramic views, private rooftop terrace, and premium finishes throughout.",
+        images: ["/api/placeholder/400/300"],
+        location: [40.7023, -73.9865],
+        propertyType: "penthouse",
+        yearBuilt: 2020
+      },
+      {
+        id: 4,
+        title: "Cozy Studio Apartment",
+        price: 295000,
+        address: "321 College Blvd, University District",
+        bedrooms: 0,
+        bathrooms: 1,
+        squareFeet: 550,
+        description: "Perfect starter home or investment property near the university with modern updates and efficient layout.",
+        images: ["/api/placeholder/400/300"],
+        location: [40.7331, -73.9902],
+        propertyType: "studio",
+        yearBuilt: 2010
+      },
+      {
+        id: 5,
+        title: "Historic Brownstone",
+        price: 875000,
+        address: "567 Heritage Ln, Historic District",
+        bedrooms: 3,
+        bathrooms: 2.5,
+        squareFeet: 2200,
+        description: "Beautifully preserved historic brownstone with original details and modern conveniences in a prime location.",
+        images: ["/api/placeholder/400/300"],
+        location: [40.7420, -74.0048],
+        propertyType: "townhouse",
+        yearBuilt: 1925
+      }
+    ];
+    
+    // Format price with commas and dollar sign
+    const formatPrice = (price) => {
+      return `$${price.toLocaleString()}`;
+    };
+
+    // Map Component
+    const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => {
+      const mapRef = useRef(null);
+      const mapInstanceRef = useRef(null);
+      const markersRef = useRef([]);
+      
+      useEffect(() => {
+        if (!mapInstanceRef.current) {
+          // Initialize map
+          mapInstanceRef.current = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+          
+          // Add OpenStreetMap tiles
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(mapInstanceRef.current);
+        }
+        
+        // Clear existing markers
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+        
+        // Add markers for properties
+        properties.forEach(property => {
+          const marker = L.marker(property.location)
+            .addTo(mapInstanceRef.current)
+            .bindPopup(`
+              <div class="map-popup">
+                <img src="${property.images[0]}" alt="${property.title}" />
+                <h3>${formatPrice(property.price)}</h3>
+                <p>${property.bedrooms} BD | ${property.bathrooms} BA | ${property.squareFeet} SF</p>
+                <p>${property.address}</p>
+                <button class="view-btn" onclick="window.selectProperty(${property.id})">View Details</button>
+              </div>
+            `);
+          
+          marker.on('click', () => {
+            setSelectedProperty(property.id);
+          });
+          
+          // Highlight selected property
+          if (property.id === selectedProperty) {
+            marker.openPopup();
+            mapInstanceRef.current.setView(property.location, 15);
+          }
+          
+          markersRef.current.push(marker);
+        });
+        
+        // Make the selectProperty function available to the popup button
+        window.selectProperty = (id) => {
+          setSelectedProperty(id);
+        };
+        
+        return () => {
+          // Clean up when component unmounts
+          if (mapInstanceRef.current) {
+            // Remove global function
+            delete window.selectProperty;
+          }
+        };
+      }, [properties, selectedProperty]);
+      
+      return <div id="map" ref={mapRef}></div>;
+    };
+
+    // Property Card Component
+    const PropertyCard = ({ property, isSelected, onClick }) => {
+      return (
+        <div className={`property-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
+          <img className="property-img" src={property.images[0]} alt={property.title} />
+          <div className="property-price">{formatPrice(property.price)}</div>
+          <div className="property-address">{property.address}</div>
+          <div className="property-features">
+            <div className="property-feature">
+              <i className="fas fa-bed"></i>
+              <span>{property.bedrooms} {property.bedrooms === 1 ? 'bed' : 'beds'}</span>
+            </div>
+            <div className="property-feature">
+              <i className="fas fa-bath"></i>
+              <span>{property.bathrooms} {property.bathrooms === 1 ? 'bath' : 'baths'}</span>
+            </div>
+            <div className="property-feature">
+              <i className="fas fa-ruler-combined"></i>
+              <span>{property.squareFeet} sq ft</span>
+            </div>
+          </div>
+          <div className="property-description">{property.description}</div>
+        </div>
+      );
+    };
+
+    // Filters Component
+    const FiltersPanel = ({ filters, setFilters, applyFilters }) => {
+      const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        const newValue = type === 'checkbox' ? checked : value;
+        
+        setFilters(prev => ({
+          ...prev,
+          [name]: newValue
+        }));
+      };
+      
+      return (
+        <div className="filters">
+          <h2>Find Your Perfect Home</h2>
+          
+          <div className="filter-group">
+            <label>Location</label>
+            <input 
+              type="text" 
+              name="location" 
+              placeholder="City, neighborhood, or address"
+              value={filters.location}
+              onChange={handleChange}
+            />
+          </div>
+          
+          <div className="filter-group">
+            <label>Property Type</label>
+            <select name="propertyType" value={filters.propertyType} onChange={handleChange}>
+              <option value="">Any</option>
+              <option value="house">House</option>
+              <option value="apartment">Apartment</option>
+              <option value="condo">Condo</option>
+              <option value="townhouse">Townhouse</option>
+              <option value="land">Land</option>
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Price Range</label>
+            <div className="price-range">
+              <input 
+                type="number" 
+                name="minPrice" 
+                placeholder="Min"
+                value={filters.minPrice}
+                onChange={handleChange}
+              />
+              <input 
+                type="number" 
+                name="maxPrice" 
+                placeholder="Max"
+                value={filters.maxPrice}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          
+          <div className="filter-group">
+            <label>Bedrooms</label>
+            <select name="bedrooms" value={filters.bedrooms} onChange={handleChange}>
+              <option value="">Any</option>
+              <option value="0">Studio</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+              <option value="5">5+</option>
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Bathrooms</label>
+            <select name="bathrooms" value={filters.bathrooms} onChange={handleChange}>
+              <option value="">Any</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+            </select>
+          </div>
+          
+          <div className="filter-group">
+            <label>Square Feet</label>
+            <div className="price-range">
+              <input 
+                type="number" 
+                name="minSqft" 
+                placeholder="Min"
+                value={filters.minSqft}
+                onChange={handleChange}
+              />
+              <input 
+                type="number" 
+                name="maxSqft" 
+                placeholder="Max"
+                value={filters.maxSqft}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          
+          <div className="filter-group">
+            <label>Year Built</label>
+            <div className="price-range">
+              <input 
+                type="number" 
+                name="minYear" 
+                placeholder="Min"
+                value={filters.minYear}
+                onChange={handleChange}
+              />
+              <input 
+                type="number" 
+                name="maxYear" 
+                placeholder="Max"
+                value={filters.maxYear}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          
+          <div className="filter-group">
+            <label>Features</label>
+            <div className="checkbox-group">
+              <div className="checkbox-item">
+                <input 
+                  type="checkbox" 
+                  id="feature-garage" 
+                  name="hasGarage"
+                  checked={filters.hasGarage}
+                  onChange={handleChange}
+                />
+                <label htmlFor="feature-garage">Garage</label>
+              </div>
+              <div className="checkbox-item">
+                <input 
+                  type="checkbox" 
+                  id="feature-pool" 
+                  name="hasPool"
+                  checked={filters.hasPool}
+                  onChange={handleChange}
+                />
+                <label htmlFor="feature-pool">Pool</label>
+              </div>
+              <div className="checkbox-item">
+                <input 
+                  type="checkbox" 
+                  id="feature-ac" 
+                  name="hasAC"
+                  checked={filters.hasAC}
+                  onChange={handleChange}
+                />
+                <label htmlFor="feature-ac">A/C</label>
+              </div>
+            </div>
+          </div>
+          
+          <button className="search-btn" onClick={applyFilters}>
+            <i className="fas fa-search"></i> Search
+          </button>
+        </div>
+      );
+    };
+
+    // Main App Component
+    const App = () => {
+      const [properties, setProperties] = useState(sampleProperties);
+      const [filteredProperties, setFilteredProperties] = useState(sampleProperties);
+      const [selectedProperty, setSelectedProperty] = useState(null);
+      const [showFilters, setShowFilters] = useState(false);
+      const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
+      const [filters, setFilters] = useState({
+        location: '',
+        propertyType: '',
+        minPrice: '',
+        maxPrice: '',
+        bedrooms: '',
+        bathrooms: '',
+        minSqft: '',
+        maxSqft: '',
+        minYear: '',
+        maxYear: '',
+        hasGarage: false,
+        hasPool: false,
+        hasAC: false
+      });
+      
+      // Fetch properties from API
+      useEffect(() => {
+        // Replace this with actual API call in production
+        const fetchProperties = async () => {
+          try {
+            // const response = await fetch('/api/properties');
+            // const data = await response.json();
+            // setProperties(data);
+            // setFilteredProperties(data);
+            
+            // Using sample data for demo
+            setProperties(sampleProperties);
+            setFilteredProperties(sampleProperties);
+          } catch (error) {
+            console.error('Error fetching properties:', error);
+          }
+        };
+        
+        fetchProperties();
+      }, []);
+      
+      // Add event listener to sign-in link - FIXED VERSION
+      useEffect(() => {
+        const signInLink = document.getElementById('sign-in-link');
+        
+        const handleSignInClick = (e) => {
+          e.preventDefault();
+          setIsLoginPopupOpen(true);
+        };
+        
+        if (signInLink) {
+          signInLink.addEventListener('click', handleSignInClick);
+          
+          // Cleanup function to prevent memory leaks
+          return () => {
+            if (signInLink) {
+              signInLink.removeEventListener('click', handleSignInClick);
+            }
+          };
+        }
+      }, []); // Empty dependency array means this runs once on mount
+      
+      // Apply filters
+      const applyFilters = () => {
+        let filtered = [...properties];
+        
+        // Filter by property type
+        if (filters.propertyType) {
+          filtered = filtered.filter(p => p.propertyType === filters.propertyType);
+        }
+        
+        // Filter by price range
+        if (filters.minPrice) {
+          filtered = filtered.filter(p => p.price >= parseInt(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+          filtered = filtered.filter(p => p.price <= parseInt(filters.maxPrice));
+        }
+        
+        // Filter by bedrooms
+        if (filters.bedrooms) {
+          filtered = filtered.filter(p => p.bedrooms >= parseInt(filters.bedrooms));
+        }
+        
+        // Filter by bathrooms
+        if (filters.bathrooms) {
+          filtered = filtered.filter(p => p.bathrooms >= parseFloat(filters.bathrooms));
+        }
+        
+        // Filter by square feet
+        if (filters.minSqft) {
+          filtered = filtered.filter(p => p.squareFeet >= parseInt(filters.minSqft));
+        }
+        if (filters.maxSqft) {
+          filtered = filtered.filter(p => p.squareFeet <= parseInt(filters.maxSqft));
+        }
+        
+        // Filter by year built
+        if (filters.minYear) {
+          filtered = filtered.filter(p => p.yearBuilt >= parseInt(filters.minYear));
+        }
+        if (filters.maxYear) {
+          filtered = filtered.filter(p => p.yearBuilt <= parseInt(filters.maxYear));
+        }
+        
+        setFilteredProperties(filtered);
+        setShowFilters(false); // Close filters on mobile after applying
+      };
+      
+      // Toggle filters visibility on mobile
+      const toggleFilters = () => {
+        setShowFilters(!showFilters);
+      };
+      
+      // Function to handle sign-in click directly (alternative approach)
+      const handleSignInClick = (e) => {
+        if (e) e.preventDefault();
+        setIsLoginPopupOpen(true);
+      };
+      
+      // Function to close the login popup
+      const closeLoginPopup = () => {
+        setIsLoginPopupOpen(false);
+      };
+      
+      return (
+        <>
+          <header>
+            <a href="#" className="logo">
+              <i className="fas fa-home"></i>
+              RealEstate Finder
+            </a>
+            <nav>
+              <ul>
+                <li><a href="#">Buy</a></li>
+                <li><a href="#">Rent</a></li>
+                <li><a href="#">Sell</a></li>
+                <li><a href="#">Agents</a></li>
+                <li><a href="#" id="sign-in-link" onClick={handleSignInClick}>Sign In</a></li>
+              </ul>
+            </nav>
+          </header>
+          
+          <main>
+            <div className={`filters ${showFilters ? 'active' : ''}`}>
+              <FiltersPanel 
+                filters={filters} 
+                setFilters={setFilters} 
+                applyFilters={applyFilters}
+              />
+            </div>
+            
+            <div className="map-container">
+              <MapComponent 
+                properties={filteredProperties} 
+                selectedProperty={selectedProperty}
+                setSelectedProperty={setSelectedProperty}
+              />
+              <button className="mobile-filters-toggle" onClick={toggleFilters}>
+                <i className="fas fa-filter"></i> Filters
+              </button>
+            </div>
+            
+            <div className="property-list">
+              {filteredProperties.map(property => (
+                <PropertyCard 
+                  key={property.id}
+                  property={property}
+                  isSelected={selectedProperty === property.id}
+                  onClick={() => setSelectedProperty(property.id)}
+                />
+              ))}
+              {filteredProperties.length === 0 && (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                  <p>No properties match your search criteria.</p>
+                  <p>Try adjusting your filters.</p>
+                </div>
+              )}
+            </div>
+          </main>
+          
+          {/* Login Popup - Using conditional rendering */}
+          {isLoginPopupOpen && (
+            <LoginPopup 
+              isOpen={isLoginPopupOpen} 
+              onClose={closeLoginPopup} 
+            />
+          )}
+        </>
+      );
+    };
+
+    // Render the App
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

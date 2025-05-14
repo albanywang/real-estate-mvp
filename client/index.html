@@ -6,321 +6,8 @@
   <title>RealEstate Finder - Find Your Dream Home</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
-    :root {
-      --primary-color: #2c3e50;
-      --secondary-color: #3498db;
-      --accent-color: #e74c3c;
-      --light-bg: #f8f9fa;
-      --dark-text: #2c3e50;
-      --light-text: #ecf0f1;
-      --border-radius: 8px;
-      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background-color: var(--light-bg);
-      color: var(--dark-text);
-    }
-    
-    header {
-      background-color: var(--primary-color);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    
-    .logo {
-      color: var(--light-text);
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
-    
-    .logo i {
-      margin-right: 10px;
-      color: var(--accent-color);
-    }
-    
-    nav ul {
-      display: flex;
-      list-style: none;
-    }
-    
-    nav li {
-      margin-left: 1.5rem;
-    }
-    
-    nav a {
-      color: var(--light-text);
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s;
-    }
-    
-    nav a:hover {
-      color: var(--secondary-color);
-    }
-    
-    main {
-      display: flex;
-      height: calc(100vh - 67px);
-    }
-    
-    .filters {
-      width: 300px;
-      background-color: white;
-      padding: 1.5rem;
-      overflow-y: auto;
-      border-right: 1px solid #ddd;
-    }
-    
-    .filters h2 {
-      margin-bottom: 1.5rem;
-      font-size: 1.2rem;
-      color: var(--primary-color);
-    }
-    
-    .filter-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    .filter-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    
-    .filter-group input,
-    .filter-group select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-    }
-    
-    .price-range {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .price-range input {
-      width: 50%;
-    }
-    
-    .filter-group .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 0.5rem;
-    }
-    
-    .filter-group .checkbox-item {
-      display: flex;
-      align-items: center;
-      margin-right: 1rem;
-    }
-    
-    .filter-group .checkbox-item input {
-      width: auto;
-      margin-right: 5px;
-    }
-    
-    button.search-btn {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 0.75rem;
-      width: 100%;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    button.search-btn:hover {
-      background-color: #c0392b;
-    }
-    
-    .map-container {
-      flex: 1;
-      position: relative;
-    }
-    
-    #map {
-      height: 100%;
-      width: 100%;
-    }
-    
-    .property-list {
-      width: 400px;
-      background-color: white;
-      overflow-y: auto;
-      border-left: 1px solid #ddd;
-    }
-    
-    .property-card {
-      padding: 1rem;
-      border-bottom: 1px solid #ddd;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    .property-card:hover {
-      background-color: var(--light-bg);
-    }
-    
-    .property-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: var(--border-radius);
-      margin-bottom: 1rem;
-    }
-    
-    .property-price {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: var(--accent-color);
-      margin-bottom: 0.5rem;
-    }
-    
-    .property-address {
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    
-    .property-features {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    
-    .property-feature {
-      display: flex;
-      align-items: center;
-    }
-    
-    .property-feature i {
-      margin-right: 5px;
-      color: var(--secondary-color);
-    }
-    
-    .property-description {
-      font-size: 0.9rem;
-      color: #666;
-      line-height: 1.4;
-    }
-    
-    .leaflet-popup-content {
-      min-width: 200px;
-    }
-    
-    .map-popup {
-      text-align: center;
-    }
-    
-    .map-popup img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 4px;
-      margin-bottom: 8px;
-    }
-    
-    .map-popup h3 {
-      margin: 0 0 5px;
-      color: var(--accent-color);
-    }
-    
-    .map-popup p {
-      margin: 0 0 5px;
-    }
-    
-    .map-popup .view-btn {
-      background-color: var(--secondary-color);
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    
-    .mobile-filters-toggle {
-      display: none;
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      z-index: 999;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 30px;
-      box-shadow: var(--box-shadow);
-      cursor: pointer;
-    }
-    
-    @media (max-width: 1024px) {
-      .property-list {
-        width: 350px;
-      }
-      
-      .filters {
-        width: 250px;
-      }
-    }
-    
-    @media (max-width: 768px) {
-      main {
-        flex-direction: column;
-        height: auto;
-      }
-      
-      .filters {
-        width: 100%;
-        height: 0;
-        overflow: hidden;
-        padding: 0;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-        transition: height 0.3s, padding 0.3s;
-      }
-      
-      .filters.active {
-        height: 500px;
-        padding: 1.5rem;
-      }
-      
-      .map-container {
-        height: 500px;
-      }
-      
-      .property-list {
-        width: 100%;
-        border-left: none;
-      }
-      
-      .mobile-filters-toggle {
-        display: block;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="./src/assets/styles/index.css" />
+
 </head>
 <body>
   <div id="root"></div>
@@ -333,79 +20,174 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
     
-    // Sample property data to be replaced with API calls
-    const sampleProperties = [
-      {
-        id: 1,
-        title: "Modern Downtown Apartment",
-        price: 425000,
-        address: "123 Main St, Downtown",
-        bedrooms: 2,
-        bathrooms: 2,
-        squareFeet: 1200,
-        description: "Beautiful modern apartment in the heart of downtown with amazing city views and access to all amenities.",
-        images: ["/api/placeholder/400/300"],
-        location: [40.7128, -74.0060],
-        propertyType: "apartment",
-        yearBuilt: 2015
-      },
-      {
-        id: 2,
-        title: "Suburban Family Home",
-        price: 650000,
-        address: "456 Oak Dr, Westside",
-        bedrooms: 4,
-        bathrooms: 3,
-        squareFeet: 2400,
-        description: "Spacious family home in a quiet suburban neighborhood with a large backyard and newly renovated kitchen.",
-        images: ["/api/placeholder/400/300"],
-        location: [40.7282, -74.0776],
-        propertyType: "house",
-        yearBuilt: 2008
-      },
-      {
-        id: 3,
-        title: "Luxury Penthouse",
-        price: 1250000,
-        address: "789 Skyview Ave, Eastside",
-        bedrooms: 3,
-        bathrooms: 3.5,
-        squareFeet: 3000,
-        description: "Exclusive penthouse with panoramic views, private rooftop terrace, and premium finishes throughout.",
-        images: ["/api/placeholder/400/300"],
-        location: [40.7023, -73.9865],
-        propertyType: "penthouse",
-        yearBuilt: 2020
-      },
-      {
-        id: 4,
-        title: "Cozy Studio Apartment",
-        price: 295000,
-        address: "321 College Blvd, University District",
-        bedrooms: 0,
-        bathrooms: 1,
-        squareFeet: 550,
-        description: "Perfect starter home or investment property near the university with modern updates and efficient layout.",
-        images: ["/api/placeholder/400/300"],
-        location: [40.7331, -73.9902],
-        propertyType: "studio",
-        yearBuilt: 2010
-      },
-      {
-        id: 5,
-        title: "Historic Brownstone",
-        price: 875000,
-        address: "567 Heritage Ln, Historic District",
-        bedrooms: 3,
-        bathrooms: 2.5,
-        squareFeet: 2200,
-        description: "Beautifully preserved historic brownstone with original details and modern conveniences in a prime location.",
-        images: ["/api/placeholder/400/300"],
-        location: [40.7420, -74.0048],
-        propertyType: "townhouse",
-        yearBuilt: 1925
-      }
-    ];
+    // Login Popup Component
+    const LoginPopup = ({ isOpen, onClose }) => {
+      const [activeTab, setActiveTab] = useState('signin');
+      const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        name: '',
+        confirmPassword: ''
+      });
+      
+      // If popup is not open, return null (but don't cause a render error)
+      if (!isOpen) return null;
+      
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      };
+      
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (activeTab === 'signin') {
+          // Handle sign in
+          console.log('Sign in with:', formData.email, formData.password);
+          // You would add authentication logic here
+        } else {
+          // Handle registration
+          if (formData.password !== formData.confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+          }
+          console.log('Register with:', formData.name, formData.email, formData.password);
+          // You would add registration logic here
+        }
+        
+        // For demo, just close the popup
+        onClose();
+      };
+      
+      const handleOverlayClick = (e) => {
+        if (e.target.className === 'login-popup-overlay') {
+          onClose();
+        }
+      };
+      
+      // Effect for event listener
+      useEffect(() => {
+        const handleEscKey = (e) => {
+          if (e.key === 'Escape') onClose();
+        };
+        
+        document.addEventListener('keydown', handleEscKey);
+        return () => document.removeEventListener('keydown', handleEscKey);
+      }, [onClose]);
+      
+      return (
+        <div className="login-popup-overlay" onClick={handleOverlayClick}>
+          <div className="login-popup-content">
+            <button className="login-popup-close" onClick={onClose}>×</button>
+            
+            <div className="login-popup-header">
+              <h2>Welcome to RealEstate Finder</h2>
+            </div>
+            
+            <div className="login-popup-tabs">
+              <div 
+                className={`login-popup-tab ${activeTab === 'signin' ? 'active' : ''}`}
+                onClick={() => setActiveTab('signin')}
+              >
+                Sign in
+              </div>
+              <div 
+                className={`login-popup-tab ${activeTab === 'register' ? 'active' : ''}`}
+                onClick={() => setActiveTab('register')}
+              >
+                New account
+              </div>
+            </div>
+            
+            <form className="login-popup-form" onSubmit={handleSubmit}>
+              {activeTab === 'register' && (
+                <div className="login-popup-form-group">
+                  <label htmlFor="name">Full Name</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required={activeTab === 'register'}
+                  />
+                </div>
+              )}
+              
+              <div className="login-popup-form-group">
+                <label htmlFor="email">Email</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              
+              <div className="login-popup-form-group">
+                <label htmlFor="password">Password</label>
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={activeTab === 'signin' ? "Enter your password" : "Create a password"}
+                  required
+                />
+              </div>
+              
+              {activeTab === 'register' && (
+                <div className="login-popup-form-group">
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    required={activeTab === 'register'}
+                  />
+                </div>
+              )}
+              
+              {activeTab === 'signin' && (
+                <div className="login-popup-forgot">
+                  <a href="#">Forgot your password?</a>
+                </div>
+              )}
+              
+              <button type="submit" className="login-popup-submit">
+                {activeTab === 'signin' ? 'Sign in' : 'Create account'}
+              </button>
+              
+              <div className="login-popup-divider">Or connect with</div>
+              
+              <div className="login-popup-social">
+                <button type="button" className="login-popup-social-btn google">
+                  <i className="fab fa-google"></i> Continue with Google
+                </button>
+                <button type="button" className="login-popup-social-btn facebook">
+                  <i className="fab fa-facebook-f"></i> Continue with Facebook
+                </button>
+                <button type="button" className="login-popup-social-btn apple">
+                  <i className="fab fa-apple"></i> Continue with Apple
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+    
     
     // Format price with commas and dollar sign
     const formatPrice = (price) => {
@@ -671,10 +453,13 @@
 
     // Main App Component
     const App = () => {
+      const { language } = useLanguage();
+      const t = translations[language];
       const [properties, setProperties] = useState(sampleProperties);
       const [filteredProperties, setFilteredProperties] = useState(sampleProperties);
       const [selectedProperty, setSelectedProperty] = useState(null);
       const [showFilters, setShowFilters] = useState(false);
+      const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
       const [filters, setFilters] = useState({
         location: '',
         propertyType: '',
@@ -711,6 +496,27 @@
         
         fetchProperties();
       }, []);
+      
+      // Add event listener to sign-in link - FIXED VERSION
+      useEffect(() => {
+        const signInLink = document.getElementById('sign-in-link');
+        
+        const handleSignInClick = (e) => {
+          e.preventDefault();
+          setIsLoginPopupOpen(true);
+        };
+        
+        if (signInLink) {
+          signInLink.addEventListener('click', handleSignInClick);
+          
+          // Cleanup function to prevent memory leaks
+          return () => {
+            if (signInLink) {
+              signInLink.removeEventListener('click', handleSignInClick);
+            }
+          };
+        }
+      }, []); // Empty dependency array means this runs once on mount
       
       // Apply filters
       const applyFilters = () => {
@@ -755,9 +561,6 @@
           filtered = filtered.filter(p => p.yearBuilt <= parseInt(filters.maxYear));
         }
         
-        // In a real application, you would handle location-based filtering using the API
-        // and make use of PostGIS spatial queries
-        
         setFilteredProperties(filtered);
         setShowFilters(false); // Close filters on mobile after applying
       };
@@ -765,6 +568,17 @@
       // Toggle filters visibility on mobile
       const toggleFilters = () => {
         setShowFilters(!showFilters);
+      };
+      
+      // Function to handle sign-in click directly (alternative approach)
+      const handleSignInClick = (e) => {
+        if (e) e.preventDefault();
+        setIsLoginPopupOpen(true);
+      };
+      
+      // Function to close the login popup
+      const closeLoginPopup = () => {
+        setIsLoginPopupOpen(false);
       };
       
       return (
@@ -780,18 +594,19 @@
                 <li><a href="#">Rent</a></li>
                 <li><a href="#">Sell</a></li>
                 <li><a href="#">Agents</a></li>
-                <li><a href="#">Sign In</a></li>
+                <li><a href="#" id="sign-in-link" onClick={handleSignInClick}>Sign In</a></li>
               </ul>
             </nav>
           </header>
           
           <main>
-            <FiltersPanel 
-              filters={filters} 
-              setFilters={setFilters} 
-              applyFilters={applyFilters}
-              className={showFilters ? 'filters active' : 'filters'}
-            />
+            <div className={`filters ${showFilters ? 'active' : ''}`}>
+              <FiltersPanel 
+                filters={filters} 
+                setFilters={setFilters} 
+                applyFilters={applyFilters}
+              />
+            </div>
             
             <div className="map-container">
               <MapComponent 
@@ -821,6 +636,14 @@
               )}
             </div>
           </main>
+          
+          {/* Login Popup - Using conditional rendering */}
+          {isLoginPopupOpen && (
+            <LoginPopup 
+              isOpen={isLoginPopupOpen} 
+              onClose={closeLoginPopup} 
+            />
+          )}
         </>
       );
     };

@@ -1,0 +1,619 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../utils/translations';
+import LanguageSelector from '../components/LanguageSelector';
+import sampleProperties from '../data/properties';
+
+// Utility function for price formatting
+const formatPrice = (price) => {
+  return `$${price.toLocaleString()}`;
+};
+
+// Map Component
+const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => {
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]);
+  
+  useEffect(() => {
+    if (!mapInstanceRef.current) {
+      // Initialize map
+      mapInstanceRef.current = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+      
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(mapInstanceRef.current);
+    }
+    
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+    
+    // Add markers for properties
+    properties.forEach(property => {
+      const marker = L.marker(property.location)
+        .addTo(mapInstanceRef.current)
+        .bindPopup(`
+          <div class="map-popup">
+            <img src="${property.images[0]}" alt="${property.title}" />
+            <h3>${formatPrice(property.price)}</h3>
+            <p>${property.bedrooms} BD | ${property.bathrooms} BA | ${property.squareFeet} SF</p>
+            <p>${property.address}</p>
+            <button class="view-btn" onclick="window.selectProperty(${property.id})">View Details</button>
+          </div>
+        `);
+      
+      marker.on('click', () => {
+        setSelectedProperty(property.id);
+      });
+      
+      // Highlight selected property
+      if (property.id === selectedProperty) {
+        marker.openPopup();
+        mapInstanceRef.current.setView(property.location, 15);
+      }
+      
+      markersRef.current.push(marker);
+    });
+    
+    // Make the selectProperty function available to the popup button
+    window.selectProperty = (id) => {
+      setSelectedProperty(id);
+    };
+    
+    return () => {
+      // Clean up when component unmounts
+      if (mapInstanceRef.current) {
+        // Remove global function
+        delete window.selectProperty;
+      }
+    };
+  }, [properties, selectedProperty]);
+  
+  return <div id="map" ref={mapRef}></div>;
+};
+
+// Property Card Component
+const PropertyCard = ({ property, isSelected, onClick, t }) => {
+  return (
+    <div className={`property-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
+      <img className="property-img" src={property.images[0]} alt={property.title} />
+      <div className="property-price">{formatPrice(property.price)}</div>
+      <div className="property-address">{property.address}</div>
+      <div className="property-features">
+        <div className="property-feature">
+          <i className="fas fa-bed"></i>
+          <span>{property.bedrooms} {property.bedrooms === 1 ? t.bed : t.beds}</span>
+        </div>
+        <div className="property-feature">
+          <i className="fas fa-bath"></i>
+          <span>{property.bathrooms} {property.bathrooms === 1 ? t.bath : t.baths}</span>
+        </div>
+        <div className="property-feature">
+          <i className="fas fa-ruler-combined"></i>
+          <span>{property.squareFeet} {t.sqft}</span>
+        </div>
+      </div>
+      <div className="property-description">{property.description}</div>
+    </div>
+  );
+};
+
+// Filters Component
+const FiltersPanel = ({ filters, setFilters, applyFilters, t }) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    
+    setFilters(prev => ({
+      ...prev,
+      [name]: newValue
+    }));
+  };
+  
+  return (
+    <div className="filters">
+      <h2>{t.findYourPerfectHome}</h2>
+      
+      <div className="filter-group">
+        <label>{t.location}</label>
+        <input 
+          type="text" 
+          name="location" 
+          placeholder={t.locationPlaceholder}
+          value={filters.location}
+          onChange={handleChange}
+        />
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.propertyType}</label>
+        <select name="propertyType" value={filters.propertyType} onChange={handleChange}>
+          <option value="">{t.any}</option>
+          <option value="house">{t.house}</option>
+          <option value="apartment">{t.apartment}</option>
+          <option value="condo">{t.condo}</option>
+          <option value="townhouse">{t.townhouse}</option>
+          <option value="land">{t.land}</option>
+        </select>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.priceRange}</label>
+        <div className="price-range">
+          <input 
+            type="number" 
+            name="minPrice" 
+            placeholder={t.min}
+            value={filters.minPrice}
+            onChange={handleChange}
+          />
+          <input 
+            type="number" 
+            name="maxPrice" 
+            placeholder={t.max}
+            value={filters.maxPrice}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.bedrooms}</label>
+        <select name="bedrooms" value={filters.bedrooms} onChange={handleChange}>
+          <option value="">{t.any}</option>
+          <option value="0">Studio</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.bathrooms}</label>
+        <select name="bathrooms" value={filters.bathrooms} onChange={handleChange}>
+          <option value="">{t.any}</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+        </select>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.squareFeet}</label>
+        <div className="price-range">
+          <input 
+            type="number" 
+            name="minSqft" 
+            placeholder={t.min}
+            value={filters.minSqft}
+            onChange={handleChange}
+          />
+          <input 
+            type="number" 
+            name="maxSqft" 
+            placeholder={t.max}
+            value={filters.maxSqft}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.yearBuilt}</label>
+        <div className="price-range">
+          <input 
+            type="number" 
+            name="minYear" 
+            placeholder={t.min}
+            value={filters.minYear}
+            onChange={handleChange}
+          />
+          <input 
+            type="number" 
+            name="maxYear" 
+            placeholder={t.max}
+            value={filters.maxYear}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+      
+      <div className="filter-group">
+        <label>{t.features}</label>
+        <div className="checkbox-group">
+          <div className="checkbox-item">
+            <input 
+              type="checkbox" 
+              id="feature-garage" 
+              name="hasGarage"
+              checked={filters.hasGarage}
+              onChange={handleChange}
+            />
+            <label htmlFor="feature-garage">{t.garage}</label>
+          </div>
+          <div className="checkbox-item">
+            <input 
+              type="checkbox" 
+              id="feature-pool" 
+              name="hasPool"
+              checked={filters.hasPool}
+              onChange={handleChange}
+            />
+            <label htmlFor="feature-pool">{t.pool}</label>
+          </div>
+          <div className="checkbox-item">
+            <input 
+              type="checkbox" 
+              id="feature-ac" 
+              name="hasAC"
+              checked={filters.hasAC}
+              onChange={handleChange}
+            />
+            <label htmlFor="feature-ac">{t.ac}</label>
+          </div>
+        </div>
+      </div>
+      
+      <button className="search-btn" onClick={applyFilters}>
+        <i className="fas fa-search"></i> {t.search}
+      </button>
+    </div>
+  );
+};
+
+// Login Popup Component
+const LoginPopup = ({ isOpen, onClose }) => {
+  const { language } = useLanguage();
+  const t = translations[language];
+  const [activeTab, setActiveTab] = useState('signin');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    confirmPassword: ''
+  });
+  
+  // If popup is not open, return null (but don't cause a render error)
+  if (!isOpen) return null;
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (activeTab === 'signin') {
+      // Handle sign in
+      console.log('Sign in with:', formData.email, formData.password);
+      // You would add authentication logic here
+    } else {
+      // Handle registration
+      if (formData.password !== formData.confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+      console.log('Register with:', formData.name, formData.email, formData.password);
+      // You would add registration logic here
+    }
+    
+    // For demo, just close the popup
+    onClose();
+  };
+  
+  const handleOverlayClick = (e) => {
+    if (e.target.className === 'login-popup-overlay') {
+      onClose();
+    }
+  };
+  
+  // Effect for event listener
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [onClose]);
+  
+  return (
+    <div className="login-popup-overlay" onClick={handleOverlayClick}>
+      <div className="login-popup-content">
+        <button className="login-popup-close" onClick={onClose}>×</button>
+        
+        <div className="login-popup-header">
+          <h2>{t.welcome}</h2>
+        </div>
+        
+        <div className="login-popup-tabs">
+          <div 
+            className={`login-popup-tab ${activeTab === 'signin' ? 'active' : ''}`}
+            onClick={() => setActiveTab('signin')}
+          >
+            {t.signIn}
+          </div>
+          <div 
+            className={`login-popup-tab ${activeTab === 'register' ? 'active' : ''}`}
+            onClick={() => setActiveTab('register')}
+          >
+            {t.newAccount}
+          </div>
+        </div>
+        
+        <form className="login-popup-form" onSubmit={handleSubmit}>
+          {activeTab === 'register' && (
+            <div className="login-popup-form-group">
+              <label htmlFor="name">{t.fullName}</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value={formData.name}
+                onChange={handleChange}
+                placeholder={t.fullNamePlaceholder}
+                required={activeTab === 'register'}
+              />
+            </div>
+          )}
+          
+          <div className="login-popup-form-group">
+            <label htmlFor="email">{t.email}</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              value={formData.email}
+              onChange={handleChange}
+              placeholder={t.emailPlaceholder}
+              required
+            />
+          </div>
+          
+          <div className="login-popup-form-group">
+            <label htmlFor="password">{t.password}</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              value={formData.password}
+              onChange={handleChange}
+              placeholder={activeTab === 'signin' ? t.passwordPlaceholder : t.createPasswordPlaceholder}
+              required
+            />
+          </div>
+          
+          {activeTab === 'register' && (
+            <div className="login-popup-form-group">
+              <label htmlFor="confirmPassword">{t.confirmPassword}</label>
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                name="confirmPassword" 
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder={t.confirmPasswordPlaceholder}
+                required={activeTab === 'register'}
+              />
+            </div>
+          )}
+          
+          {activeTab === 'signin' && (
+            <div className="login-popup-forgot">
+              <a href="#">{t.forgotPassword}</a>
+            </div>
+          )}
+          
+          <button type="submit" className="login-popup-submit">
+            {activeTab === 'signin' ? t.signIn : t.createAccount}
+          </button>
+          
+          <div className="login-popup-divider">{t.orConnectWith}</div>
+          
+          <div className="login-popup-social">
+            <button type="button" className="login-popup-social-btn google">
+              <i className="fab fa-google"></i> {t.continueWithGoogle}
+            </button>
+            <button type="button" className="login-popup-social-btn facebook">
+              <i className="fab fa-facebook-f"></i> {t.continueWithFacebook}
+            </button>
+            <button type="button" className="login-popup-social-btn apple">
+              <i className="fab fa-apple"></i> {t.continueWithApple}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Main App Component
+const App = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
+  
+  const [properties, setProperties] = useState(sampleProperties);
+  const [filteredProperties, setFilteredProperties] = useState(sampleProperties);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    location: '',
+    propertyType: '',
+    minPrice: '',
+    maxPrice: '',
+    bedrooms: '',
+    bathrooms: '',
+    minSqft: '',
+    maxSqft: '',
+    minYear: '',
+    maxYear: '',
+    hasGarage: false,
+    hasPool: false,
+    hasAC: false
+  });
+  
+  // Fetch properties from API
+  useEffect(() => {
+    // Replace this with actual API call in production
+    const fetchProperties = async () => {
+      try {
+        // const response = await fetch('/api/properties');
+        // const data = await response.json();
+        // setProperties(data);
+        // setFilteredProperties(data);
+        
+        // Using imported sample data for demo
+        setProperties(sampleProperties);
+        setFilteredProperties(sampleProperties);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+      }
+    };
+    
+    fetchProperties();
+  }, []);
+  
+  // Apply filters
+  const applyFilters = () => {
+    let filtered = [...properties];
+    
+    // Filter by property type
+    if (filters.propertyType) {
+      filtered = filtered.filter(p => p.propertyType === filters.propertyType);
+    }
+    
+    // Filter by price range
+    if (filters.minPrice) {
+      filtered = filtered.filter(p => p.price >= parseInt(filters.minPrice));
+    }
+    if (filters.maxPrice) {
+      filtered = filtered.filter(p => p.price <= parseInt(filters.maxPrice));
+    }
+    
+    // Filter by bedrooms
+    if (filters.bedrooms) {
+      filtered = filtered.filter(p => p.bedrooms >= parseInt(filters.bedrooms));
+    }
+    
+    // Filter by bathrooms
+    if (filters.bathrooms) {
+      filtered = filtered.filter(p => p.bathrooms >= parseFloat(filters.bathrooms));
+    }
+    
+    // Filter by square feet
+    if (filters.minSqft) {
+      filtered = filtered.filter(p => p.squareFeet >= parseInt(filters.minSqft));
+    }
+    if (filters.maxSqft) {
+      filtered = filtered.filter(p => p.squareFeet <= parseInt(filters.maxSqft));
+    }
+    
+    // Filter by year built
+    if (filters.minYear) {
+      filtered = filtered.filter(p => p.yearBuilt >= parseInt(filters.minYear));
+    }
+    if (filters.maxYear) {
+      filtered = filtered.filter(p => p.yearBuilt <= parseInt(filters.maxYear));
+    }
+    
+    setFilteredProperties(filtered);
+    setShowFilters(false); // Close filters on mobile after applying
+  };
+  
+  // Toggle filters visibility on mobile
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+  
+  // Function to handle sign-in click directly
+  const handleSignInClick = (e) => {
+    if (e) e.preventDefault();
+    setIsLoginPopupOpen(true);
+  };
+  
+  // Function to close the login popup
+  const closeLoginPopup = () => {
+    setIsLoginPopupOpen(false);
+  };
+  
+  return (
+    <>
+      <header>
+        <a href="#" className="logo">
+          <i className="fas fa-home"></i>
+          RealEstate Finder
+        </a>
+        <nav>
+          <ul>
+            <li><a href="#">{t.buy}</a></li>
+            <li><a href="#">{t.rent}</a></li>
+            <li><a href="#">{t.sell}</a></li>
+            <li><a href="#">{t.agents}</a></li>
+            <li><a href="#" id="sign-in-link" onClick={handleSignInClick}>{t.signIn}</a></li>
+            <li><LanguageSelector /></li>
+          </ul>
+        </nav>
+      </header>
+      
+      <main>
+        <div className={`filters ${showFilters ? 'active' : ''}`}>
+          <FiltersPanel 
+            filters={filters} 
+            setFilters={setFilters} 
+            applyFilters={applyFilters}
+            t={t}
+          />
+        </div>
+        
+        <div className="map-container">
+          <MapComponent 
+            properties={filteredProperties} 
+            selectedProperty={selectedProperty}
+            setSelectedProperty={setSelectedProperty}
+          />
+          <button className="mobile-filters-toggle" onClick={toggleFilters}>
+            <i className="fas fa-filter"></i> {t.filters}
+          </button>
+        </div>
+        
+        <div className="property-list">
+          {filteredProperties.map(property => (
+            <PropertyCard 
+              key={property.id}
+              property={property}
+              isSelected={selectedProperty === property.id}
+              onClick={() => setSelectedProperty(property.id)}
+              t={t}
+            />
+          ))}
+          {filteredProperties.length === 0 && (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>{t.noProperties}</p>
+              <p>{t.tryAdjusting}</p>
+            </div>
+          )}
+        </div>
+      </main>
+      
+      {/* Login Popup - Using conditional rendering */}
+      {isLoginPopupOpen && (
+        <LoginPopup 
+          isOpen={isLoginPopupOpen} 
+          onClose={closeLoginPopup} 
+        />
+      )}
+    </>
+  );
+};
+
+export default App;
