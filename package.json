@@ -1,7 +1,37 @@
 {
-  "dependencies": {
-    "leaflet": "^1.9.4",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  }
+    "name": "realestate-finder",
+    "version": "1.0.0",
+    "description": "Japanese real estate property finder application",
+    "scripts": {
+        "start": "concurrently \"npm run server\" \"npm run client\"",
+        "server": "cd server && npm run start",
+        "client": "cd client && npm start",
+        "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+        "build": "cd client && npm run build",
+        "dev:server": "cd server && npm run dev",
+        "dev:client": "cd client && npm start",
+        "db:setup": "cd server && npm run db:setup"
+    },
+    "keywords": [
+        "real-estate",
+        "property",
+        "japan",
+        "react",
+        "express",
+        "postgresql"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "nodemon": "^3.1.10",
+        "webpack-dev-server": "^5.2.1"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "multer": "^1.4.5-lts.2",
+        "pg": "^8.16.0"
+    }
 }

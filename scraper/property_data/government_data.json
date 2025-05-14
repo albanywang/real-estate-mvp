@@ -1,0 +1,200 @@
+{
+  "title": "Japanese Government Real Estate Data Sources",
+  "description": "Information on accessing Japanese property data through government sources",
+  "governmentDataSources": [
+    {
+      "name": "土地総合情報システム (Land General Information System)",
+      "url": "https://www.land.mlit.go.jp/webland/",
+      "description": "Official government database of land transactions and prices",
+      "dataTypes": [
+        "Land prices",
+        "Transaction history",
+        "Price trends"
+      ],
+      "searchParams": "Prefecture, municipality, district",
+      "format": "Web interface, CSV download"
+    },
+    {
+      "name": "地価公示・地価調査 (Official Land Price Publication)",
+      "url": "https://www.land.mlit.go.jp/landPrice/",
+      "description": "Annual government assessment of land values throughout Japan",
+      "dataTypes": [
+        "Official land prices",
+        "Benchmark land values"
+      ],
+      "searchParams": "Address, area",
+      "format": "Web interface, CSV, PDF"
+    },
+    {
+      "name": "不動産取引価格情報 (Real Estate Transaction Price Information)",
+      "url": "https://www.land.mlit.go.jp/webland/servlet/MainServlet",
+      "description": "Quarterly reports on actual transaction prices",
+      "dataTypes": [
+        "Transaction prices",
+        "Property details",
+        "Area information"
+      ],
+      "searchParams": "Time period, region, property type",
+      "format": "CSV, Excel"
+    },
+    {
+      "name": "住宅・土地統計調査 (Housing and Land Survey)",
+      "url": "https://www.stat.go.jp/data/jyutaku/index.html",
+      "description": "Comprehensive survey of housing conditions in Japan",
+      "dataTypes": [
+        "Housing stock",
+        "Vacancy rates",
+        "Housing characteristics"
+      ],
+      "searchParams": "Region, housing type",
+      "format": "CSV, Excel, PDF"
+    },
+    {
+      "name": "e-Stat (Portal Site of Official Statistics of Japan)",
+      "url": "https://www.e-stat.go.jp/",
+      "description": "Japan's portal for all government statistics, including real estate",
+      "dataTypes": [
+        "Housing statistics",
+        "Land use",
+        "Construction statistics"
+      ],
+      "searchParams": "Various",
+      "format": "API, CSV, Excel"
+    }
+  ],
+  "landPriceSample": [
+    {
+      "prefecture": "東京都",
+      "municipality": "港区",
+      "district": "六本木",
+      "previousPrice": 2650000,
+      "currentPrice": 2720000,
+      "changeRate": 2.6,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "港区",
+      "district": "赤坂",
+      "previousPrice": 2450000,
+      "currentPrice": 2520000,
+      "changeRate": 2.9,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "渋谷区",
+      "district": "渋谷",
+      "previousPrice": 2380000,
+      "currentPrice": 2450000,
+      "changeRate": 2.9,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "渋谷区",
+      "district": "恵比寿",
+      "previousPrice": 1950000,
+      "currentPrice": 2010000,
+      "changeRate": 3.1,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "新宿区",
+      "district": "新宿",
+      "previousPrice": 2250000,
+      "currentPrice": 2310000,
+      "changeRate": 2.7,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "中央区",
+      "district": "銀座",
+      "previousPrice": 3840000,
+      "currentPrice": 3950000,
+      "changeRate": 2.9,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "中央区",
+      "district": "日本橋",
+      "previousPrice": 2780000,
+      "currentPrice": 2850000,
+      "changeRate": 2.5,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "千代田区",
+      "district": "丸の内",
+      "previousPrice": 3950000,
+      "currentPrice": 4050000,
+      "changeRate": 2.5,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "千代田区",
+      "district": "大手町",
+      "previousPrice": 3580000,
+      "currentPrice": 3670000,
+      "changeRate": 2.5,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "商業地"
+    },
+    {
+      "prefecture": "東京都",
+      "municipality": "目黒区",
+      "district": "中目黒",
+      "previousPrice": 1150000,
+      "currentPrice": 1190000,
+      "changeRate": 3.5,
+      "unit": "円/㎡",
+      "surveyDate": "2025-01-01",
+      "propertyType": "住宅地"
+    }
+  ],
+  "governmentDataGuide": {
+    "steps": [
+      "1. Visit the government data portal (see list above)",
+      "2. Navigate to the specific dataset you need",
+      "3. Use the search filters to narrow down to your area of interest",
+      "4. Download the data in your preferred format (usually CSV or Excel)",
+      "5. Process the data using your preferred tools (Excel, Python, R, etc.)",
+      "6. Consider using the e-Stat API for programmatic access to official statistics"
+    ],
+    "dataLimitations": [
+      "Government data may have a delay of several months",
+      "Transaction data is anonymized and may not include specific addresses",
+      "Some datasets are updated quarterly or annually, not in real-time",
+      "Most interfaces and data are in Japanese only",
+      "Data may be aggregated at district level rather than individual properties"
+    ],
+    "useCases": [
+      "Market analysis and price trend research",
+      "Investment decision-making based on official land values",
+      "Understanding regional price differences",
+      "Analyzing property value changes over time"
+    ]
+  }
+}

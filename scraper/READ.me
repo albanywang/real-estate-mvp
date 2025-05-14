@@ -1,0 +1,270 @@
+# Fudousan.or.jp Property Scraper
+
+A comprehensive web scraper for retrieving real estate property listings and details from [fudousan.or.jp](https://www.fudousan.or.jp) (不動産ジャパン - Real Estate Japan).
+
+## Features
+
+- Scrape property listings for both rentals and sales
+- Filter by property type (apartments, houses, land, commercial)
+- Search by location/area in Japan
+- Export data in JSON or CSV format
+- Extract detailed property information from individual property pages
+- Handles pagination and multiple search result pages
+- Flexible configuration system with presets
+
+## Project Structure
+
+- `fudousan-config.js` - Central configuration file with defaults and presets
+- `fudousan-scraper.js` - Main property listings scraper
+- `fudousan-detail-scraper.js` - Detailed property information scraper
+- `fudousan-scraper-usage.js` - Example usage and demonstration
+
+## Requirements
+
+- Node.js (v14 or later)
+- npm (Node Package Manager)
+
+## Installation
+
+1. Clone this repository or download the files
+2. Install the required dependencies:
+
+```bash
+npm install puppeteer csv-writer
+```
+
+## Usage
+
+### Basic Usage
+
+The main script can be used with the default configuration:
+
+```bash
+node fudousan-scraper-usage.js
+```
+
+This will scrape apartment listings for sale in Tokyo and save the results in JSON format.
+
+### Using Configuration Presets
+
+The scraper comes with predefined configuration presets for common use cases:
+
+```javascript
+const { scrapeProperties } = require('./fudousan-scraper');
+const { applyPreset } = require('./fudousan-config');
+
+// Use the Tokyo apartments preset
+const config = applyPreset('tokyoApartments');
+
+// Customize any settings if needed
+config.search.maxPages = 3;
+
+// Run the scraper
+scrapeProperties(config).then(result => {
+  console.log(`Scraped ${result.count} properties`);
+});
+```
+
+Available presets:
+- `tokyoApartments` - Apartments for sale in Tokyo
+- `osakaHouseRentals` - Houses for rent in Osaka
+- `yokohamaCommercial` - Commercial properties in Yokohama
+- `kyotoLand` - Land for sale in Kyoto
+- `tokyoLuxuryApartments` - High-end rental apartments in Tokyo
+
+### Custom Configuration
+
+You can create a custom configuration by merging with the default:
+
+```javascript
+const { scrapeProperties } = require('./fudousan-scraper');
+const { mergeConfig } = require('./fudousan-config');
+
+// Create custom configuration
+const customConfig = mergeConfig({
+  search: {
+    type: 'buy',
+    propertyType: 'house',
+    location: '京都府', // Kyoto
+    maxPages: 2
+  },
+  filters: {
+    priceMin: 30000000, // 30 million yen
+    priceMax: 80000000, // 80 million yen
+    yearBuiltMin: 2010, // Built after 2010
+    features: ['駐車場', 'ペット可'] // Parking, pet-friendly
+  },
+  output: {
+    format: 'csv',
+    path: './output/kyoto_houses'
+  }
+});
+
+// Run the scraper with custom config
+scrapeProperties(customConfig);
+```
+
+### Configuration Options
+
+The configuration structure is as follows:
+
+```javascript
+{
+  // Base website URL
+  baseUrl: 'https://www.fudousan.or.jp',
+  
+  // Search parameters
+  search: {
+    type: 'buy',        // Options: 'buy', 'rent'
+    propertyType: 'mansion', // Options: 'mansion' (apartment), 'house', 'land', 'business'
+    location: '東京都',  // Location in Japanese
+    resultsPerPage: 30,
+    maxPages: 5,        // Maximum number of pages to scrape
+  },
+  
+  // Output settings
+  output: {
+    format: 'json',     // Options: 'json', 'csv'
+    path: './output',   // Output directory
+  },
+  
+  // Filters (all are optional)
+  filters: {
+    priceMin: null,     // Minimum price in JPY
+    priceMax: null,     // Maximum price in JPY
+    sizeMin: null,      // Minimum size in square meters
+    sizeMax: null,      // Maximum size in square meters
+    roomsMin: null,     // Minimum number of rooms
+    yearBuiltMin: null, // Minimum year built
+    distanceFromStation: null, // Maximum distance from station (in minutes)
+    features: [],       // Array of desired features (e.g., ['駐車場', 'ペット可'])
+  },
+  
+  // Detail scraper settings
+  detailScraper: {
+    concurrentScrapes: 5, // Number of detail pages to scrape simultaneously
+    extractImages: true,  // Whether to extract image URLs
+    extractNearbyFacilities: true, // Whether to extract nearby facilities
+    extractAgentInfo: true, // Whether to extract real estate agent information
+  },
+  
+  // Technical settings
+  technical: {
+    timeout: 30000,     // Navigation timeout in milliseconds
+    userAgent: '...',   // User agent string
+    headless: true      // Run browser in headless mode
+  }
+}scraper.js
+```
+
+This script takes a list of property detail URLs (which can be obtained from the main scraper) and extracts comprehensive information from each property page.
+
+### Example Usage Script
+
+For quick demonstrations, use the included usage examples:
+
+```bash
+node fudousan-scraper-usage.js
+```
+
+This script contains several examples showcasing different scraping scenarios:
+
+1. Scraping apartments for sale in Tokyo
+2. Scraping houses for rent in Osaka
+3. Scraping commercial properties in Yokohama
+4. Complete scraping pipeline (listings + details)
+
+You can modify the script to run different examples by uncommenting the desired functions.
+
+## Output Format
+
+### JSON Output Example
+
+```json
+[
+  {
+    "title": "東京都中央区築地 3LDK マンション",
+    "price": "7,980万円",
+    "address": "東京都中央区築地1-2-3",
+    "sqm": "75.5㎡",
+    "rooms": "3LDK",
+    "yearBuilt": "2015年",
+    "stationAccess": "東京メトロ日比谷線「築地駅」徒歩5分",
+    "propertyType": "マンション",
+    "description": "築地市場近く、リノベーション済み物件",
+    "imageUrl": "https://www.fudousan.or.jp/images/property123.jpg",
+    "detailUrl": "https://www.fudousan.or.jp/property/123"
+  },
+  // More properties...
+]
+```
+
+### Detailed Property Information Example
+
+```json
+{
+  "url": "https://www.fudousan.or.jp/property/123",
+  "title": "東京都中央区築地 3LDK マンション",
+  "images": [
+    "https://www.fudousan.or.jp/images/property123_1.jpg",
+    "https://www.fudousan.or.jp/images/property123_2.jpg"
+  ],
+  "details": {
+    "価格": "7,980万円",
+    "間取り": "3LDK",
+    "専有面積": "75.5㎡",
+    "築年月": "2015年3月",
+    "階数": "8階 / 12階建て",
+    "方角": "南東向き",
+    "管理費": "15,000円/月",
+    "修繕積立金": "12,000円/月"
+  },
+  "features": [
+    "オートロック",
+    "宅配ボックス",
+    "ペット可",
+    "駐車場",
+    "浴室乾燥機"
+  ],
+  "agentInfo": {
+    "name": "不動産エージェント株式会社",
+    "address": "東京都中央区銀座1-1-1",
+    "phone": "03-1234-5678",
+    "license": "東京都知事 (1) 第12345号"
+  },
+  "nearbyFacilities": [
+    "東京メトロ日比谷線「築地駅」徒歩5分",
+    "スーパーマーケット 徒歩3分",
+    "コンビニ 徒歩1分",
+    "公園 徒歩7分"
+  ],
+  "fullDescription": "築地市場近くの好立地物件。リノベーション済みで即入居可能。南東向きで日当たり良好。オートロック、宅配ボックス完備で防犯面も安心。駅近で交通の便良好。",
+  "location": {
+    "latitude": "35.6673",
+    "longitude": "139.7707"
+  },
+  "scrapedAt": "2025-05-10T12:34:56.789Z"
+}
+
+## Notes and Limitations
+
+- The selectors in the scraper may need to be adjusted if the website structure changes
+- Respect the website's `robots.txt` and use the scraper responsibly
+- Add appropriate delays between requests to avoid putting too much load on the website
+- Some properties may have incomplete information if they're not properly filled in the source website
+- Japanese characters are preserved in the output
+
+## Tips for Modification
+
+- Add proxy support if you need to make a large number of requests
+- Implement user agents rotation to make requests appear more natural
+- Add error recovery mechanisms for more robust scraping
+- Implement data cleansing functions for consistent output
+
+## Legal Notice
+
+Web scraping may be against the terms of service of some websites. This tool is provided for educational purposes only. Please ensure you have permission to scrape data from fudousan.or.jp before using this tool and comply with their terms of service.
+
+## License
+
+MIT License

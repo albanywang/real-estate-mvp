@@ -1,0 +1,101 @@
+/* Price marker styles */
+.custom-div-icon {
+    background: none;
+    border: none;
+  }
+  
+ /* price-marker */ 
+  .price-marker {
+    background-color: #e03131;
+    color: white;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #c92a2a;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: inline-block;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  
+  .price-marker:hover,
+  .price-marker.hover {
+    background-color: #2b8a3e;
+    border-color: #2b7d39;
+    transform: scale(1.05);
+    z-index: 1000;
+  }
+  
+  .price-marker.selected {
+    background-color: #364fc7;
+    border-color: #3b5bdb;
+  }
+  
+  .price-marker-text {
+    white-space: nowrap;
+  }
+  
+/* price fill marker */  
+.price-pill-container {
+  position: relative;
+  display: inline-block;
+}
+
+.price-pill-marker {
+  background-color: #e03131; /* Red background by default */
+  color: white;
+  border-radius: 12px; /* Pill shape */
+  padding: 3px 8px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: inline-block;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255,255,255,0.5); /* Subtle white border */
+}
+
+/* Small triangle pointer */
+.price-pill-arrow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #e03131; /* Match pill background color */
+  z-index: 2;
+}
+
+.price-pill-marker:hover,
+.price-pill-marker.hover {
+  background-color: #364fc7; /* Blue on hover */
+  transform: scale(1.05);
+  z-index: 1000;
+}
+
+.price-pill-marker.selected {
+  background-color: #364fc7; /* Blue when selected */
+  transform: scale(1.05);
+  z-index: 1000;
+}
+
+/* Change arrow color on hover */
+.price-pill-marker:hover + .price-pill-arrow,
+.price-pill-marker.hover + .price-pill-arrow,
+.price-pill-container:hover .price-pill-arrow {
+  border-top-color: #364fc7; /* Blue arrow on hover */
+}
+
+/* Change arrow color when selected */
+.price-pill-marker.selected + .price-pill-arrow {
+  border-top-color: #364fc7; /* Blue arrow when selected */
+}
+
+.price-pill-text {
+  white-space: nowrap;
+  font-size: 13px;
+}

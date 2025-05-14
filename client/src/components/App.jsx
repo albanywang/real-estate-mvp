@@ -1,24 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../utils/translations';
-import LanguageSelector from '../components/LanguageSelector';
-import sampleProperties from '../data/properties';
+import { formatPriceInMan } from '../utils/formatUtils';
+
+const API_URL = 'http://localhost:3001/api';
 
 // Utility function for price formatting
 const formatPrice = (price) => {
-  return `$${price.toLocaleString()}`;
+  return new Intl.NumberFormat('ja-JP', { 
+    style: 'currency', 
+    currency: 'JPY',
+    maximumFractionDigits: 0
+  }).format(price);
 };
 
+// Utility function for area formatting
+const formatArea = (area) => {
+  return `${area}㎡`;
+};
+
+
 // Map Component
-const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => {
+const MapComponent = (props) => {
+  const { properties, selectedProperty, setSelectedProperty, openPropertyDetail, t } = props;
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
-  
+
+
   useEffect(() => {
     if (!mapInstanceRef.current) {
-      // Initialize map
-      mapInstanceRef.current = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+      // Initialize map centered on Tokyo
+      mapInstanceRef.current = L.map(mapRef.current).setView([35.6762, 139.6503], 12);
       
       // Add OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -29,25 +42,99 @@ const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
+  
+    // Function to format area
+    const formatArea = (area) => {
+      return `${area}㎡`;
+    };
     
     // Add markers for properties
     properties.forEach(property => {
-      const marker = L.marker(property.location)
-        .addTo(mapInstanceRef.current)
-        .bindPopup(`
-          <div class="map-popup">
-            <img src="${property.images[0]}" alt="${property.title}" />
-            <h3>${formatPrice(property.price)}</h3>
-            <p>${property.bedrooms} BD | ${property.bathrooms} BA | ${property.squareFeet} SF</p>
-            <p>${property.address}</p>
-            <button class="view-btn" onclick="window.selectProperty(${property.id})">View Details</button>
-          </div>
-        `);
+      if (!property.location) {
+        console.warn(`Property ID ${property.id} is missing location coordinates`);
+        return; // Skip this property
+      }
+      // Create custom HTML for the marker
+      const markerHtml = `
+      <div class="price-pill-container">
+        <div class="price-pill-marker${property.id === selectedProperty ? ' selected' : ''}">
+          <span class="price-pill-text">${formatPriceInMan(property.price)}</span>
+        </div>
+        <div class="price-pill-arrow"></div>
+      </div>
+      `;
       
-      marker.on('click', () => {
-        setSelectedProperty(property.id);
+      // Create custom icon
+      const customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: markerHtml,
+        iconSize: [80, 30],
+        iconAnchor: [30, 30]
       });
       
+      // Create marker with custom icon
+      const marker = L.marker(property.location, { 
+        icon: customIcon,
+        riseOnHover: true
+      }).addTo(mapInstanceRef.current);
+      
+      // Store the marker element for hover effects
+      let markerElement;
+      
+      marker.bindPopup(`
+          <div class="map-popup">
+            <img src="${property.images[0]}" alt="${property.title}" />
+            <h3>${property.title}</h3>
+            <div class="map-popup-price">${new Intl.NumberFormat('ja-JP', {
+              style: 'currency',
+              currency: 'JPY',
+              maximumFractionDigits: 0
+            }).format(property.price)}</div>
+            <p>${property.layout} | ${formatArea(property.area)}</p>
+            <p>${property.address}</p>
+            <button class="map-popup-detail-btn" onclick="window.openPropertyDetail(${property.id})">詳細を見る</button>
+          </div>
+        `);
+
+      // When marker is added to map, get the element for hover effect
+      marker.on('add', function() {
+        setTimeout(() => {
+          const markerElements = document.getElementsByClassName('price-marker');
+          for (let i = 0; i < markerElements.length; i++) {
+            if (markerElements[i].innerHTML.includes(formatPriceInMan(property.price))) {
+              markerElement = markerElements[i];
+              
+              // Add hover effects
+              markerElement.addEventListener('mouseover', function() {
+                this.classList.add('hover');
+              });
+              
+              markerElement.addEventListener('mouseout', function() {
+                if (property.id !== selectedProperty) {
+                  this.classList.remove('hover');
+                }
+              });
+              
+              // Add click event
+              markerElement.addEventListener('click', function() {
+                setSelectedProperty(property.id);
+                marker.openPopup();
+                if (typeof openPropertyDetail === 'function') {
+                  openPropertyDetail(property);
+                }
+              });
+              
+              break;
+            }
+          }
+        }, 100);
+      });
+        
+      // When popup opens, update selected state
+      marker.on('popupopen', function() {
+        setSelectedProperty(property.id);
+      });
+            
       // Highlight selected property
       if (property.id === selectedProperty) {
         marker.openPopup();
@@ -57,6 +144,15 @@ const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => 
       markersRef.current.push(marker);
     });
     
+    // Also update your window function
+    window.openPropertyDetail = (id) => {
+      const property = properties.find(p => p.id === id);
+      if (property && typeof openPropertyDetail === 'function') {
+        setSelectedProperty(id);
+        openPropertyDetail(property);
+      }
+    }; 
+
     // Make the selectProperty function available to the popup button
     window.selectProperty = (id) => {
       setSelectedProperty(id);
@@ -66,10 +162,10 @@ const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => 
       // Clean up when component unmounts
       if (mapInstanceRef.current) {
         // Remove global function
-        delete window.selectProperty;
+        delete window.openPropertyDetail;
       }
     };
-  }, [properties, selectedProperty]);
+  }, [properties, selectedProperty, setSelectedProperty, openPropertyDetail]);
   
   return <div id="map" ref={mapRef}></div>;
 };
@@ -78,24 +174,26 @@ const MapComponent = ({ properties, selectedProperty, setSelectedProperty }) => 
 const PropertyCard = ({ property, isSelected, onClick, t }) => {
   return (
     <div className={`property-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
+      {/* Make sure the title is here */}
+      <div className="property-title">{property.title}</div>
       <img className="property-img" src={property.images[0]} alt={property.title} />
       <div className="property-price">{formatPrice(property.price)}</div>
       <div className="property-address">{property.address}</div>
       <div className="property-features">
         <div className="property-feature">
           <i className="fas fa-bed"></i>
-          <span>{property.bedrooms} {property.bedrooms === 1 ? t.bed : t.beds}</span>
+          <span>{property.layout}</span>
         </div>
         <div className="property-feature">
-          <i className="fas fa-bath"></i>
-          <span>{property.bathrooms} {property.bathrooms === 1 ? t.bath : t.baths}</span>
+          <i className="fas fa-building"></i>
+          <span>{property.floorInfo}</span>
         </div>
         <div className="property-feature">
           <i className="fas fa-ruler-combined"></i>
-          <span>{property.squareFeet} {t.sqft}</span>
+          <span>{formatArea(property.area)}</span>
         </div>
       </div>
-      <div className="property-description">{property.description}</div>
+      <div className="property-transportation">{property.transportation}</div>
     </div>
   );
 };
@@ -133,8 +231,7 @@ const FiltersPanel = ({ filters, setFilters, applyFilters, t }) => {
           <option value="">{t.any}</option>
           <option value="house">{t.house}</option>
           <option value="apartment">{t.apartment}</option>
-          <option value="condo">{t.condo}</option>
-          <option value="townhouse">{t.townhouse}</option>
+          <option value="mansion">{t.mansion}</option>
           <option value="land">{t.land}</option>
         </select>
       </div>
@@ -160,26 +257,29 @@ const FiltersPanel = ({ filters, setFilters, applyFilters, t }) => {
       </div>
       
       <div className="filter-group">
-        <label>{t.bedrooms}</label>
+        <label>{t.layout}</label>
         <select name="bedrooms" value={filters.bedrooms} onChange={handleChange}>
           <option value="">{t.any}</option>
-          <option value="0">Studio</option>
-          <option value="1">1+</option>
-          <option value="2">2+</option>
-          <option value="3">3+</option>
-          <option value="4">4+</option>
-          <option value="5">5+</option>
+          <option value="1R">1R</option>
+          <option value="1K">1K</option>
+          <option value="1DK">1DK</option>
+          <option value="1LDK">1LDK</option>
+          <option value="2K">2K</option>
+          <option value="2DK">2DK</option>
+          <option value="2LDK">2LDK</option>
+          <option value="3LDK">3LDK</option>
+          <option value="4LDK">4LDK+</option>
         </select>
       </div>
       
       <div className="filter-group">
-        <label>{t.bathrooms}</label>
-        <select name="bathrooms" value={filters.bathrooms} onChange={handleChange}>
+        <label>{t.structure}</label>
+        <select name="structure" value={filters.structure} onChange={handleChange}>
           <option value="">{t.any}</option>
-          <option value="1">1+</option>
-          <option value="2">2+</option>
-          <option value="3">3+</option>
-          <option value="4">4+</option>
+          <option value="RC">RC（鉄筋コンクリート）</option>
+          <option value="SRC">SRC（鉄骨鉄筋コンクリート）</option>
+          <option value="S">S（鉄骨造）</option>
+          <option value="W">W（木造）</option>
         </select>
       </div>
       
@@ -224,6 +324,26 @@ const FiltersPanel = ({ filters, setFilters, applyFilters, t }) => {
       </div>
       
       <div className="filter-group">
+        <label>{t.managementFee}</label>
+        <div className="price-range">
+          <input 
+            type="number" 
+            name="minManagementFee" 
+            placeholder={t.min}
+            value={filters.minManagementFee}
+            onChange={handleChange}
+          />
+          <input 
+            type="number" 
+            name="maxManagementFee" 
+            placeholder={t.max}
+            value={filters.maxManagementFee}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+      
+      <div className="filter-group">
         <label>{t.features}</label>
         <div className="checkbox-group">
           <div className="checkbox-item">
@@ -239,22 +359,22 @@ const FiltersPanel = ({ filters, setFilters, applyFilters, t }) => {
           <div className="checkbox-item">
             <input 
               type="checkbox" 
-              id="feature-pool" 
-              name="hasPool"
-              checked={filters.hasPool}
-              onChange={handleChange}
-            />
-            <label htmlFor="feature-pool">{t.pool}</label>
-          </div>
-          <div className="checkbox-item">
-            <input 
-              type="checkbox" 
               id="feature-ac" 
               name="hasAC"
               checked={filters.hasAC}
               onChange={handleChange}
             />
             <label htmlFor="feature-ac">{t.ac}</label>
+          </div>
+          <div className="checkbox-item">
+            <input 
+              type="checkbox" 
+              id="feature-autoLock" 
+              name="hasAutoLock"
+              checked={filters.hasAutoLock}
+              onChange={handleChange}
+            />
+            <label htmlFor="feature-autoLock">{t.autoLock}</label>
           </div>
         </div>
       </div>
@@ -278,7 +398,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     confirmPassword: ''
   });
   
-  // If popup is not open, return null (but don't cause a render error)
+  // If popup is not open, return null
   if (!isOpen) return null;
   
   const handleChange = (e) => {
@@ -299,7 +419,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     } else {
       // Handle registration
       if (formData.password !== formData.confirmPassword) {
-        alert('Passwords do not match!');
+        alert('パスワードが一致しません！');
         return;
       }
       console.log('Register with:', formData.name, formData.email, formData.password);
@@ -423,11 +543,11 @@ const LoginPopup = ({ isOpen, onClose }) => {
             <button type="button" className="login-popup-social-btn google">
               <i className="fab fa-google"></i> {t.continueWithGoogle}
             </button>
-            <button type="button" className="login-popup-social-btn facebook">
-              <i className="fab fa-facebook-f"></i> {t.continueWithFacebook}
+            <button type="button" className="login-popup-social-btn line">
+              <i className="fab fa-line"></i> {t.continueWithLine}
             </button>
-            <button type="button" className="login-popup-social-btn apple">
-              <i className="fab fa-apple"></i> {t.continueWithApple}
+            <button type="button" className="login-popup-social-btn yahoo">
+              <i className="fab fa-yahoo"></i> {t.continueWithYahoo}
             </button>
           </div>
         </form>
@@ -438,96 +558,123 @@ const LoginPopup = ({ isOpen, onClose }) => {
 
 // Main App Component
 const App = () => {
-  const { language } = useLanguage();
-  const t = translations[language];
-  
-  const [properties, setProperties] = useState(sampleProperties);
-  const [filteredProperties, setFilteredProperties] = useState(sampleProperties);
+  const [language] = useState('jp');
+  const t = translations[language] || translations.jp;
+
+  const [properties, setProperties] = useState([]);
+  const [filteredProperties, setFilteredProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
+  const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false);
+  const [detailProperty, setDetailProperty] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);  
   const [filters, setFilters] = useState({
     location: '',
     propertyType: '',
     minPrice: '',
     maxPrice: '',
-    bedrooms: '',
-    bathrooms: '',
-    minSqft: '',
-    maxSqft: '',
+    layout: '',
+    structure: '',
+    minArea: '',
+    maxArea: '',
     minYear: '',
     maxYear: '',
-    hasGarage: false,
-    hasPool: false,
-    hasAC: false
+    minManagementFee: '',
+    maxManagementFee: '',
   });
   
+  const openPropertyDetail = (property) => {
+    setDetailProperty(property);
+    setIsDetailPopupOpen(true);
+  };
+  
+  const closePropertyDetail = () => {
+    setIsDetailPopupOpen(false);
+  };
+
   // Fetch properties from API
   useEffect(() => {
-    // Replace this with actual API call in production
+    let isMounted = true; // Flag to track mount state
     const fetchProperties = async () => {
       try {
-        // const response = await fetch('/api/properties');
-        // const data = await response.json();
-        // setProperties(data);
-        // setFilteredProperties(data);
+        setIsLoading(true);
         
-        // Using imported sample data for demo
-        setProperties(sampleProperties);
-        setFilteredProperties(sampleProperties);
+        // Add error checking for API endpoint
+        const API_URL = 'http://localhost:3001/api'; // Make sure this is defined
+        
+        const response = await fetch(`${API_URL}/properties`);
+        
+        // Check if response is ok
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Only update state if still mounted
+        if (isMounted) {
+          setProperties(data);
+          setFilteredProperties(data);
+          setIsLoading(false);
+        }
       } catch (error) {
-        console.error('Error fetching properties:', error);
+        if (isMounted) {
+          console.error('Error:', error);
+          setError('Failed to load');
+          setIsLoading(false);
+        }
       }
     };
     
     fetchProperties();
+    // Cleanup function to run on unmount
+    return () => {
+      isMounted = false;
+    };    
   }, []);
   
-  // Apply filters
-  const applyFilters = () => {
-    let filtered = [...properties];
-    
-    // Filter by property type
-    if (filters.propertyType) {
-      filtered = filtered.filter(p => p.propertyType === filters.propertyType);
+  // Apply filters through API
+  const applyFilters = async () => {
+    try {
+      setIsLoading(true);
+      
+      const filterParams = {
+        minPrice: filters.minPrice ? parseInt(filters.minPrice) || 0 : null,
+        maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) || 0 : null,
+        propertyType: filters.propertyType || null,
+        layout: filters.layout || null,
+        minArea: filters.minArea ? parseFloat(filters.minArea) : null,
+        maxArea: filters.maxArea ? parseFloat(filters.maxArea) : null,
+      };
+      
+      const response = await fetch(`${API_URL}/properties/filter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filterParams),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Filter request failed');
+      }
+      
+      const data = await response.json();
+      // Validate before setting state
+      if (Array.isArray(data)) {
+        setFilteredProperties(data);
+      } else {
+        throw new Error('Expected array response');
+      }
+      setIsLoading(false);
+      setShowFilters(false); // Close filters on mobile after applying
+    } catch (error) {
+      console.error('Error applying filters:', error);
+      setError('Failed to filter properties. Please try again.');
+      setIsLoading(false);
     }
-    
-    // Filter by price range
-    if (filters.minPrice) {
-      filtered = filtered.filter(p => p.price >= parseInt(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      filtered = filtered.filter(p => p.price <= parseInt(filters.maxPrice));
-    }
-    
-    // Filter by bedrooms
-    if (filters.bedrooms) {
-      filtered = filtered.filter(p => p.bedrooms >= parseInt(filters.bedrooms));
-    }
-    
-    // Filter by bathrooms
-    if (filters.bathrooms) {
-      filtered = filtered.filter(p => p.bathrooms >= parseFloat(filters.bathrooms));
-    }
-    
-    // Filter by square feet
-    if (filters.minSqft) {
-      filtered = filtered.filter(p => p.squareFeet >= parseInt(filters.minSqft));
-    }
-    if (filters.maxSqft) {
-      filtered = filtered.filter(p => p.squareFeet <= parseInt(filters.maxSqft));
-    }
-    
-    // Filter by year built
-    if (filters.minYear) {
-      filtered = filtered.filter(p => p.yearBuilt >= parseInt(filters.minYear));
-    }
-    if (filters.maxYear) {
-      filtered = filtered.filter(p => p.yearBuilt <= parseInt(filters.maxYear));
-    }
-    
-    setFilteredProperties(filtered);
-    setShowFilters(false); // Close filters on mobile after applying
   };
   
   // Toggle filters visibility on mobile
@@ -551,7 +698,7 @@ const App = () => {
       <header>
         <a href="#" className="logo">
           <i className="fas fa-home"></i>
-          RealEstate Finder
+          不動産ファインダー
         </a>
         <nav>
           <ul>
@@ -560,12 +707,12 @@ const App = () => {
             <li><a href="#">{t.sell}</a></li>
             <li><a href="#">{t.agents}</a></li>
             <li><a href="#" id="sign-in-link" onClick={handleSignInClick}>{t.signIn}</a></li>
-            <li><LanguageSelector /></li>
           </ul>
         </nav>
       </header>
       
       <main>
+        {/* Left Column - Filters */}
         <div className={`filters ${showFilters ? 'active' : ''}`}>
           <FiltersPanel 
             filters={filters} 
@@ -575,43 +722,65 @@ const App = () => {
           />
         </div>
         
+        {/* Center Column - Map */}
         <div className="map-container">
           <MapComponent 
             properties={filteredProperties} 
             selectedProperty={selectedProperty}
             setSelectedProperty={setSelectedProperty}
+            openPropertyDetail={openPropertyDetail}
+            t={t} // Add this line
           />
           <button className="mobile-filters-toggle" onClick={toggleFilters}>
             <i className="fas fa-filter"></i> {t.filters}
           </button>
         </div>
         
+        {/* Property list with loading state */}
         <div className="property-list">
-          {filteredProperties.map(property => (
-            <PropertyCard 
-              key={property.id}
-              property={property}
-              isSelected={selectedProperty === property.id}
-              onClick={() => setSelectedProperty(property.id)}
-              t={t}
-            />
-          ))}
-          {filteredProperties.length === 0 && (
+          {isLoading ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading properties...</p>
+            </div>
+          ) : error ? (
+            <div className="error-message">
+              <p>{error}</p>
+              <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          ) : filteredProperties.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <p>{t.noProperties}</p>
               <p>{t.tryAdjusting}</p>
             </div>
+          ) : (
+            filteredProperties.map(property => (
+              <PropertyCard 
+                key={property.id}
+                property={property}
+                isSelected={selectedProperty === property.id}
+                onClick={() => {
+                  setSelectedProperty(property.id);
+                  openPropertyDetail(property);
+                }}
+                t={t}
+              />
+            ))
           )}
         </div>
       </main>
       
       {/* Login Popup - Using conditional rendering */}
-      {isLoginPopupOpen && (
-        <LoginPopup 
-          isOpen={isLoginPopupOpen} 
-          onClose={closeLoginPopup} 
-        />
-      )}
+      <LoginPopup 
+        isOpen={isLoginPopupOpen} 
+        onClose={closeLoginPopup} 
+      />
+      {/* property popup show detail information */}
+      <PropertyDetailPopup
+        property={detailProperty}
+        isOpen={isDetailPopupOpen}
+        onClose={closePropertyDetail}
+      />
     </>
   );
 };

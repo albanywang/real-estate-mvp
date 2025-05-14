@@ -1,0 +1,218 @@
+/* Property Detail Popup Styles */
+
+.property-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  
+  .property-detail-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 95%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  .property-detail-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+  }
+  
+  .property-detail-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .property-detail-title-section {
+    flex: 1;
+  }
+  
+  .property-detail-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 700;
+  }
+  
+  .property-detail-address {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .property-detail-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #FF4D4D;
+    text-align: left;
+  }
+  
+  .property-detail-images {
+    width: 100%;
+    height: 350px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .property-detail-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .property-detail-body {
+    padding: 20px;
+  }
+  
+  .property-detail-info-header {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .property-detail-icon-container {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #003366;
+  }
+  
+  .property-detail-icon-container i {
+    margin-right: 10px;
+    color: #FF4D4D;
+  }
+  
+  .property-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    table-layout: fixed;
+    border: 1px solid #ddd;
+  }
+  
+  /* First two rows - full width */
+.property-detail-table tr:nth-child(-n+2) th {
+    width: 30%;
+  }
+  
+  .property-detail-table tr:nth-child(-n+2) td {
+    width: 70%;
+  }
+  
+  
+    .property-detail-table th,
+    .property-detail-table td {
+      padding: 12px 15px;
+      text-align: left; /* Ensure text aligns to the left */
+      border: 1px solid #ddd;
+    }
+
+    /* Make all cells white background by default */
+    .property-detail-table td {
+      background-color: #ffffff;
+    }
+
+    /* Style for odd columns (1st, 3rd) */
+    .property-detail-table th:nth-child(1),
+    .property-detail-table th:nth-child(3) {
+      background-color: #f2f2f2;
+    }
+
+    /* Style for even columns (2nd, 4th) */
+    .property-detail-table th:nth-child(2),
+    .property-detail-table th:nth-child(4) {
+      background-color: #ffffff;
+    }
+
+    .property-detail-table-grid {
+        margin-top: 10px;
+      }
+
+  .property-detail-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .property-detail-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 4px;
+    border: none;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .property-detail-btn i {
+    margin-right: 8px;
+  }
+  
+  .property-detail-btn.loan-calculator {
+    background-color: #007BFF;
+    color: white;
+  }
+  
+  .property-detail-btn.contact {
+    background-color: #FF4D4D;
+    color: white;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .property-detail-header {
+      flex-direction: column;
+    }
+    
+    .property-detail-price {
+      margin-left: 0;
+      margin-top: 10px;
+      text-align: left;
+    }
+    
+    .property-detail-images {
+      height: 250px;
+    }
+    
+    .property-detail-buttons {
+      flex-direction: column;
+    }
+  }
+  
+  /* Additional detail for specific rows */
+  .property-detail-table tr:nth-child(odd) {
+    background-color: #fafafa;
+  }
+  

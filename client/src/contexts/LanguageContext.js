@@ -1,23 +1,29 @@
-// First, let's create a language context to manage the language state
-// Create a new file called LanguageContext.js
-
+// client/src/contexts/LanguageContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// Create the context
+// Create context
 const LanguageContext = createContext();
 
-// Language provider component
+// Create a custom hook to use the language context
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
+
+// Create a provider component
 export const LanguageProvider = ({ children }) => {
-  // Get initial language from localStorage or use English as default
+  // Get saved language from localStorage or default to Japanese
   const [language, setLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem('language');
-    return savedLanguage || 'en';
+    return savedLanguage || 'ja'; // Default to Japanese
   });
 
   // Update localStorage when language changes
   useEffect(() => {
     localStorage.setItem('language', language);
-    document.documentElement.lang = language; // Update HTML lang attribute
   }, [language]);
 
   // Function to change language
@@ -25,12 +31,17 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(newLanguage);
   };
 
+  // Value object to be provided by context
+  const value = {
+    language,
+    changeLanguage
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-// Custom hook to use the language context
-export const useLanguage = () => useContext(LanguageContext);
+export default LanguageProvider;

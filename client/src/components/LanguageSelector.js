@@ -2,7 +2,7 @@
 // Create a file called LanguageSelector.js
 
 import React from 'react';
-import { useLanguage } from './LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LanguageSelector = () => {
   const { language, changeLanguage } = useLanguage();

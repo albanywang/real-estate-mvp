@@ -1,0 +1,180 @@
+/* Login popup */
+.login-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .login-popup-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  .login-popup-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--light-text);
+  }
+  
+  .login-popup-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-popup-header h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-weight: 700;
+  }
+  
+  .login-popup-tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .login-popup-tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--light-text);
+    transition: all 0.3s;
+  }
+  
+  .login-popup-tab.active {
+    color: var(--secondary-color);
+    border-bottom: 3px solid var(--secondary-color);
+  }
+  
+  .login-popup-form-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .login-popup-form-group label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-text);
+    font-weight: 500;
+  }
+  
+  .login-popup-form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  
+  .login-popup-forgot {
+    text-align: right;
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-popup-forgot a {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    text-decoration: none;
+  }
+  
+  .login-popup-submit {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 1rem;
+  }
+  
+  .login-popup-submit:hover {
+    background-color: #ff3333;
+  }
+  
+  .login-popup-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--light-text);
+    font-size: 0.8rem;
+    margin: 1.5rem 0;
+  }
+  
+  .login-popup-divider::before,
+  .login-popup-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .login-popup-divider::before {
+    margin-right: 0.5rem;
+  }
+  
+  .login-popup-divider::after {
+    margin-left: 0.5rem;
+  }
+  
+  .login-popup-social {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .login-popup-social-btn {
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+  
+  .login-popup-social-btn i {
+    margin-right: 0.5rem;
+  }
+  
+  .login-popup-social-btn.google {
+    background-color: #DB4437;
+    color: white;
+  }
+  
+  .login-popup-social-btn.line {
+    background-color: #00B900;
+    color: white;
+  }
+  
+  .login-popup-social-btn.yahoo {
+    background-color: #720e9e;
+    color: white;
+  }
+
+  .login-popup-content {
+    padding: 1.5rem;
+  }

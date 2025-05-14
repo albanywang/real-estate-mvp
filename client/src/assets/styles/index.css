@@ -1,54 +1,60 @@
-/* Main Styles for RealEstate Finder */
+/* index.css - Japanese Real Estate Website */
 
-:root {
-  --primary-color: #2c3e50;
-  --secondary-color: #3498db;
-  --accent-color: #e74c3c;
-  --light-bg: #f8f9fa;
-  --dark-text: #2c3e50;
-  --light-text: #ecf0f1;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+/* Import Japanese font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 
+/* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+  --primary-color: #003366;
+  --secondary-color: #FF4D4D;
+  --accent-color: #FFD700;
+  --light-bg: #F8F9FA;
+  --dark-text: #333333;
+  --light-text: #777777;
+  --border-color: #E0E0E0;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 body {
-  background-color: var(--light-bg);
+  font-family: 'Noto Sans JP', sans-serif;
   color: var(--dark-text);
-  padding: 0;
-  margin: 0;
+  background-color: var(--light-bg);
+  line-height: 1.6;
 }
 
-/* Header Styles */
+/* Header styles */
 header {
-  background-color: var(--primary-color);
-  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
+  padding: 1rem 2rem;
+  background-color: white;
+  box-shadow: var(--shadow);
+  position: fixed;
   top: 0;
-  z-index: 1000;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .logo {
-  color: var(--light-text);
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
+  color: var(--primary-color);
   text-decoration: none;
   display: flex;
   align-items: center;
 }
 
 .logo i {
-  margin-right: 10px;
-  color: var(--accent-color);
+  margin-right: 0.5rem;
+  color: var(--secondary-color);
 }
 
 nav ul {
@@ -56,174 +62,126 @@ nav ul {
   list-style: none;
 }
 
-nav li {
+nav ul li {
   margin-left: 1.5rem;
 }
 
-nav a {
-  color: var(--light-text);
+nav ul li a {
   text-decoration: none;
-  font-size: 1rem;
+  color: var(--dark-text);
+  font-weight: 500;
   transition: color 0.3s;
 }
 
-nav a:hover {
+/*
+nav ul li a:hover {
   color: var(--secondary-color);
-}
+}*/
 
-/* Main Content Layout */
+/* Main layout */
 main {
-  display: flex;
-  height: calc(100vh - 67px);
-  overflow: hidden;
-  padding: 10px; /* Add padding around the entire container */
-  box-sizing: border-box;
-  background-color: #f5f7fa;
-  justify-content: center; /* Center the content horizontally */
+  margin-top: 64px;
+  display: grid;
+  padding: 20px; /* Add padding around the entire container */
+  grid-template-columns: 280px 1fr 350px;
+  grid-template-rows: 1fr;
+  height: calc(100vh - 64px);
 }
 
-/* Filters Panel Styles */
+/* Filters panel */
 .filters {
-  width: 350px;
-  min-width: 350px;
   background-color: white;
   padding: 3px;
-  margin-right: 20px; /* Add space between filter and map */
+  box-shadow: var(--shadow);
   overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-  z-index: 10;
+  height: 100%;
+  grid-column: 1;
 }
-
-/* Set all text to not scale with container */
-.filters h2,
-.filters label,
-.filters input,
-.filters select,
-.filters button {
-  font-size: 0.9rem; /* Consistent font size */
-  line-height: 1.4;
-}    
 
 .filters h2 {
-  margin-bottom: 1.5rem;
   font-size: 1.2rem;
+  margin-bottom: 1.5rem;
   color: var(--primary-color);
+  text-align: center;
+  font-weight: 700;
 }
 
-/* Style checkboxes container */
+.filter-group {
+  margin-bottom: 1.2rem;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--dark-text);
+  font-weight: 500;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.price-range {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.price-range input {
+  width: 50%;
+}
+
 .checkbox-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  margin-right: 1rem;
 }
 
 .checkbox-item input {
   width: auto;
-  margin-right: 5px;
+  margin-right: 0.5rem;
 }
 
-/* Style search button */
-button.search-btn {
-  height: 2.75rem; /* Match input/select height */
-}
-
-.filter-group {
-  margin-bottom: 1.2rem;
+.search-btn {
   width: 100%;
-}
-
-.filter-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-/* Control dropdown size specifically */
-.filter-group select {
-  width: 100%;
-  max-width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.9rem; /* Slightly smaller font */
-  height: 2.75rem; /* Fixed height for dropdowns */
-  background-position: right 0.75rem center; /* Position the dropdown arrow */
-  appearance: none; /* Remove default styling */
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: 1rem;
-  cursor: pointer;
-}
-
-.price-range {
-  display: flex;
-  gap: 10px;
-}
-
-.price-range input {
-  flex: 1;
-  min-width: 0; /* Allow inputs to shrink if needed */
-}
-
-/* Control text inputs */
-.filter-group input[type="text"],
-.filter-group input[type="number"] {
-  width: 100%;
-  height: 2.75rem; /* Match select height */
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
-}
-
-.filter-group .checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 0.5rem;
-}
-
-.filter-group .checkbox-item {
-  display: flex;
-  align-items: center;
-  margin-right: 1rem;
-}
-
-.filter-group .checkbox-item input {
-  width: auto;
-  margin-right: 5px;
-}
-
-button.search-btn {
-  background-color: var(--accent-color);
+  padding: 0.8rem;
+  background-color: var(--secondary-color);
   color: white;
   border: none;
-  padding: 0.75rem;
-  width: 100%;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 1rem;
 }
 
-button.search-btn:hover {
-  background-color: #c0392b;
+.search-btn:hover {
+  background-color: #ff3333;
 }
 
-/* Map Container Styles */
+.search-btn i {
+  margin-right: 0.5rem;
+}
+
+/* Map container */
 .map-container {
-  flex: 1;
+  height: 100%;
   position: relative;
-  border-radius: 10px; /* Rounded corners to match filter panel */
-  overflow: hidden; /* Keep the map inside the rounded corners */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Matching shadow */
+  box-shadow: var(--shadow);
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  grid-column: 2;
 }
 
 #map {
@@ -231,415 +189,370 @@ button.search-btn:hover {
   width: 100%;
 }
 
-/* Property List Styles */
-.property-list {
-  width: 350px;
+.mobile-filters-toggle {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
   background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+
+/* Property list */
+.property-list {
+  grid-column: 3;
   overflow-y: auto;
-  margin-left: 20px; /* Space between map and property list */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Matching shadow */
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 350px;
+  height: 100%;
 }
 
 .property-card {
-  padding: 1rem;
-  border-bottom: 1px solid #ddd;
+  background-color: white;
+  /* Increase min-height to ensure everything fits */
+  min-height: 430px; /* Increase from 400px */
+  /* Add max-height and overflow if needed */
+  max-height: 600px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: var(--shadow);
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .property-card:hover {
-  background-color: var(--light-bg);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.property-card.selected {
+  border: 2px solid var(--secondary-color);
 }
 
 .property-img {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: var(--border-radius);
-  margin-bottom: 1rem;
+  height: 150px;
+  object-fit: contain;
+  object-position: center; /* Centers the image */
 }
 
 .property-price {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: var(--accent-color);
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--secondary-color);
 }
 
 .property-address {
+  padding: 0 1rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--dark-text);
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
 .property-features {
   display: flex;
+  font-size: 0.7rem;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  background-color: #f9f9f9;
+  margin-bottom: 0;
 }
 
 .property-feature {
   display: flex;
   align-items: center;
+  font-size: 0.8rem;
 }
 
 .property-feature i {
-  margin-right: 5px;
-  color: var(--secondary-color);
-}
-
-.property-description {
-  font-size: 0.9rem;
-  color: #666;
-  line-height: 1.4;
-}
-
-/* Map Popup Styles */
-.leaflet-popup-content {
-  min-width: 200px;
-}
-
-.map-popup {
-  text-align: center;
-}
-
-.map-popup img {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-.map-popup h3 {
-  margin: 0 0 5px;
-  color: var(--accent-color);
-}
-
-.map-popup p {
-  margin: 0 0 5px;
-}
-
-.map-popup .view-btn {
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.mobile-filters-toggle {
-  display: none;
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 999;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 30px;
-  box-shadow: var(--box-shadow);
-  cursor: pointer;
-}
-
-/* Login Popup Styles */
-.login-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.login-popup-content {
-  background: white;
-  padding: 25px;
-  border-radius: var(--border-radius);
-  width: 90%;
-  max-width: 420px;
-  position: relative;
-  box-shadow: var(--box-shadow);
-  animation: popup-fade-in 0.3s ease-out;
-}
-
-@keyframes popup-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-popup-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #333;
-}
-
-.login-popup-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.login-popup-header h2 {
-  font-size: 24px;
+  margin-right: 0.3rem;
   color: var(--primary-color);
-  margin-bottom: 5px;
 }
 
-.login-popup-tabs {
-  display: flex;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 20px;
+.property-structure,
+.property-management-fee,
+.property-area-of-use {
+  padding: 0.3rem 1rem;
+  font-size: 0.8rem;
+  color: var(--light-text);
+  margin-bottom: 0;
 }
 
-.login-popup-tab {
-  flex: 1;
-  padding: 10px 0;
-  text-align: center;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-.login-popup-tab.active {
-  border-bottom: 2px solid var(--accent-color);
-  color: var(--accent-color);
+.feature-label {
   font-weight: 500;
+  color: var(--dark-text);
 }
 
-.login-popup-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.property-title {
+    padding: 0.5rem 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.4;
+    /* Ensure visibility */
+    display: block;
+    z-index: 1;
 }
 
-.login-popup-form-group {
-  display: flex;
-  flex-direction: column;
+.property-transportation {
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--light-text);
+  margin-top: 0;
+  /* Remove flex-grow which might be causing issues */
+  flex-grow: 0;
+  /* Add padding at the bottom to ensure text isn't cut */
+  padding: 0.8rem 1rem 1.5rem;
+  /* Make sure there's no overflow being hidden */
+  overflow: visible;  
 }
 
-.login-popup-form-group label {
-  margin-bottom: 5px;
-  font-weight: 500;
-}
 
-.login-popup-form-group input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: var(--border-radius);
-  font-size: 16px;
-}
-
-.login-popup-form-group input:focus {
-  outline: none;
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-}
-
-.login-popup-forgot {
-  text-align: center;
-  margin: 10px 0;
-}
-
-.login-popup-forgot a {
-  color: var(--secondary-color);
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.login-popup-submit {
-  background-color: var(--accent-color);
+.view-btn {
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 12px;
-  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.8rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.view-btn:hover {
+  background-color: #00264d;
+}
+
+
+/* Custom Leaflet Map styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 10px;
+  width: auto !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 5px;
+  right: 5px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  line-height: 18px;
+  text-align: center;
 }
 
-.login-popup-submit:hover {
-  background-color: #c0392b;
-}
-
-.login-popup-divider {
-  display: flex;
-  align-items: center;
-  margin: 20px 0;
-  color: #999;
-  font-size: 14px;
-}
-
-.login-popup-divider::before,
-.login-popup-divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid #ddd;
-}
-
-.login-popup-divider::before {
-  margin-right: 10px;
-}
-
-.login-popup-divider::after {
-  margin-left: 10px;
-}
-
-.login-popup-social {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.login-popup-social-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.login-popup-social-btn:hover {
-  background-color: #f5f5f5;
-}
-
-.login-popup-social-btn i {
-  margin-right: 10px;
-}
-
-.login-popup-social-btn.google i {
-  color: #DB4437;
-}
-
-.login-popup-social-btn.facebook i {
-  color: #4267B2;
-}
-
-.login-popup-social-btn.apple i {
-  color: #000;
-}
-
-/* Language Selector Styles */
+/* Language selector */
 .language-selector {
-  position: relative;
-  margin-left: 1.5rem;
-}
-
-.language-select {
-  background-color: transparent;
-  color: var(--light-text);
-  border: 1px solid var(--secondary-color);
-  border-radius: var(--border-radius);
-  padding: 0.35rem 0.5rem;
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ecf0f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 0.8rem;
-  padding-right: 1.5rem;
-  transition: border-color 0.3s;
+  font-size: 0.9rem;
 }
 
-.language-select:hover, .language-select:focus {
-  border-color: var(--accent-color);
-  outline: none;
+.language-selector select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: white;
+  font-family: 'Noto Sans JP', sans-serif;
 }
 
-.language-select option {
-  background-color: var(--primary-color);
-  color: var(--light-text);
-}
 
-/* Responsive Styles */
-@media (max-width: 1200px) {
+
+  .image-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  
+  .image-nav-btn:hover {
+    opacity: 1;
+  }
+  
+  .prev-btn {
+    left: 15px;
+  }
+  
+  .next-btn {
+    right: 15px;
+  }
+  
+  .image-counter {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+
+
+/* Responsive design */
+@media (max-width: 1280px) {
   main {
-    padding: 15px;
+    grid-template-columns: 250px 1fr 300px;
+  }
+  
+  .property-card {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  main {
+    grid-template-columns: 240px 1fr 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 220px 1fr 0;
+    grid-template-rows: 1fr 1fr;
   }
   
   .filters {
-    width: 300px;
-    min-width: 300px;
-    margin-right: 15px;
+    grid-row: 1 / span 2;
+  }
+  
+  .map-container {
+    grid-column: 2;
+    grid-row: 1;
   }
   
   .property-list {
-    width: 300px;
-    margin-left: 15px;
+    grid-column: 2;
+    grid-row: 2;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
+  header {
+    padding: 1rem;
+  }
+  
+  nav ul li {
+    margin-left: 1rem;
+  }
+  
   main {
-    flex-direction: column;
-    height: auto;
-    padding: 10px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50vh 50vh;
   }
   
   .filters {
-    width: 100%;
-    min-width: 100%;
-    height: 0;
-    overflow: hidden;
-    padding: 0;
-    margin-right: 0;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    transition: height 0.3s, padding 0.3s;
+    position: fixed;
+    left: -280px;
+    top: 64px;
+    width: 280px;
+    height: calc(100vh - 64px);
+    transition: left 0.3s;
+    z-index: 99;
+    grid-row: auto;
   }
   
   .filters.active {
-    height: 500px;
-    padding: 1.5rem;
-  }
-  
-  .map-container {
-    height: 500px;
-    width: 100%;
-  }
-  
-  .property-list {
-    width: 100%;
-    border-left: none;
+    left: 0;
   }
   
   .mobile-filters-toggle {
     display: block;
   }
   
-  .login-popup-content {
-    width: 95%;
-    padding: 20px;
-  }
-
-  .language-selector {
-    margin-left: 1rem;
+  .map-container {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
   }
   
-  .language-select {
-    padding: 0.25rem 0.4rem;
+  .property-list {
+    grid-column: 1;
+    grid-row: 2;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+  
+  .logo {
+    margin-bottom: 0.5rem;
+  }
+  
+  nav ul {
     font-size: 0.8rem;
   }
+  
+  nav ul li {
+    margin-left: 0.5rem;
+  }
+  
+  main {
+    margin-top: 100px;
+    height: calc(100vh - 100px);
+  }
+  
+  .filters {
+    top: 100px;
+    height: calc(100vh - 100px);
+  }
+  
+  .property-list {
+    grid-template-columns: 1fr;
+    padding: 0.5rem;
+  }
+  
 }
