@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../utils/translations';
 import { formatPriceInMan } from '../utils/formatUtils';
+import PropertyDetailPopup from './PropertyDetailPopup';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
 const API_URL = 'http://localhost:3001/api';
 
@@ -694,21 +696,12 @@ const App = () => {
   };
   
   return (
-    <>
+    <LanguageProvider>
       <header>
         <a href="#" className="logo">
           <i className="fas fa-home"></i>
           不動産ファインダー
         </a>
-        <nav>
-          <ul>
-            <li><a href="#">{t.buy}</a></li>
-            <li><a href="#">{t.rent}</a></li>
-            <li><a href="#">{t.sell}</a></li>
-            <li><a href="#">{t.agents}</a></li>
-            <li><a href="#" id="sign-in-link" onClick={handleSignInClick}>{t.signIn}</a></li>
-          </ul>
-        </nav>
       </header>
       
       <main>
@@ -731,9 +724,6 @@ const App = () => {
             openPropertyDetail={openPropertyDetail}
             t={t} // Add this line
           />
-          <button className="mobile-filters-toggle" onClick={toggleFilters}>
-            <i className="fas fa-filter"></i> {t.filters}
-          </button>
         </div>
         
         {/* Property list with loading state */}
@@ -781,7 +771,7 @@ const App = () => {
         isOpen={isDetailPopupOpen}
         onClose={closePropertyDetail}
       />
-    </>
+    </LanguageProvider>
   );
 };
 
