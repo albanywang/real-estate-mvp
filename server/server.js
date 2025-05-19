@@ -1,6 +1,7 @@
+// server/server.js
 const express = require('express');
-const { Pool } = require('pg');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -9,105 +10,43 @@ const port = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // For serving images
+app.use(express.static(path.join(__dirname, 'public')));
 
-// PostgreSQL connection
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+// Explicitly serve the public/images directory
+//app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// Get all properties
-app.get('/api/properties', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM properties');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
+// Explicitly serve the images directory
+app.use('/images', express.static(path.join(__dirname, 'server', 'public', 'images')));
+
+// Routes
+const propertiesRoutes = require('./routes/properties');
+app.use('/api/properties', propertiesRoutes);
+
+// ===== DEBUGGING MIDDLEWARE =====
+// Add this temporarily to debug image requests
+app.use((req, res, next) => {
+  if (req.path.includes('/images/')) {
+    console.log('Image request received:', req.path);
+    
+    // Check if file exists
+    const imagePath = path.join(__dirname, 'public', req.path);
+    const fs = require('fs');
+    
+    fs.access(imagePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        console.error(`Image not found at ${imagePath}`);
+        // Continue anyway to see the actual error
+      } else {
+        console.log(`Image found at ${imagePath}`);
+      }
+      next();
+    });
+  } else {
+    next();
   }
 });
 
-// Get single property by ID
-app.get('/api/properties/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query('SELECT * FROM properties WHERE id = $1', [id]);
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Property not found' });
-    }
-    
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
-
-// Filter properties
-app.post('/api/properties/filter', async (req, res) => {
-  try {
-    const { 
-      minPrice, 
-      maxPrice, 
-      propertyType, 
-      layout, 
-      minArea, 
-      maxArea 
-    } = req.body;
-    
-    let query = 'SELECT * FROM properties WHERE 1=1';
-    const values = [];
-    let valueIndex = 1;
-    
-    if (minPrice) {
-      query += ` AND price >= $${valueIndex}`;
-      values.push(minPrice);
-      valueIndex++;
-    }
-    
-    if (maxPrice) {
-      query += ` AND price <= $${valueIndex}`;
-      values.push(maxPrice);
-      valueIndex++;
-    }
-    
-    if (propertyType) {
-      query += ` AND property_type = $${valueIndex}`;
-      values.push(propertyType);
-      valueIndex++;
-    }
-    
-    if (layout) {
-      query += ` AND layout = $${valueIndex}`;
-      values.push(layout);
-      valueIndex++;
-    }
-    
-    if (minArea) {
-      query += ` AND area >= $${valueIndex}`;
-      values.push(minArea);
-      valueIndex++;
-    }
-    
-    if (maxArea) {
-      query += ` AND area <= $${valueIndex}`;
-      values.push(maxArea);
-      valueIndex++;
-    }
-    
-    const result = await pool.query(query, values);
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
-
+// Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { translations } from '../utils/translations';
+import japanesePhrases from '../utils/japanesePhrases';
 import { formatPrice, formatManagementFee, formatArea, formatBalcony } from '../utils/formatUtils';
 
 const PropertyDetailPopup = ({ property, isOpen, onClose }) => {
-  const { language } = useLanguage();
-  const t = translations[language];
+
 
   // If not open, don't render anything
   if (!isOpen || !property) return null;
@@ -67,7 +65,7 @@ const prevImage = () => {
           <div className="property-detail-info-header">
             <div className="property-detail-icon-container">
               <i className="fas fa-file"></i>
-              <span>{t.propertyInfo}</span>
+              <span>{japanesePhrases.propertyInfo}</span>
             </div>
           </div>
           
@@ -75,15 +73,15 @@ const prevImage = () => {
         <table className="property-detail-table">
         <tbody>
             <tr>
-                <th style={{ width: '20%', textAlign: 'left' }}>{t.transportation}</th>
+                <th style={{ width: '20%', textAlign: 'left' }}>{japanesePhrases.transportation}</th>
                 <td style={{ width: '80%', textAlign: 'left' }}>{property.transportation}</td>
             </tr>
             <tr>
-                <th style={{ width: '20%', textAlign: 'left' }}>{t.address}</th>
+                <th style={{ width: '20%', textAlign: 'left' }}>{japanesePhrases.address}</th>
                 <td style={{ width: '80%', textAlign: 'left' }}>{property.address}</td>
             </tr>
             <tr>
-                <th style={{ width: '20%', textAlign: 'left' }}>{t.propertyType}</th>
+                <th style={{ width: '20%', textAlign: 'left' }}>{japanesePhrases.propertyType}</th>
                 <td style={{ width: '80%', textAlign: 'left' }}>{property.propertyType}</td>
             </tr>            
         </tbody>
@@ -92,31 +90,31 @@ const prevImage = () => {
         <table className="property-detail-table property-detail-table-grid">
         <tbody>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.price}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.price}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatPrice(property.price)}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.pricePerSquareMeter}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.pricePerSquareMeter}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatPrice(Math.round(property.price / property.area))}</td>            
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.managementFee}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.managementFee}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatManagementFee(property.managementFee)}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.repairReserveFund}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.repairReserveFund}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatManagementFee(property.repairReserveFund)}</td>                
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.landLeaseFee}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.landLeaseFee}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.landLeaseFee}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.rightFee}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.rightFee}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.rightFee}</td>                
             </tr> 
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.depositGuarantee}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.depositGuarantee}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.depositGuarantee}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.maintenanceFees}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.maintenanceFees}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.maintenanceFees}</td>                
             </tr>   
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.otherFees}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.otherFees}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.otherFees}</td>              
             </tr>                                               
         </tbody>
@@ -125,52 +123,52 @@ const prevImage = () => {
         <table className="property-detail-table property-detail-table-grid">
         <tbody>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.layout}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.layout}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.layout}</td>
                 <th style={{ width: '15%', textAlign: 'left' }}></th>
                 <td style={{ width: '35%', textAlign: 'left' }}></td>
             </tr>          
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.area}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.area}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatArea(property.area)}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.balcony}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.balcony}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{formatBalcony(property.balcony)}</td>
             </tr>
             {/* Continue with other rows */}
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.floorInfo}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.floorInfo}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.floorInfo}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.structure}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.structure}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.structure}</td>
             </tr>
             <tr>
-            <th style={{ width: '15%', textAlign: 'left' }}>{t.yearBuilt}</th>
+            <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.yearBuilt}</th>
             <td style={{ width: '35%', textAlign: 'left' }}>{property.yearBuilt}</td>
-            <th style={{ width: '15%', textAlign: 'left' }}>{t.totalUnits}</th>
+            <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.totalUnits}</th>
             <td style={{ width: '35%', textAlign: 'left' }}>{property.totalUnits}</td>
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.parking}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.parking}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.parking}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.bikeStorage}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.bikeStorage}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.bikeStorage}</td>
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.bicycleParking}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.bicycleParking}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.bicycleParking}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.pets}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.pets}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.pets}</td>
             </tr> 
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.landRights}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.landRights}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.landRights}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.siteArea}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.siteArea}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.siteArea}</td>
             </tr>  
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.managementForm}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.managementForm}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.managementForm}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.landLawNotofication}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.landLawNotofication}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.landLawNotofication}</td>
             </tr>                                 
         </tbody>
@@ -179,21 +177,21 @@ const prevImage = () => {
         <table className="property-detail-table property-detail-table-grid">
         <tbody>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.propertyNumber}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.propertyNumber}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.propertyNumber}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.currentSituation}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.currentSituation}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.currentSituation}</td>            
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.extraditionPossibleDate}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.extraditionPossibleDate}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.extraditionPossibleDate}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.transactionMode}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.transactionMode}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.transactionMode}</td>            
             </tr>
             <tr>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.informationReleaseDate}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.informationReleaseDate}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.informationReleaseDate}</td>
-                <th style={{ width: '15%', textAlign: 'left' }}>{t.nextScheduledUpdateDate}</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>{japanesePhrases.nextScheduledUpdateDate}</th>
                 <td style={{ width: '35%', textAlign: 'left' }}>{property.nextScheduledUpdateDate}</td>            
             </tr>                                                            
         </tbody>

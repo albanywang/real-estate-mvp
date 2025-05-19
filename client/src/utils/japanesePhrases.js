@@ -1,0 +1,131 @@
+// src/utils/japanesePhrases.js
+
+const japanesePhrases = {
+    // Navigation
+    appTitle: '不動産ファインダー',
+    buy: '購入',
+    rent: '賃貸',
+    sell: '売却',
+    agents: '不動産会社',
+    signIn: 'ログイン',
+
+    // Filters
+    findYourPerfectHome: '理想の住まいを探す',
+    location: 'エリア',
+    locationPlaceholder: 'エリアを入力',
+    propertyType: '物件種別',
+    any: 'すべて',
+    house: '一戸建て',
+    apartment: 'マンション',
+    mansion: '高級マンション',
+    land: '土地',
+    priceRange: '価格帯',
+    min: '下限',
+    max: '上限',
+    layout: '間取り',
+    structure: '構造',
+    squareFeet: '面積（㎡）',
+    yearBuilt: '築年数',
+    managementFee: '管理費',
+    features: '設備・特徴',
+    garage: '駐車場',
+    ac: 'エアコン',
+    autoLock: 'オートロック',
+    search: '検索する',
+    filters: '絞り込み条件',
+    oldApartment: "中古マンション",
+
+    // Property details
+    bed: '部屋',
+    beds: '部屋',
+    sqft: '㎡',
+    areaOfUse: '用途地域',
+    transportation: '交通アクセス',
+    propertyInfo: '物件情報',
+    address: '所在地',
+    price: '価格',
+    pricePerSquareMeter: '平米単価',
+    repairReserveFund: '修繕積立金',
+    floorInfo: '階数',
+    area: '専有面積',
+    loanCalculator: 'ローンシミュレーター',
+    contactAgent: 'お問い合わせ',
+    balcony: "バルコニー",
+    landLeaseFee: "借地期間・地代（月額)",
+    rightFee: "権利金",
+    depositGuarantee: "敷金 / 保証金",
+    maintenanceFees: "維持費等",
+    otherFees: "その他一時金",
+    totalUnits: "総戸数",
+    parking: "駐車場",
+    bikeStorage: "バイク置き場",
+    bicycleParking: "駐輪場",
+    pets: "ペット",
+    landRights: "土地権利",
+    siteArea: "敷地面積",
+    managementForm: "管理形態／管理員の勤務形態",
+    landLawNotofication: "国土法届出",
+    currentSituation: "現況",
+    extraditionPossibleDate: "引渡可能時期",
+    transactionMode: "取引態様",
+    propertyNumber: "物件番号",
+    informationReleaseDate: "情報公開日",
+    nextScheduledUpdateDate: "次回更新予定日",
+    kitchen: "キッチン",
+    bathToilet: "バス・トイレ",
+    facilitiesServices: "設備・サービス",
+    others: "その他",    
+
+    // Status messages
+    loading: '読み込み中...',
+    errorLoading: 'データの読み込みに失敗しました',
+    retry: '再試行',
+    noProperties: '条件に合う物件がありません',
+    tryAdjusting: '検索条件を変更してお試しください',
+
+    // Property popup
+    viewDetails: '詳細を見る',
+    close: '閉じる',
+
+    // Form fields
+    submit: '送信',
+    cancel: 'キャンセル',
+
+    // Property types
+    usedApartment: '中古マンション',
+    newApartment: '新築マンション',
+    usedHouse: '中古一戸建て',
+    newHouse: '新築一戸建て',
+
+    // Login/Register
+    welcome: "不動産ファインダーへようこそ",
+    signIn: "ログイン",
+    newAccount: "新規登録",
+    fullName: "お名前",
+    fullNamePlaceholder: "お名前を入力してください",
+    email: "メールアドレス",
+    emailPlaceholder: "メールアドレスを入力してください",
+    password: "パスワード",
+    passwordPlaceholder: "パスワードを入力してください",
+    createPasswordPlaceholder: "新しいパスワードを作成してください",
+    confirmPassword: "パスワード（確認）",
+    confirmPasswordPlaceholder: "パスワードを再入力してください",
+    forgotPassword: "パスワードをお忘れですか？",
+    createAccount: "アカウント作成",
+    orConnectWith: "または以下でログイン",
+    continueWithGoogle: "Googleでログイン",
+    continueWithLine: "LINEでログイン",
+    continueWithYahoo: "Yahoo!でログイン",
+
+    // Other common terms
+    yes: 'はい',
+    no: 'いいえ',
+    back: '戻る',
+    next: '次へ',
+    save: '保存',
+    delete: '削除',
+    edit: '編集'
+
+};
+
+export default japanesePhrases;

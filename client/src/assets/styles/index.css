@@ -178,6 +178,8 @@ main {
 .map-container {
   height: 100%;
   position: relative;
+  min-height: 400px;
+  width: 100%;
   box-shadow: var(--shadow);
   border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
@@ -357,6 +359,12 @@ main {
 .leaflet-popup-content {
   margin: 10px;
   width: auto !important;
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1;
 }
 
 .leaflet-container a.leaflet-popup-close-button {

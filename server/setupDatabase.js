@@ -20,27 +20,21 @@ async function setupDatabase() {
       'utf8'
     );
     
+    // Enable PostGIS and execute schema
+    await pool.query('CREATE EXTENSION IF NOT EXISTS postgis;');
     // Run schema creation
     await pool.query(schemaSQL);
     console.log('Database schema created successfully');
-    
-    // Read seed data
-    const seedSQL = fs.readFileSync(
-      path.join(__dirname, 'db', 'seeds', 'seed.sql'),
-      'utf8'
-    );
-    
-    // Insert seed data
-    await pool.query(seedSQL);
-    console.log('Seed data inserted successfully');
-    
+       
     await pool.end();
     
     console.log('Database setup completed');
   } catch (err) {
     console.error('Error setting up database:', err);
-    process.exit(1);
+    throw error; // Rethrow for debugging
+  } finally {
+      await pool.end();
   }
 }
 
-setupDatabase();
+setupDatabase().catch(() => process.exit(1));
