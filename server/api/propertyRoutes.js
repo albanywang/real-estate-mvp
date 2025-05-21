@@ -1,7 +1,6 @@
 // api/propertyRoutes.js
 import express from 'express';
-import propertyModel from '../data/propertyModel';
-
+import propertyModel from '../data/propertyModel.js'; // Add .js extension
 const router = express.Router();
 
 // Get all properties with filtering

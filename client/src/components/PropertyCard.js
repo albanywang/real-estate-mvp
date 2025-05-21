@@ -1,28 +1,37 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { formatPrice, formatArea } from '../utils/formatUtils';
-import SmartImageLoader from './SmartImageLoader'; // Import the new component
+import { getImageUrl } from '../services/api';
 
 // Property Card Component
 const PropertyCard = ({ property, isSelected, onClick }) => {
-  // Add error handling for images
+
   const handleImageError = (e) => {
-    console.error(`Failed to load image: ${e.target.src}`);
-    e.target.src = "/placeholder.jpg"; // Fallback image
-  };
+    console.error(`Image failed to load: ${e.target.src}`);
+    e.target.src = getImageUrl('/images/placeholder.jpg');
+  };  
 
   return (
     <div className={`property-card ${isSelected ? 'selected' : ''}`} onClick={onClick}>
       {/* Make sure the title is here */}
       <div className="property-title">{property.title}</div>
 
-      {/* Use the SmartImageLoader with a fixed height container */}
-      <div style={{ height: '200px', width: '100%' }}>
-        <SmartImageLoader 
-          src={property.images && property.images.length > 0 ? property.images[0] : null}
-          alt={property.title}
-          className="property-img"
-          fallbackImg="/placeholder.jpg" // Optional fallback image
-        />
+      {/* Image with error handling */}
+      <div className="property-img-container" style={{ height: '200px', width: '100%' }}>
+        {property.images && property.images.length > 0 ? (
+          <img 
+            className="property-img" 
+            src={getImageUrl(property.images[0])} 
+            alt={property.title} 
+            onError={handleImageError}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        ) : (
+          <div className="no-image-placeholder">No Image Available</div>
+        )}
       </div>
 
       <div className="property-price">{formatPrice(property.price)}</div>

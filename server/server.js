@@ -1,8 +1,18 @@
 // server/server.js
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import dotenv from 'dotenv';
+import propertiesRoutes from './routes/properties.js';
+
+// Initialize dotenv
+dotenv.config();
+
+// Get dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -12,14 +22,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Explicitly serve the public/images directory
-//app.use('/images', express.static(path.join(__dirname, 'public/images')));
-
 // Explicitly serve the images directory
 app.use('/images', express.static(path.join(__dirname, 'server', 'public', 'images')));
 
 // Routes
-const propertiesRoutes = require('./routes/properties');
 app.use('/api/properties', propertiesRoutes);
 
 // ===== DEBUGGING MIDDLEWARE =====
@@ -30,7 +36,6 @@ app.use((req, res, next) => {
     
     // Check if file exists
     const imagePath = path.join(__dirname, 'public', req.path);
-    const fs = require('fs');
     
     fs.access(imagePath, fs.constants.F_OK, (err) => {
       if (err) {

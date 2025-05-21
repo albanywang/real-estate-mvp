@@ -60,7 +60,10 @@ const App = () => {
         
         const data = await response.json();
         console.log("Fetched properties:", data);
-        
+        // Log location fields specifically
+        data.forEach(property => {
+          console.log(`Property ID ${property.id} location:`, property.location);
+        });
         setProperties(data);
         setFilteredProperties(data);
         setIsLoading(false);

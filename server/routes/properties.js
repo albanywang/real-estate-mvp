@@ -1,10 +1,19 @@
 // server/routes/properties.js
-const express = require('express');
+import express from 'express';
+import { Pool } from 'pg';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Initialize dotenv
+dotenv.config();
+
+// Get directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const router = express.Router();
-const { Pool } = require('pg');
-const multer = require('multer');
-const path = require('path');
-require('dotenv').config();
 
 // Configure PostgreSQL connection
 const pool = new Pool({
@@ -37,49 +46,49 @@ router.get('/', async (req, res) => {
         id,
         title,
         price,
-        price_per_square_meter,
+        pricePerSquareMeter,
         address,
         layout,
         area,
-        floor_info,
+        floorInfo,
         structure,
-        management_fee,
-        area_of_use,
+        managementFee,
+        areaOfUse,
         transportation,
         ST_AsGeoJSON(location)::jsonb AS location,
-        property_type,
-        year_built,
-        balcony_area,
-        total_units,
-        repair_reserve_fund,
-        land_lease_fee,
-        right_fee,
-        deposit_guarantee,
-        maintenance_fees,
-        other_fees,
-        bicycle_parking,
-        bike_storage,
-        site_area,
+        propertyType,
+        yearBuilt,
+        balconyArea,
+        totalUnits,
+        repairReserveFund,
+        landLeaseFee,
+        rightFee,
+        depositGuarantee,
+        maintenanceFees,
+        otherFees,
+        bicycleParking,
+        bikeStorage,
+        siteArea,
         pets,
-        land_rights,
-        management_form,
-        land_law_notification,
-        current_situation,
-        extradition_possible_date,
-        transaction_mode,
-        property_number,
-        information_release_date,
-        next_scheduled_update_date,
+        landRights,
+        managementForm,
+        landLawNotification,
+        currentSituation,
+        extraditionPossibleDate,
+        transactionMode,
+        propertyNumber,
+        informationReleaseDate,
+        nextScheduledUpdateDate,
         remarks,
-        evaluation_certificate,
+        evaluationCertificate,
         parking,
         kitchen,
-        bath_toilet,
-        facilities_services,
+        bathToilet,
+        facilitiesServices,
         others,
         images,
-        created_at,
-        updated_at
+        createdAt,
+        updatedAt
       FROM properties 
       ORDER BY id DESC
     `);
@@ -171,9 +180,9 @@ router.post('/', upload.array('images', 10), async (req, res) => {
     // Insert property into database
     const result = await pool.query(`
       INSERT INTO properties (
-        title, price, address, layout, area, floor_info, structure,
-        management_fee, area_of_use, transportation, location, property_type,
-        year_built, images
+        title, price, address, layout, area, floorInfo, structure,
+        managementFee, areaOfUse, transportation, location, propertyType,
+        yearBuilt, images
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
       ) RETURNING *
@@ -219,43 +228,43 @@ router.post('/filter', async (req, res) => {
     let paramIndex = 1;
     
     if (minPrice) {
-      query += ` AND price >= $${paramIndex}`;
+      query += ` AND price >= ${paramIndex}`;
       values.push(parseInt(minPrice));
       paramIndex++;
     }
     
     if (maxPrice) {
-      query += ` AND price <= $${paramIndex}`;
+      query += ` AND price <= ${paramIndex}`;
       values.push(parseInt(maxPrice));
       paramIndex++;
     }
     
     if (propertyType) {
-      query += ` AND property_type = $${paramIndex}`;
+      query += ` AND propertyType = ${paramIndex}`;
       values.push(propertyType);
       paramIndex++;
     }
     
     if (layout) {
-      query += ` AND layout = $${paramIndex}`;
+      query += ` AND layout = ${paramIndex}`;
       values.push(layout);
       paramIndex++;
     }
     
     if (minArea) {
-      query += ` AND area >= $${paramIndex}`;
+      query += ` AND area >= ${paramIndex}`;
       values.push(parseFloat(minArea));
       paramIndex++;
     }
     
     if (maxArea) {
-      query += ` AND area <= $${paramIndex}`;
+      query += ` AND area <= ${paramIndex}`;
       values.push(parseFloat(maxArea));
       paramIndex++;
     }
     
     if (yearBuilt) {
-      query += ` AND year_built LIKE $${paramIndex}`;
+      query += ` AND yearBuilt LIKE ${paramIndex}`;
       values.push(`%${yearBuilt}%`); // Using LIKE for partial match on year
       paramIndex++;
     }
@@ -296,4 +305,4 @@ router.post('/filter', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
