@@ -1,4 +1,7 @@
 // routes/PropertyRoutes.js
+// Defines Express routes for property-related endpoints
+// It acts as the entry point for HTTP requests and delegates logic to services or directly interacts with models
+// It is the Controller layer of MVC models
 import express from 'express';
 import multer from 'multer';
 import path from 'path';

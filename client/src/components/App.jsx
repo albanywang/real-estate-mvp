@@ -1,3 +1,4 @@
+// This is the view part of MVC model
 import React, { useState, useEffect } from 'react';
 import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
 import PropertyDetailPopup from './PropertyDetailPopup';

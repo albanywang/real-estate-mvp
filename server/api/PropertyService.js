@@ -1,4 +1,10 @@
 // api/PropertyService.js
+/**
+ * PropertyService - Business logic layer for property operations
+ * Contains the logic for handling requests (e.g., validating input, querying the database, or processing property data)
+ * It acts as an intermediary between routes (Controller) and the Model, 
+ * encapsulating logic like validation or data processing.
+ */
 import {
   Property,
   PropertySearch,
@@ -9,10 +15,6 @@ import {
   PropertyEnums
 } from '../models/index.js';
 
-/**
- * PropertyService - Business logic layer for property operations
- * Handles complex business rules, data transformation, and validation
- */
 class PropertyService {
   /**
    * Create PropertyService instance

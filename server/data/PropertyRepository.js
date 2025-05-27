@@ -1,4 +1,8 @@
 // data/PropertyRepository.js
+// handle data base connection
+// the Repository pattern is often used in larger applications to abstract database operations. 
+// It acts as an intermediary between the Controller (or services) and the Model, 
+// encapsulating data access logic (e.g., queries, CRUD operations).
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 

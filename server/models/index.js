@@ -1,5 +1,8 @@
 // models/index.js - Main export file
 // This is where you put the main export statement
+// This is model part of MVC design pattern that handle data and buiness logic
+// The Model represents the data structure, database schema, and business logic for interacting with data 
+// (e.g., properties in a real estate app). It defines how data is stored, validated, and manipulated
 import { Property } from './Property.js';
 import { PropertySearch } from './PropertySearch.js';
 import { PropertyStatistics } from './PropertyStatistics.js';
