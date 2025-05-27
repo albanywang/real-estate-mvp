@@ -1,0 +1,949 @@
+// routes/PropertyRoutes.js
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import {
+  Property,
+  PropertySearch,
+  PropertyCollection,
+  PropertyFactory,
+  PropertyEnums,
+  PropertyValidators
+} from '../models/index.js';
+
+// Import PropertyService
+import PropertyService from '../api/PropertyService.js';
+
+// Get directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/**
+ * PropertyRoutes - Handles all property-related HTTP routes
+ */
+class PropertyRoutes {
+  constructor(propertyRepository, propertyService = null) {
+    // Validate repository
+    if (!propertyRepository) {
+      throw new Error('PropertyRepository is required');
+    }
+
+    this.propertyRepo = propertyRepository;
+    
+    // Initialize service - create new one if not provided
+    if (propertyService) {
+      this.propertyService = propertyService;
+    } else {
+      console.log('Creating new PropertyService instance...');
+      this.propertyService = new PropertyService(propertyRepository);
+    }
+
+    // Validate service is properly initialized
+    if (!this.propertyService) {
+      throw new Error('PropertyService initialization failed');
+    }
+
+    console.log('PropertyRoutes initialized with service:', !!this.propertyService);
+
+    this.router = express.Router();
+    
+    // Configure multer for image uploads
+    this.upload = this.configureMulter();
+    
+    // Setup all routes
+    this.setupRoutes();
+  }
+
+  /**
+   * Configure multer for file uploads
+   * @returns {multer} Configured multer instance
+   */
+  configureMulter() {
+    const storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../public/images'));
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'property-' + uniqueSuffix + ext);
+      }
+    });
+
+    const fileFilter = (req, file, cb) => {
+      // Check file type
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    };
+
+    return multer({ 
+      storage,
+      fileFilter,
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit per file
+        files: 20 // Maximum 20 files
+      }
+    });
+  }
+
+  /**
+   * Setup all property routes
+   */
+  setupRoutes() {
+    // GET routes
+    this.router.get('/', this.getAllProperties.bind(this));
+    this.router.get('/search', this.searchProperties.bind(this));
+    this.router.get('/statistics', this.getStatistics.bind(this));
+    this.router.get('/layouts', this.getLayouts.bind(this));
+    this.router.get('/property-types', this.getPropertyTypes.bind(this));
+    this.router.get('/enums', this.getEnums.bind(this));
+    
+    // Debug routes (temporary)
+    this.router.get('/debug/raw', this.debugRaw.bind(this));
+    this.router.get('/debug/count', this.debugCount.bind(this));
+    
+    this.router.get('/:id', this.getPropertyById.bind(this));
+
+    // POST routes
+    this.router.post('/', this.upload.array('images', 20), this.createProperty.bind(this));
+    this.router.post('/filter', this.filterProperties.bind(this));
+    this.router.post('/bulk-import', this.upload.single('csv'), this.bulkImport.bind(this));
+
+    // PUT routes
+    this.router.put('/:id', this.upload.array('images', 20), this.updateProperty.bind(this));
+
+    // DELETE routes
+    this.router.delete('/:id', this.deleteProperty.bind(this));
+
+    // Utility routes
+    this.router.get('/:id/exists', this.checkPropertyExists.bind(this));
+  }
+
+  /**
+   * GET /properties - Get all properties with optional filtering
+   */
+  async getAllProperties(req, res) {
+    try {
+      // Debug logging
+      console.log('getAllProperties called');
+      console.log('PropertyService available:', !!this.propertyService);
+      console.log('PropertyRepo available:', !!this.propertyRepo);
+
+      const {
+        title,
+        minPrice,
+        maxPrice,
+        address,
+        layout,
+        minArea,
+        maxArea,
+        propertyType,
+        petsAllowed,
+        transportation,
+        yearBuilt,
+        sortBy = 'id',
+        sortOrder = 'DESC',
+        limit = 20,
+        offset = 0
+      } = req.query;
+
+      // Parse boolean values
+      const parsedPetsAllowed = petsAllowed ? petsAllowed === 'true' : null;
+
+      // Create search parameters
+      const searchParams = {
+        title,
+        minPrice: minPrice ? Number(minPrice) : null,
+        maxPrice: maxPrice ? Number(maxPrice) : null,
+        address,
+        layout,
+        minArea: minArea ? Number(minArea) : null,
+        maxArea: maxArea ? Number(maxArea) : null,
+        propertyType,
+        petsAllowed: parsedPetsAllowed,
+        transportation,
+        yearBuilt,
+        sortBy,
+        sortOrder,
+        limit: Math.min(Number(limit) || 20, 100), // Cap at 100
+        offset: Number(offset) || 0
+      };
+
+      let result;
+
+      // Temporarily bypass service and use direct repository with simple search
+      console.log('Using direct repository with simpleSearch...');
+      
+      let repoResult;
+      
+      try {
+        // Try simpleSearch method first
+        repoResult = await this.propertyRepo.simpleSearch({
+          limit: searchParams.limit,
+          offset: searchParams.offset
+        });
+      } catch (simpleSearchError) {
+        console.log('simpleSearch failed, using direct query:', simpleSearchError.message);
+        
+        // Fallback to direct database query
+        const pool = this.propertyRepo.getPool();
+        const directQuery = `
+          SELECT 
+            id,
+            title,
+            price,
+            pricepersquaremeter as "pricePerSquareMeter",
+            address,
+            layout,
+            area,
+            floorinfo as "floorInfo",
+            structure,
+            managementfee as "managementFee",
+            areaofuse as "areaOfUse",
+            transportation,
+            ST_AsGeoJSON(location)::jsonb AS location,
+            propertytype as "propertyType",
+            yearbuilt as "yearBuilt",
+            balconyarea as "balconyArea",
+            totalunits as "totalUnits",
+            repairreservefund as "repairReserveFund",
+            landleasefee as "landLeaseFee",
+            rightfee as "rightFee",
+            depositguarantee as "depositGuarantee",
+            maintenancefees as "maintenanceFees",
+            otherfees as "otherFees",
+            bicycleparking as "bicycleParking",
+            bikestorage as "bikeStorage",
+            sitearea as "siteArea",
+            pets,
+            landrights as "landRights",
+            managementform as "managementForm",
+            landlawnotification as "landLawNotification",
+            currentsituation as "currentSituation",
+            extraditionpossibledate as "extraditionPossibleDate",
+            transactionmode as "transactionMode",
+            propertynumber as "propertyNumber",
+            informationreleasedate as "informationReleaseDate",
+            nextscheduledupdatedate as "nextScheduledUpdateDate",
+            remarks,
+            evaluationcertificate as "evaluationCertificate",
+            parking,
+            kitchen,
+            bathtoilet as "bathToilet",
+            facilitiesservices as "facilitiesServices",
+            others,
+            images,
+            createdat as "createdAt",
+            updatedat as "updatedAt"
+          FROM properties
+          ORDER BY createdat DESC
+          LIMIT $1 OFFSET $2
+        `;
+        
+        const countQuery = 'SELECT COUNT(*) as total FROM properties';
+        
+        const [directResult, countResult] = await Promise.all([
+          pool.query(directQuery, [searchParams.limit, searchParams.offset]),
+          pool.query(countQuery)
+        ]);
+        
+        const total = parseInt(countResult.rows[0].total);
+        
+        repoResult = {
+          properties: directResult.rows,
+          pagination: {
+            total,
+            count: directResult.rows.length,
+            hasMore: searchParams.offset + directResult.rows.length < total,
+            offset: searchParams.offset,
+            limit: searchParams.limit
+          }
+        };
+      }
+      
+      // Process properties with complete field mapping for frontend
+      const properties = repoResult.properties.map(propData => ({
+        id: propData.id,
+        title: propData.title || '',
+        price: parseFloat(propData.price) || 0,
+        pricePerSquareMeter: parseFloat(propData.pricePerSquareMeter) || 0,
+        address: propData.address || '',
+        layout: propData.layout || '',
+        area: parseFloat(propData.area) || 0,
+        floorInfo: propData.floorInfo || '',
+        structure: propData.structure || '',
+        managementFee: parseFloat(propData.managementFee) || 0,
+        areaOfUse: propData.areaOfUse || '',
+        transportation: propData.transportation || '',
+        location: propData.location || null,
+        propertyType: propData.propertyType || '',
+        yearBuilt: propData.yearBuilt || '',
+        balconyArea: parseFloat(propData.balconyArea) || 0,
+        totalUnits: parseInt(propData.totalUnits) || 0,
+        repairReserveFund: parseFloat(propData.repairReserveFund) || 0,
+        landLeaseFee: parseFloat(propData.landLeaseFee) || 0,
+        rightFee: propData.rightFee || '0',
+        depositGuarantee: parseFloat(propData.depositGuarantee) || 0,
+        maintenanceFees: propData.maintenanceFees || '',
+        otherFees: parseFloat(propData.otherFees) || 0,
+        bicycleParking: propData.bicycleParking || '',
+        bikeStorage: propData.bikeStorage || '',
+        siteArea: propData.siteArea || '',
+        pets: propData.pets || '',
+        landRights: propData.landRights || '',
+        managementForm: propData.managementForm || '',
+        landLawNotification: propData.landLawNotification || '',
+        currentSituation: propData.currentSituation || '',
+        extraditionPossibleDate: propData.extraditionPossibleDate || '',
+        transactionMode: propData.transactionMode || '',
+        propertyNumber: propData.propertyNumber || '',
+        informationReleaseDate: propData.informationReleaseDate || '',
+        nextScheduledUpdateDate: propData.nextScheduledUpdateDate || '',
+        remarks: propData.remarks || '',
+        evaluationCertificate: propData.evaluationCertificate || '',
+        parking: propData.parking || '',
+        kitchen: propData.kitchen || '',
+        bathToilet: propData.bathToilet || '',
+        facilitiesServices: propData.facilitiesServices || '',
+        others: propData.others || '',
+        images: propData.images || [],
+        createdAt: propData.createdAt,
+        updatedAt: propData.updatedAt
+      }));
+
+      result = {
+        properties,
+        pagination: repoResult.pagination || {},
+        summary: {
+          count: properties.length,
+          averagePrice: properties.length > 0 
+            ? Math.round(properties.reduce((sum, p) => sum + (p.price || 0), 0) / properties.length)
+            : 0,
+          averageArea: properties.length > 0
+            ? Math.round((properties.reduce((sum, p) => sum + (p.area || 0), 0) / properties.length) * 100) / 100
+            : 0,
+          priceRange: {
+            min: properties.length > 0 ? Math.min(...properties.map(p => p.price)) : 0,
+            max: properties.length > 0 ? Math.max(...properties.map(p => p.price)) : 0
+          },
+          areaRange: {
+            min: properties.length > 0 ? Math.min(...properties.map(p => p.area)) : 0,
+            max: properties.length > 0 ? Math.max(...properties.map(p => p.area)) : 0
+          }
+        }
+      };
+
+      // Ensure consistent response format
+      res.json({
+        success: true,
+        data: Array.isArray(result.properties) ? result.properties : [],
+        pagination: result.pagination || {},
+        summary: result.summary || {},
+        count: result.properties ? result.properties.length : 0
+      });
+
+    } catch (error) {
+      console.error('Error in getAllProperties:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch properties',
+        message: error.message,
+        data: [],  // Always return empty array on error
+        count: 0
+      });
+    }
+  }
+
+  /**
+   * GET /properties/search - Advanced property search
+   */
+  async searchProperties(req, res) {
+    try {
+      // Create search object from query parameters
+      const search = new PropertySearch(req.query);
+      
+      // Validate search parameters
+      const validation = search.validate();
+      if (!validation.isValid) {
+        return res.status(400).json({
+          success: false,
+          errors: validation.errors
+        });
+      }
+
+      // Perform search
+      const result = await this.propertyRepo.search(search.toSearchParams());
+      
+      // Create collection
+      const collection = new PropertyCollection(result.properties, result.pagination);
+
+      res.json({
+        success: true,
+        data: collection.properties.map(prop => new Property(prop).toJSON()),
+        pagination: collection.pagination,
+        summary: collection.getSummary(),
+        searchParams: search.toSearchParams()
+      });
+
+    } catch (error) {
+      console.error('Error in searchProperties:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to search properties',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/:id - Get property by ID
+   */
+  async getPropertyById(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          error: 'Property ID is required'
+        });
+      }
+
+      const propertyData = await this.propertyRepo.findById(id);
+      
+      if (!propertyData) {
+        return res.status(404).json({
+          success: false,
+          error: 'Property not found'
+        });
+      }
+
+      // Create Property instance for validation and computed fields
+      const property = new Property(propertyData);
+
+      res.json({
+        success: true,
+        data: property.toJSON()
+      });
+
+    } catch (error) {
+      console.error(`Error fetching property ${req.params.id}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch property',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * POST /properties - Create a new property
+   */
+  async createProperty(req, res) {
+    try {
+      // Create property from form data using factory
+      const property = PropertyFactory.fromFormData(req.body, req.files || []);
+      
+      // Validate property data
+      const validation = property.validate();
+      if (!validation.isValid) {
+        return res.status(400).json({
+          success: false,
+          errors: validation.errors,
+          warnings: validation.warnings
+        });
+      }
+
+      // Additional custom validations
+      const imageValidation = PropertyValidators.validateImages(property.images);
+      if (!imageValidation.isValid) {
+        return res.status(400).json({
+          success: false,
+          errors: imageValidation.errors
+        });
+      }
+
+      // Create property in database
+      const createdProperty = await this.propertyRepo.create(property.toJSON());
+      
+      // Return created property with computed fields
+      const result = new Property(createdProperty);
+
+      res.status(201).json({
+        success: true,
+        data: result.toJSON(),
+        message: 'Property created successfully'
+      });
+
+    } catch (error) {
+      console.error('Error creating property:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create property',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * PUT /properties/:id - Update a property
+   */
+  async updateProperty(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          error: 'Property ID is required'
+        });
+      }
+
+      // Check if property exists
+      const exists = await this.propertyRepo.exists(id);
+      if (!exists) {
+        return res.status(404).json({
+          success: false,
+          error: 'Property not found'
+        });
+      }
+
+      // Process update data
+      let updateData = { ...req.body };
+      
+      // Handle new images if uploaded
+      if (req.files && req.files.length > 0) {
+        const newImages = req.files.map(file => `/images/${file.filename}`);
+        
+        // Merge with existing images or replace
+        if (req.body.replaceImages === 'true') {
+          updateData.images = newImages;
+        } else {
+          // Get existing property to merge images
+          const existingProperty = await this.propertyRepo.findById(id);
+          const existingImages = existingProperty.images || [];
+          updateData.images = [...existingImages, ...newImages];
+        }
+      }
+
+      // Create property instance for validation
+      const existingProperty = await this.propertyRepo.findById(id);
+      const updatedProperty = new Property({
+        ...existingProperty,
+        ...updateData,
+        id,
+        updatedAt: new Date()
+      });
+
+      // Validate updated property
+      const validation = updatedProperty.validate();
+      if (!validation.isValid) {
+        return res.status(400).json({
+          success: false,
+          errors: validation.errors,
+          warnings: validation.warnings
+        });
+      }
+
+      // Update in database
+      const result = await this.propertyRepo.update(id, updateData);
+      
+      // Return updated property
+      const finalProperty = new Property(result);
+
+      res.json({
+        success: true,
+        data: finalProperty.toJSON(),
+        message: 'Property updated successfully'
+      });
+
+    } catch (error) {
+      console.error(`Error updating property ${req.params.id}:`, error);
+      
+      if (error.message === 'Property not found') {
+        return res.status(404).json({
+          success: false,
+          error: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update property',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * DELETE /properties/:id - Delete a property
+   */
+  async deleteProperty(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          error: 'Property ID is required'
+        });
+      }
+
+      const deletedProperty = await this.propertyRepo.delete(id);
+
+      res.json({
+        success: true,
+        data: deletedProperty,
+        message: 'Property deleted successfully'
+      });
+
+    } catch (error) {
+      console.error(`Error deleting property ${req.params.id}:`, error);
+      
+      if (error.message === 'Property not found') {
+        return res.status(404).json({
+          success: false,
+          error: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete property',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * POST /properties/filter - Filter properties (legacy endpoint)
+   */
+  async filterProperties(req, res) {
+    try {
+      const {
+        minPrice,
+        maxPrice,
+        propertyType,
+        layout,
+        minArea,
+        maxArea,
+        yearBuilt
+      } = req.body;
+
+      // Validate filter parameters
+      if (minPrice !== undefined && (isNaN(minPrice) || minPrice < 0)) {
+        return res.status(400).json({
+          success: false,
+          error: 'minPrice must be a positive number',
+          data: []
+        });
+      }
+
+      if (maxPrice !== undefined && (isNaN(maxPrice) || maxPrice < 0)) {
+        return res.status(400).json({
+          success: false,
+          error: 'maxPrice must be a positive number',
+          data: []
+        });
+      }
+
+      if (minPrice && maxPrice && Number(minPrice) > Number(maxPrice)) {
+        return res.status(400).json({
+          success: false,
+          error: 'minPrice cannot be greater than maxPrice',
+          data: []
+        });
+      }
+
+      // Use service filter method
+      const result = await this.propertyService.filterProperties(req.body);
+
+      res.json({
+        success: true,
+        data: Array.isArray(result.properties) ? result.properties : [],
+        summary: result.summary || {},
+        count: result.properties ? result.properties.length : 0,
+        filterApplied: req.body
+      });
+
+    } catch (error) {
+      console.error('Error filtering properties:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to filter properties',
+        message: error.message,
+        data: []  // Always return empty array on error
+      });
+    }
+  }
+
+  /**
+   * GET /properties/statistics - Get property statistics
+   */
+  async getStatistics(req, res) {
+    try {
+      const stats = await this.propertyRepo.getStatistics();
+      
+      res.json({
+        success: true,
+        data: stats
+      });
+
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch statistics',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/layouts - Get available layouts
+   */
+  async getLayouts(req, res) {
+    try {
+      const layouts = await this.propertyRepo.getDistinctLayouts();
+      
+      res.json({
+        success: true,
+        data: layouts
+      });
+
+    } catch (error) {
+      console.error('Error fetching layouts:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch layouts',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/property-types - Get available property types
+   */
+  async getPropertyTypes(req, res) {
+    try {
+      const types = await this.propertyRepo.getDistinctPropertyTypes();
+      
+      res.json({
+        success: true,
+        data: types
+      });
+
+    } catch (error) {
+      console.error('Error fetching property types:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch property types',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/enums - Get all enums for frontend
+   */
+  async getEnums(req, res) {
+    try {
+      res.json({
+        success: true,
+        data: {
+          propertyTypes: PropertyEnums.PROPERTY_TYPES,
+          layouts: PropertyEnums.LAYOUTS,
+          transactionModes: PropertyEnums.TRANSACTION_MODES,
+          managementForms: PropertyEnums.MANAGEMENT_FORMS,
+          landRights: PropertyEnums.LAND_RIGHTS,
+          priceRanges: PropertyEnums.PRICE_RANGES,
+          sortOptions: PropertyEnums.SORT_OPTIONS
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching enums:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch enums',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/:id/exists - Check if property exists
+   */
+  async checkPropertyExists(req, res) {
+    try {
+      const { id } = req.params;
+      const exists = await this.propertyRepo.exists(id);
+      
+      res.json({
+        success: true,
+        exists
+      });
+
+    } catch (error) {
+      console.error(`Error checking property existence for ${req.params.id}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check property existence',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * POST /properties/bulk-import - Bulk import from CSV
+   */
+  async bulkImport(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'CSV file is required'
+        });
+      }
+
+      // This is a placeholder for CSV import logic
+      // You would implement CSV parsing and bulk creation here
+      res.json({
+        success: true,
+        message: 'Bulk import feature coming soon',
+        file: req.file.filename
+      });
+
+    } catch (error) {
+      console.error('Error in bulk import:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to import properties',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * DEBUG: Get raw database data
+   */
+  async debugRaw(req, res) {
+    try {
+      console.log('🔍 Debug raw called');
+      const pool = this.propertyRepo.getPool();
+      
+      // Direct query to see raw data
+      const result = await pool.query('SELECT * FROM properties LIMIT 10');
+      
+      res.json({
+        success: true,
+        rawData: result.rows,
+        count: result.rows.length,
+        columns: result.fields?.map(f => f.name) || [],
+        message: `Found ${result.rows.length} raw records`
+      });
+      
+    } catch (error) {
+      console.error('Debug raw error:', error);
+      res.json({
+        success: false,
+        error: error.message,
+        errorCode: error.code,
+        message: 'Database query failed'
+      });
+    }
+  }
+
+  /**
+   * DEBUG: Get count and test repository
+   */
+  async debugCount(req, res) {
+    try {
+      console.log('🔍 Debug count called');
+      
+      // Test repository methods
+      const count = await this.propertyRepo.count();
+      console.log('Repository count:', count);
+      
+      // Test repository search
+      const searchResult = await this.propertyRepo.search({ limit: 5 });
+      console.log('Repository search result:', {
+        propertiesLength: searchResult.properties?.length,
+        paginationTotal: searchResult.pagination?.total
+      });
+      
+      res.json({
+        success: true,
+        repositoryCount: count,
+        searchResult: {
+          propertiesCount: searchResult.properties?.length || 0,
+          properties: searchResult.properties || [],
+          pagination: searchResult.pagination || {}
+        }
+      });
+      
+    } catch (error) {
+      console.error('Debug count error:', error);
+      res.json({
+        success: false,
+        error: error.message,
+        stack: error.stack
+      });
+    }
+  }
+
+  /**
+   * Error handling middleware for this router
+   */
+  setupErrorHandling() {
+    this.router.use((error, req, res, next) => {
+      console.error('PropertyRoutes error:', error);
+
+      // Handle multer errors
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({
+            success: false,
+            error: 'File size too large. Maximum 5MB per file.'
+          });
+        }
+        if (error.code === 'LIMIT_FILE_COUNT') {
+          return res.status(400).json({
+            success: false,
+            error: 'Too many files. Maximum 20 files allowed.'
+          });
+        }
+      }
+
+      // Handle file type errors
+      if (error.message === 'Only image files are allowed') {
+        return res.status(400).json({
+          success: false,
+          error: error.message
+        });
+      }
+
+      // Generic error
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error',
+        message: error.message
+      });
+    });
+  }
+
+  /**
+   * Get the Express router
+   * @returns {express.Router} Configured router
+   */
+  getRouter() {
+    this.setupErrorHandling();
+    return this.router;
+  }
+}
+
+export default PropertyRoutes;
