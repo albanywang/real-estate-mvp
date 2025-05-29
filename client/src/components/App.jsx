@@ -4,10 +4,12 @@ import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils'
 import PropertyDetailPopup from './PropertyDetailPopup';
 import MapComponent from './MapComponent';
 import PropertyCard from './PropertyCard';
-import FiltersPanel from './FiltersPanel'; // If you have this component
+import FiltersPanel from './FiltersPanel';
 import LoginPopup from './LoginPopup';
 import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
+// Import the fullscreen image functionality
+import '../utils/FullscreenImageViewer'; // Adjust path as needed
 
 // Main App Component
 const App = () => {
@@ -21,6 +23,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiStats, setApiStats] = useState({ total: 0, count: 0 });
+  const [fullscreenViewerReady, setFullscreenViewerReady] = useState(false);
   
   const [filters, setFilters] = useState({
     location: '',
@@ -40,14 +43,47 @@ const App = () => {
     hasAutoLock: false
   });
 
+  // Initialize fullscreen image viewer
+  useEffect(() => {
+    const initializeFullscreenViewer = () => {
+      // Check if the fullscreen viewer is available
+      if (window.openFullscreenImage && window.fullscreenViewer) {
+        console.log('✅ Fullscreen image viewer initialized');
+        setFullscreenViewerReady(true);
+      } else {
+        console.log('⏳ Waiting for fullscreen viewer to initialize...');
+        // Try again after a short delay
+        setTimeout(initializeFullscreenViewer, 100);
+      }
+    };
+
+    // Initialize with a small delay to ensure the script has loaded
+    setTimeout(initializeFullscreenViewer, 50);
+
+    // Cleanup function to remove event listeners when component unmounts
+    return () => {
+      // The fullscreen viewer handles its own cleanup
+      if (window.fullscreenViewer && window.fullscreenViewer.close) {
+        window.fullscreenViewer.close();
+      }
+    };
+  }, []);
+
   const openPropertyDetail = (property) => {
+    console.log('🏠 Opening property detail for:', property);
     setDetailProperty(property);
     setIsDetailPopupOpen(true);
   };
 
   const closePropertyDetail = () => {
+    console.log('🏠 Closing property detail');
     setIsDetailPopupOpen(false);
     setDetailProperty(null);
+    
+    // Also close fullscreen viewer if it's open
+    if (window.fullscreenViewer && window.fullscreenViewer.isOpen) {
+      window.fullscreenViewer.close();
+    }
   };
 
   // Fetch properties from API using the improved fetchProperties function
@@ -236,7 +272,7 @@ const App = () => {
     }
   };
 
-  // Debug function - call this from browser console
+  // Enhanced debug function with fullscreen viewer info
   React.useEffect(() => {
     // Make debug function available globally
     window.debugRealEstate = {
@@ -245,9 +281,31 @@ const App = () => {
       filters,
       apiStats,
       debugAPI,
-      retryLoading
+      retryLoading,
+      fullscreenViewerReady,
+      fullscreenViewer: window.fullscreenViewer || null,
+      openFullscreenImage: window.openFullscreenImage || null
     };
-  }, [properties, filteredProperties, filters, apiStats]);
+  }, [properties, filteredProperties, filters, apiStats, fullscreenViewerReady]);
+
+  // Handle keyboard shortcuts at app level
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only handle shortcuts when detail popup is open and fullscreen is not open
+      if (isDetailPopupOpen && (!window.fullscreenViewer || !window.fullscreenViewer.isOpen)) {
+        switch(e.key) {
+          case 'Escape':
+            closePropertyDetail();
+            break;
+          default:
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isDetailPopupOpen]);
 
   return (
     <>
@@ -265,7 +323,7 @@ const App = () => {
           </ul>
         </nav>
         
-        {/* Add debug info in header (only in development) */}
+        {/* Enhanced debug info in header (only in development) */}
         {process.env.NODE_ENV === 'development' && (
           <div style={{ 
             position: 'absolute', 
@@ -275,9 +333,15 @@ const App = () => {
             color: '#666',
             background: 'rgba(255,255,255,0.9)',
             padding: '4px 8px',
-            borderRadius: '4px'
+            borderRadius: '4px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px'
           }}>
-            {apiStats.count} properties loaded
+            <div>{apiStats.count} properties loaded</div>
+            <div style={{ color: fullscreenViewerReady ? 'green' : 'orange' }}>
+              📸 {fullscreenViewerReady ? 'Ready' : 'Loading...'}
+            </div>
           </div>
         )}
       </header>
@@ -386,7 +450,7 @@ const App = () => {
               <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
                 <details>
                   <summary>Debug Info</summary>
-                  <pre>{JSON.stringify({ error, apiStats }, null, 2)}</pre>
+                  <pre>{JSON.stringify({ error, apiStats, fullscreenViewerReady }, null, 2)}</pre>
                 </details>
               </div>
             </div>
@@ -462,12 +526,13 @@ const App = () => {
         onClose={closeLoginPopup}
       />
       
-      {/* Property Detail Popup */}
+      {/* Property Detail Popup with fullscreen support */}
       <PropertyDetailPopup
         property={detailProperty}
         isOpen={isDetailPopupOpen}
         onClose={closePropertyDetail}
         phrases={japanesePhrases}
+        fullscreenViewerReady={fullscreenViewerReady}
       />
     </>
   );

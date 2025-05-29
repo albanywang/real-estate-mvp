@@ -5,7 +5,7 @@
  * @param {boolean} showCurrency - Whether to include the ¥ symbol
  * @returns {string} Formatted price string
  */
-export const formatPrice = (price, unit = '', showCurrency = true) => {
+export const formatPrice = (price, unit = '円', showCurrency = false) => {
     if (price === null || price === undefined) return '-';
     
     const formattedPrice = price.toLocaleString();
@@ -24,7 +24,7 @@ export const formatPrice = (price, unit = '', showCurrency = true) => {
     if (price === null || price === undefined) return '-';
     
     const priceInMan = Math.round(price / 10000);
-    return formatPrice(priceInMan, '万', showCurrency);
+    return formatPrice(priceInMan, '万円', showCurrency);
   };
   
   /**

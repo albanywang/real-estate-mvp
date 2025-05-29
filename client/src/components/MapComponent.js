@@ -103,11 +103,7 @@ const MapComponent = (props) => {
           <div class="map-popup">
             <img src="${property.images?.[0] || ''}" alt="${property.title || ''}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image';" />
             <h3>${property.title}</h3>
-            <div class="map-popup-price">${new Intl.NumberFormat('ja-JP', {
-        style: 'currency',
-        currency: 'JPY',
-        maximumFractionDigits: 0
-      }).format(property.price)}</div>
+            <div class="map-popup-price">${formatPriceInMan(property.price)}</div>
             <p>${property.layout || ''} ${property.area ? `| ${formatArea(property.area)}` : ''}</p>
             <p>${property.address}</p>
             <button class="map-popup-detail-btn" onclick="window.openPropertyDetail(${property.id})">詳細を見る</button>

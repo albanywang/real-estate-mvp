@@ -22,6 +22,24 @@ import PropertyService from '../api/PropertyService.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Helper function for API
+function formatDateToString(date) {
+  if (!date) return null;
+  
+  // If it's already a string in YYYY-MM-DD format, return as-is
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  
+  // Convert Date object to YYYY-MM-DD string in local timezone
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const day = d.getDate().toString().padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * PropertyRoutes - Handles all property-related HTTP routes
  */
@@ -268,6 +286,15 @@ class PropertyRoutes {
         };
       }
       
+      // Helper function to handle fee fields that should be null for empty strings
+      const processFeeField = (value) => {
+        if (value === null || value === '' || value === undefined) {
+          return null;
+        }
+        const numValue = parseFloat(value);
+        return isNaN(numValue) ? null : numValue;
+      };
+      
       // Process properties with complete field mapping for frontend
       const properties = repoResult.properties.map(propData => ({
         id: propData.id,
@@ -288,11 +315,14 @@ class PropertyRoutes {
         balconyArea: parseFloat(propData.balconyArea) || 0,
         totalUnits: parseInt(propData.totalUnits) || 0,
         repairReserveFund: parseFloat(propData.repairReserveFund) || 0,
-        landLeaseFee: parseFloat(propData.landLeaseFee) || 0,
-        rightFee: propData.rightFee || '0',
-        depositGuarantee: parseFloat(propData.depositGuarantee) || 0,
+        
+        // Fixed fee fields - these will now return null for empty strings
+        landLeaseFee: processFeeField(propData.landLeaseFee),
+        rightFee: processFeeField(propData.rightFee),
+        depositGuarantee: processFeeField(propData.depositGuarantee),
+        otherFees: processFeeField(propData.otherFees),
+        
         maintenanceFees: propData.maintenanceFees || '',
-        otherFees: parseFloat(propData.otherFees) || 0,
         bicycleParking: propData.bicycleParking || '',
         bikeStorage: propData.bikeStorage || '',
         siteArea: propData.siteArea || '',
@@ -304,10 +334,11 @@ class PropertyRoutes {
         extraditionPossibleDate: propData.extraditionPossibleDate || '',
         transactionMode: propData.transactionMode || '',
         propertyNumber: propData.propertyNumber || '',
-        informationReleaseDate: propData.informationReleaseDate || '',
-        nextScheduledUpdateDate: propData.nextScheduledUpdateDate || '',
+        // Format date fields to YYYY-MM-DD strings
+        informationReleaseDate: formatDateToString(propData.informationReleaseDate),
+        nextScheduledUpdateDate: formatDateToString(propData.nextScheduledUpdateDate),
         remarks: propData.remarks || '',
-        evaluationCertificate: propData.evaluationCertificate || '',
+        extraditionPossibleDate: formatDateToString(propData.extraditionPossibleDate),
         parking: propData.parking || '',
         kitchen: propData.kitchen || '',
         bathToilet: propData.bathToilet || '',
@@ -360,88 +391,87 @@ class PropertyRoutes {
       });
     }
   }
+    /**
+     * GET /properties/search - Advanced property search
+     */
+    async searchProperties(req, res) {
+      try {
+        // Create search object from query parameters
+        const search = new PropertySearch(req.query);
+        
+        // Validate search parameters
+        const validation = search.validate();
+        if (!validation.isValid) {
+          return res.status(400).json({
+            success: false,
+            errors: validation.errors
+          });
+        }
 
-  /**
-   * GET /properties/search - Advanced property search
-   */
-  async searchProperties(req, res) {
-    try {
-      // Create search object from query parameters
-      const search = new PropertySearch(req.query);
-      
-      // Validate search parameters
-      const validation = search.validate();
-      if (!validation.isValid) {
-        return res.status(400).json({
+        // Perform search
+        const result = await this.propertyRepo.search(search.toSearchParams());
+        
+        // Create collection
+        const collection = new PropertyCollection(result.properties, result.pagination);
+
+        res.json({
+          success: true,
+          data: collection.properties.map(prop => new Property(prop).toJSON()),
+          pagination: collection.pagination,
+          summary: collection.getSummary(),
+          searchParams: search.toSearchParams()
+        });
+
+      } catch (error) {
+        console.error('Error in searchProperties:', error);
+        res.status(500).json({
           success: false,
-          errors: validation.errors
+          error: 'Failed to search properties',
+          message: error.message
         });
       }
-
-      // Perform search
-      const result = await this.propertyRepo.search(search.toSearchParams());
-      
-      // Create collection
-      const collection = new PropertyCollection(result.properties, result.pagination);
-
-      res.json({
-        success: true,
-        data: collection.properties.map(prop => new Property(prop).toJSON()),
-        pagination: collection.pagination,
-        summary: collection.getSummary(),
-        searchParams: search.toSearchParams()
-      });
-
-    } catch (error) {
-      console.error('Error in searchProperties:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to search properties',
-        message: error.message
-      });
     }
-  }
 
-  /**
-   * GET /properties/:id - Get property by ID
-   */
-  async getPropertyById(req, res) {
-    try {
-      const { id } = req.params;
+    /**
+     * GET /properties/:id - Get property by ID
+     */
+    async getPropertyById(req, res) {
+      try {
+        const { id } = req.params;
 
-      if (!id) {
-        return res.status(400).json({
+        if (!id) {
+          return res.status(400).json({
+            success: false,
+            error: 'Property ID is required'
+          });
+        }
+
+        const propertyData = await this.propertyRepo.findById(id);
+        
+        if (!propertyData) {
+          return res.status(404).json({
+            success: false,
+            error: 'Property not found'
+          });
+        }
+
+        // Create Property instance for validation and computed fields
+        const property = new Property(propertyData);
+
+        res.json({
+          success: true,
+          data: property.toJSON()
+        });
+
+      } catch (error) {
+        console.error(`Error fetching property ${req.params.id}:`, error);
+        res.status(500).json({
           success: false,
-          error: 'Property ID is required'
+          error: 'Failed to fetch property',
+          message: error.message
         });
       }
-
-      const propertyData = await this.propertyRepo.findById(id);
-      
-      if (!propertyData) {
-        return res.status(404).json({
-          success: false,
-          error: 'Property not found'
-        });
-      }
-
-      // Create Property instance for validation and computed fields
-      const property = new Property(propertyData);
-
-      res.json({
-        success: true,
-        data: property.toJSON()
-      });
-
-    } catch (error) {
-      console.error(`Error fetching property ${req.params.id}:`, error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch property',
-        message: error.message
-      });
     }
-  }
 
   /**
    * POST /properties - Create a new property
