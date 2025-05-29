@@ -123,6 +123,32 @@ const japanesePhrases = {
     continueWithLine: "LINEでログイン",
     continueWithYahoo: "Yahoo!でログイン",
 
+    // 東京23区
+    chiyodaWard: '千代田区',
+    chuoWard: '中央区',
+    minatoWard: '港区',
+    shinjukuWard: '新宿区',
+    bunkyoWard: '文京区',
+    taitoWard: '台東区',
+    sumidaWard: '墨田区',
+    kotoWard: '江東区',
+    shinagawaWard: '品川区',
+    meguroWard: '目黒区',
+    OtaWard: '大田区',
+    setagayaWard: '世田谷区',
+    shibuyaWard: '渋谷区',
+    nakanoWard: '中野区',
+    suginamiWard: '杉並区',
+    toshimaWard: '豊島区',
+    kitaWard: '北区',
+    arakawaWard: '荒川区',
+    itabashiWard: '板橋区',
+    nerimaWard: '練馬区',
+    adachiWard: '足立区',
+    katsushikaWard: '葛飾区',
+    edogawaWard: '江戸川区',
+
+
     // Other common terms
     yes: 'はい',
     no: 'いいえ',
@@ -131,6 +157,8 @@ const japanesePhrases = {
     save: '保存',
     delete: '削除',
     edit: '編集'
+
+
 
 };
 
