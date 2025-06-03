@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status      
 )
 VALUES (
     'ＴＨＥ　ＲＯＰＰＯＮＧＩ　ＴＯＫＹＯ', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区六本木３丁目', 
     '2LDK', 
     104.40, 
-    '37/39階', 
+    '37階 / 地上39階建', 
     'RC', 
     43210, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     'オール電化／電気温水器', 
     '※家具・調度品等は販売価格に含まれておりません。', 
-    ARRAY['/images/id6-1.jpg', '/images/id6-2.jpg', '/images/id6-3.jpg', '/images/id6-4.jpg', '/images/id6-5.jpg']
+    ARRAY['/images/id6-1.jpg', '/images/id6-2.jpg', '/images/id6-3.jpg', '/images/id6-4.jpg', '/images/id6-5.jpg'],
+    '105-0021',
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status       
 );

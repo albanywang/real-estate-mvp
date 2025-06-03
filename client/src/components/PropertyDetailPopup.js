@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import japanesePhrases from '../utils/japanesePhrases';
-import { formatPrice, formatPriceInMan, formatManagementFee, formatArea, formatBalcony } from '../utils/formatUtils';
+import { formatPrice, formatTraditionalPrice, formatManagementFee, formatArea, formatBalcony } from '../utils/formatUtils';
 import { getImageUrl } from '../services/api';
 import { formatDate, formatDateCompact, formatDateRelative } from '../utils/formatDate';
 
@@ -152,7 +152,7 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
           <div className="property-detail-title-section">
             <h1 className="property-detail-title">{property.title}</h1>
             <div className="property-detail-price">
-              {formatPriceInMan(property.price)}
+              {formatTraditionalPrice(property.price)}
             </div>
           </div>
         </div>
@@ -314,9 +314,9 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
             <tbody>
               <tr>
                 <th>{phrases?.price || japanesePhrases.price}</th>
-                <td>{formatPriceInMan(property.price)}</td>
+                <td>{formatTraditionalPrice(property.price)}</td>
                 <th>{phrases?.pricePerSquareMeter || japanesePhrases.pricePerSquareMeter}</th>
-                <td>{property.area ? formatPriceInMan(Math.round(property.price / property.area)) : '－'}</td>            
+                <td>{property.area ? formatTraditionalPrice(Math.round(property.price / property.area)) : '－'}</td>            
               </tr>
               <tr>
                 <th>{phrases?.managementFee || japanesePhrases.managementFee}</th>

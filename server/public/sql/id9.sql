@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status      
 )
 VALUES (
     '白金ザ・スカイ　西棟', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区白金１丁目', 
     '2LDK', 
     55.88, 
-    '14/45階', 
+    '14階 / 地上45階建', 
     'RC', 
     21592, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     'オール電化／電気温水器', 
     '※総戸数：１２４７戸※記載内容と現況が異なる場合は現況を優先とさせていただきます。※専有面積にはトランクルーム面積０．６４平米を含みます。', 
-    ARRAY['/images/id9-1.jpg', '/images/id9-2.jpg', '/images/id9-3.jpg', '/images/id9-4.jpg', '/images/id9-5.jpg']
+    ARRAY['/images/id9-1.jpg', '/images/id9-2.jpg', '/images/id9-3.jpg', '/images/id9-4.jpg', '/images/id9-5.jpg'],
+    '105-0021',
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status   
 );

@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+        -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status    
 )
 VALUES (
     '東京ツインパークス　ライトウイング', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区東新橋１丁目', 
     '2LDK', 
     99.10, 
-    '42/47階', 
+    '42階 / 地上47階建', 
     'RC', 
     36700, 
     '準工業地域', 
@@ -52,5 +54,12 @@ VALUES (
     '-', 
     '全居室収納、ウォークインクローゼット、床暖房、トランクルーム、オートロック、モニター付インターホン、ディンプルキー、防犯カメラ、都市ガス、ケーブルTV', 
     '日勤管理 ・掲載中の家具・什器は販売価格に含まれません', 
-    ARRAY['/images/id3-1.jpg', '/images/id3-2.jpg', '/images/id3-3.jpg', '/images/id3-4.jpg', '/images/id3-5.jpg']
+    ARRAY['/images/id3-1.jpg', '/images/id3-2.jpg', '/images/id3-3.jpg', '/images/id3-4.jpg', '/images/id3-5.jpg'],
+    -- New area hierarchy and zipcode data
+    '105-0021', -- Harumi area zipcode
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status    
 );

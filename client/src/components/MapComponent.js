@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import React, { useRef, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css'; // Make sure Leaflet CSS is imported
-import { formatArea, formatPriceInMan } from '../utils/formatUtils';
+import { formatArea, formatTraditionalPrice } from '../utils/formatUtils';
 
 // Fix Leaflet's icon paths
 delete L.Icon.Default.prototype._getIconUrl;
@@ -79,7 +79,7 @@ const MapComponent = (props) => {
       const markerHtml = `
         <div class="price-pill-container" data-property-id="${property.id}">
           <div class="price-pill-marker${property.id === selectedProperty ? ' selected' : ''}">
-            <span class="price-pill-text">${formatPriceInMan(property.price)}</span>
+            <span class="price-pill-text">${formatTraditionalPrice(property.price)}</span>
           </div>
           <div class="price-pill-arrow"></div>
         </div>
@@ -103,7 +103,7 @@ const MapComponent = (props) => {
           <div class="map-popup">
             <img src="${property.images?.[0] || ''}" alt="${property.title || ''}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image';" />
             <h3>${property.title}</h3>
-            <div class="map-popup-price">${formatPriceInMan(property.price)}</div>
+            <div class="map-popup-price">${formatTraditionalPrice(property.price)}</div>
             <p>${property.layout || ''} ${property.area ? `| ${formatArea(property.area)}` : ''}</p>
             <p>${property.address}</p>
             <button class="map-popup-detail-btn" onclick="window.openPropertyDetail(${property.id})">詳細を見る</button>
@@ -115,7 +115,7 @@ const MapComponent = (props) => {
         setTimeout(() => {
           const markerElements = document.getElementsByClassName('price-pill-marker');
           for (let i = 0; i < markerElements.length; i++) {
-            if (markerElements[i].innerHTML.includes(formatPriceInMan(property.price))) {
+            if (markerElements[i].innerHTML.includes(formatTraditionalPrice(property.price))) {
               const markerElement = markerElements[i];
 
               // Add hover effects

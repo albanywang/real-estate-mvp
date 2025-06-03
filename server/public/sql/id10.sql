@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
 )
 VALUES (
     '品川Vタワー', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区港南２丁目', 
     '2LDK', 
     61.21, 
-    '9/43階', 
+    '9階 / 地上43階建', 
     'RC', 
     20100, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     'オール電化／電気温水器', 
     '・インターネット使用料は2025年4月分より1，265円になります。', 
-    ARRAY['/images/id10-1.jpg', '/images/id10-2.jpg', '/images/id10-3.jpg', '/images/id10-4.jpg', '/images/id10-5.jpg']
+    ARRAY['/images/id10-1.jpg', '/images/id10-2.jpg', '/images/id10-3.jpg', '/images/id10-4.jpg', '/images/id10-5.jpg'],
+    '105-0021',
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status      
 );

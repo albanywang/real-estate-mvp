@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status  
 )
 VALUES (
     '六本木ヒルズレジデンスB棟', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区六本木６丁目', 
     '2LDK', 
     89.59, 
-    '5/43階', 
+    '5階 / 地上43階建', 
     'RC', 
     72650, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     '全居室収納、ウォークインクローゼット、床暖房、トランクルーム、オートロック、モニター付インターホン、ディンプルキー、防犯カメラ、都市ガス、ケーブルTV', 
     '共有持分：46560／100000000・バルコニー面積は平面図上で測定した面積であり、おおよその表示です。 駐車場空状況：2025年4月確認 565000円', 
-    ARRAY['/images/id4-1.jpg', '/images/id4-2.jpg', '/images/id4-3.jpg', '/images/id4-4.jpg', '/images/id4-5.jpg']
+    ARRAY['/images/id4-1.jpg', '/images/id4-2.jpg', '/images/id4-3.jpg', '/images/id4-4.jpg', '/images/id4-5.jpg'],
+    '105-0021',
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status 
 );

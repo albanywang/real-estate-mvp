@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status    
 )
 VALUES (
     'センチュリーパークタワー 50階 ４ＬＤＫ', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都中央区佃２丁目', 
     '4LDK', 
     175.83, 
-    '地上54階地下3階建 / 50階', 
+    '50階 / 地上54階建', 
     'RC', 
     60700, 
     '準工業地域', 
@@ -52,5 +54,12 @@ VALUES (
     '-', 
     '全居室収納、ウォークインクローゼット、床暖房、トランクルーム、オートロック、モニター付インターホン、ディンプルキー、防犯カメラ、都市ガス、ケーブルTV', 
     '主要採光面：南向き,用途地域：商業地域,駐車場空状況：2025年4月確認リフォーム：(室内フルリフォーム中(2025年5月上旬完成予定))管理形態：全部委託／・熱料金：変動費（使用相当分の料金が別途かかります）', 
-    ARRAY['/images/id2-1.jpg', '/images/id2-2.jpg', '/images/id2-3.jpg', '/images/id2-4.jpg', '/images/id2-5.jpg']
+    ARRAY['/images/id2-1.jpg', '/images/id2-2.jpg', '/images/id2-3.jpg', '/images/id2-4.jpg', '/images/id2-5.jpg'],
+    -- New area hierarchy and zipcode data
+    '104-0051', -- Harumi area zipcode
+    '首都圏',
+    '東京都',
+    '23区',
+    '中央区',
+    'for sale' -- Property status
 );

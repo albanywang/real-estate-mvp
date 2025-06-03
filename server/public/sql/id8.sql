@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
 )
 VALUES (
     'ＨＡＲＵＭＩ　ＦＬＡＧ　ＳＵＮ　ＶＩＬＬＡＧＥＦ棟', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都中央区晴海５丁目', 
     '3LDK', 
     86.45, 
-    '13/18階', 
+    '13階 / 地上18階建', 
     'RC', 
     26280, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     'オール電化／電気温水器', 
     '日勤管理 掲載中の家具・什器および内装費用等は販売価格に含まれません', 
-    ARRAY['/images/id8-1.jpg', '/images/id8-2.jpg', '/images/id8-3.jpg', '/images/id8-4.jpg', '/images/id8-5.jpg']
+    ARRAY['/images/id8-1.jpg', '/images/id8-2.jpg', '/images/id8-3.jpg', '/images/id8-4.jpg', '/images/id8-5.jpg'],
+    '104-0051',
+    '首都圏',
+    '東京都',
+    '23区',
+    '中央区',
+    'for sale' -- Property status      
 );

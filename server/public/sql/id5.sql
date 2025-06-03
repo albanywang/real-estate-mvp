@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status    
 )
 VALUES (
     'パークコート麻布十番ザ・タワー', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都港区三田１丁目', 
     '3LDK', 
     89.69, 
-    '27/36階', 
+    '27階 / 地上36階建', 
     'RC', 
     32440, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     '全居室収納、ウォークインクローゼット、床暖房、トランクルーム、オートロック、モニター付インターホン、ディンプルキー、防犯カメラ、都市ガス、ケーブルTV', 
     '駐輪場使用料：月額300円　　・バイク置き場使用料：月額2，000-3，000円／用途地域2：第二種住居地域', 
-    ARRAY['/images/id5-1.jpg', '/images/id5-2.jpg', '/images/id5-3.jpg', '/images/id5-4.jpg', '/images/id5-5.jpg']
+    ARRAY['/images/id5-1.jpg', '/images/id5-2.jpg', '/images/id5-3.jpg', '/images/id5-4.jpg', '/images/id5-5.jpg'],
+    '105-0021',
+    '首都圏',
+    '東京都',
+    '23区',
+    '港区',
+    'for sale' -- Property status     
 );

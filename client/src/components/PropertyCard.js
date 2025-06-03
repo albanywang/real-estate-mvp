@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
+import { formatPrice, formatArea, formatTraditionalPrice } from '../utils/formatUtils';
 import { getImageUrl } from '../services/api';
 
 // Property Card Component
@@ -34,7 +34,7 @@ const PropertyCard = ({ property, isSelected, onClick }) => {
         )}
       </div>
 
-      <div className="property-price">{formatPriceInMan(property.price)}</div>
+      <div className="property-price">{formatTraditionalPrice(property.price)}</div>
       <div className="property-address">{property.address}</div>
       <div className="property-features">
         <div className="property-feature">

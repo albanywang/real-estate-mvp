@@ -27,30 +27,22 @@ export const formatPrice = (price, unit = '円', showCurrency = false) => {
     return formatPrice(priceInMan, '万円', showCurrency);
   };
   
-  /**
-   * Formats a price in Japanese yen with traditional 億/万 notation
-   * @param {number} price - The price in yen
-   * @param {boolean} showCurrency - Whether to include the ¥ symbol
-   * @returns {string} Formatted price string with 億/万 units
-   */
-  export const formatTraditionalPrice = (price, showCurrency = true) => {
-    if (price === null || price === undefined) return '-';
-    
-    const currencySymbol = showCurrency ? '¥' : '';
-    
-    if (price >= 100000000) {
-      const oku = Math.floor(price / 100000000);
-      const man = Math.floor((price % 100000000) / 10000);
-      
-      if (man === 0) {
-        return `${currencySymbol}${oku}億`;
-      }
-      return `${currencySymbol}${oku}億${man}万`;
-    } else {
-      const man = Math.floor(price / 10000);
-      return `${currencySymbol}${man}万`;
-    }
-  };
+/**
+ * Formats a price in Japanese yen with traditional 億/万 notation
+ * @param {number} price - The price in yen
+ * @returns {string} Formatted price string with 億/万 units
+ */
+export const formatTraditionalPrice = (price) => {
+  if (price === null || price === undefined) return '-';
+ 
+  if (price >= 100000000) {
+    const okuValue = price / 100000000;
+    return `${okuValue.toFixed(2)}億円`;
+  } else {
+    const man = Math.floor(price / 10000);
+    return `${man.toLocaleString()}万`;
+  }
+};
   
   /**
    * Formats a price per square meter

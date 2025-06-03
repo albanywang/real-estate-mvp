@@ -7,7 +7,9 @@ INSERT INTO properties (
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber, 
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate, 
-    parking, kitchen, bathToilet, facilitiesServices, others, images
+    parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New hierarchical area fields and zipcode
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
 )
 VALUES (
     'Ｂｒｉｌｌｉａ銀座ｉｄ', 
@@ -16,7 +18,7 @@ VALUES (
     '東京都中央区銀座２丁目', 
     '1K', 
     26.73, 
-    '14/14階', 
+    '14階 / 地上14階建', 
     'RC', 
     9100, 
     '準工業地域', 
@@ -52,5 +54,11 @@ VALUES (
     '-', 
     'オール電化／電気温水器', 
     '※上記壁芯面積はトランクルーム面積（約０．２８平米）を含みます', 
-    ARRAY['/images/id7-1.jpg', '/images/id7-2.jpg', '/images/id7-3.jpg', '/images/id7-4.jpg', '/images/id7-5.jpg']
+    ARRAY['/images/id7-1.jpg', '/images/id7-2.jpg', '/images/id7-3.jpg', '/images/id7-4.jpg', '/images/id7-5.jpg'],
+    '104-0051',
+    '首都圏',
+    '東京都',
+    '23区',
+    '中央区',
+    'for sale' -- Property status     
 );
