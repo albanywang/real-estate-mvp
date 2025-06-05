@@ -221,7 +221,7 @@ main {
 .property-card {
   background-color: white;
   /* Increase min-height to ensure everything fits */
-  min-height: 430px; /* Increase from 400px */
+  min-height: 300px; /* Increase from 400px */
   /* Add max-height and overflow if needed */
   max-height: 600px;
   margin-bottom: 10px;

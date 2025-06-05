@@ -954,6 +954,497 @@ class PropertyService {
   extractCommonFeatures(properties) { 
     return ['parking', 'pets_allowed', 'modern_kitchen'];
   }
+
+  /**
+
+   * Search for locations based on user input (city, postcode, or address)
+
+   * Returns suggestions for dropdown
+
+   */
+
+  async searchLocations(query, limit = 10) {
+
+    if (!query || query.trim().length < 2) {
+
+      return [];
+
+    }
+
+ 
+
+    const searchTerm = `%${query.trim()}%`;
+
+   
+
+    try {
+
+      const suggestions = await this.db.query(`
+
+        WITH location_suggestions AS (
+
+          -- Search by zipcode
+
+          SELECT DISTINCT
+
+            'zipcode' as type,
+
+            zipcode as value,
+
+            CONCAT(zipcode, ' - ', area_level_4, ', ', area_level_2) as display_text,
+
+            area_level_1,
+
+            area_level_2,
+
+            area_level_3,
+
+            area_level_4,
+
+            zipcode,
+
+            COUNT(*) as property_count
+
+          FROM properties
+
+          WHERE zipcode ILIKE $1
+
+            AND status = 'for sale'
+
+          GROUP BY zipcode, area_level_1, area_level_2, area_level_3, area_level_4
+
+         
+
+          UNION ALL
+
+         
+
+          -- Search by area_level_4 (ward/city)
+
+          SELECT DISTINCT
+
+            'city' as type,
+
+            area_level_4 as value,
+
+            CONCAT(area_level_4, ', ', area_level_2, ' (', area_level_3, ')') as display_text,
+
+            area_level_1,
+
+            area_level_2,
+
+            area_level_3,
+
+            area_level_4,
+
+            NULL as zipcode,
+
+            COUNT(*) as property_count
+
+          FROM properties
+
+          WHERE area_level_4 ILIKE $1
+
+            AND status = 'for sale'
+
+          GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
+
+         
+
+          UNION ALL
+
+         
+
+          -- Search by area_level_3 (special ward area)
+
+          SELECT DISTINCT
+
+            'area' as type,
+
+            area_level_3 as value,
+
+            CONCAT(area_level_3, ', ', area_level_2) as display_text,
+
+            area_level_1,
+
+            area_level_2,
+
+            area_level_3,
+
+            NULL as area_level_4,
+
+            NULL as zipcode,
+
+            COUNT(*) as property_count
+
+          FROM properties
+
+          WHERE area_level_3 ILIKE $1
+
+            AND status = 'for sale'
+
+          GROUP BY area_level_1, area_level_2, area_level_3
+
+         
+
+          UNION ALL
+
+         
+
+          -- Search by address
+
+          SELECT DISTINCT
+
+            'address' as type,
+
+            address as value,
+
+            address as display_text,
+
+            area_level_1,
+
+            area_level_2,
+
+            area_level_3,
+
+            area_level_4,
+
+            zipcode,
+
+            1 as property_count
+
+          FROM properties
+
+          WHERE address ILIKE $1
+
+            AND status = 'for sale'
+
+        )
+
+        SELECT *
+
+        FROM location_suggestions
+
+        ORDER BY
+
+          CASE type
+
+            WHEN 'zipcode' THEN 1
+
+            WHEN 'city' THEN 2
+
+            WHEN 'area' THEN 3
+
+            WHEN 'address' THEN 4
+
+          END,
+
+          property_count DESC,
+
+          display_text ASC
+
+        LIMIT $2
+
+      `, [searchTerm, limit]);
+
+ 
+
+      return suggestions.rows;
+
+    } catch (error) {
+
+      console.error('Error searching locations:', error);
+
+      throw new Error('Failed to search locations');
+
+    }
+
+  }
+
+ 
+
+  /**
+
+   * Get properties based on selected location suggestion
+
+   */
+
+  async getPropertiesByLocation(locationData, filters = {}) {
+
+    const { type, value, area_level_1, area_level_2, area_level_3, area_level_4, zipcode } = locationData;
+
+   
+
+    let whereConditions = ['status = $1'];
+
+    let queryParams = ['for sale'];
+
+    let paramIndex = 2;
+
+ 
+
+    // Build WHERE clause based on location type
+
+    switch (type) {
+
+      case 'zipcode':
+
+        whereConditions.push(`zipcode = $${paramIndex}`);
+
+        queryParams.push(zipcode);
+
+        paramIndex++;
+
+        break;
+
+     
+
+      case 'city':
+
+        whereConditions.push(`area_level_4 = $${paramIndex}`);
+
+        queryParams.push(area_level_4);
+
+        paramIndex++;
+
+        break;
+
+     
+
+      case 'area':
+
+        whereConditions.push(`area_level_3 = $${paramIndex}`);
+
+        queryParams.push(area_level_3);
+
+        paramIndex++;
+
+        break;
+
+     
+
+      case 'address':
+
+        whereConditions.push(`address ILIKE $${paramIndex}`);
+
+        queryParams.push(`%${value}%`);
+
+        paramIndex++;
+
+        break;
+
+    }
+
+ 
+
+    // Add additional filters
+
+    if (filters.minPrice) {
+
+      whereConditions.push(`price >= $${paramIndex}`);
+
+      queryParams.push(filters.minPrice);
+
+      paramIndex++;
+
+    }
+
+ 
+
+    if (filters.maxPrice) {
+
+      whereConditions.push(`price <= $${paramIndex}`);
+
+      queryParams.push(filters.maxPrice);
+
+      paramIndex++;
+
+    }
+
+ 
+
+    if (filters.propertyType) {
+
+      whereConditions.push(`propertyType = $${paramIndex}`);
+
+      queryParams.push(filters.propertyType);
+
+      paramIndex++;
+
+    }
+
+ 
+
+    if (filters.minArea) {
+
+      whereConditions.push(`area >= $${paramIndex}`);
+
+      queryParams.push(filters.minArea);
+
+      paramIndex++;
+
+    }
+
+ 
+
+    if (filters.maxArea) {
+
+      whereConditions.push(`area <= $${paramIndex}`);
+
+      queryParams.push(filters.maxArea);
+
+      paramIndex++;
+
+    }
+
+ 
+
+    try {
+
+      const result = await this.db.query(`
+
+        SELECT
+
+          id,
+
+          title,
+
+          price,
+
+          pricePerSquareMeter,
+
+          address,
+
+          layout,
+
+          area,
+
+          floorInfo,
+
+          structure,
+
+          propertyType,
+
+          yearBuilt,
+
+          images,
+
+          zipcode,
+
+          area_level_1,
+
+          area_level_2,
+
+          area_level_3,
+
+          area_level_4,
+
+          ST_X(location) as longitude,
+
+          ST_Y(location) as latitude,
+
+          transportation,
+
+          balconyArea,
+
+          managementFee,
+
+          createdAt
+
+        FROM properties
+
+        WHERE ${whereConditions.join(' AND ')}
+
+        ORDER BY createdAt DESC
+
+        LIMIT 50
+
+      `, queryParams);
+
+ 
+
+      return result.rows;
+
+    } catch (error) {
+
+      console.error('Error getting properties by location:', error);
+
+      throw new Error('Failed to get properties');
+
+    }
+
+  }
+
+ 
+
+  /**
+
+   * Get popular locations for initial suggestions
+
+   */
+
+  async getPopularLocations(limit = 20) {
+
+    try {
+
+      const result = await this.db.query(`
+
+        WITH popular_areas AS (
+
+          SELECT
+
+            'city' as type,
+
+            area_level_4 as value,
+
+            CONCAT(area_level_4, ', ', area_level_2) as display_text,
+
+            area_level_1,
+
+            area_level_2,
+
+            area_level_3,
+
+            area_level_4,
+
+            NULL as zipcode,
+
+            COUNT(*) as property_count
+
+          FROM properties
+
+          WHERE status = 'for sale'
+
+            AND area_level_4 IS NOT NULL
+
+          GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
+
+          HAVING COUNT(*) >= 5
+
+          ORDER BY property_count DESC
+
+          LIMIT $1
+
+        )
+
+        SELECT * FROM popular_areas
+
+      `, [limit]);
+
+ 
+
+      return result.rows;
+
+    } catch (error) {
+
+      console.error('Error getting popular locations:', error);
+
+      throw new Error('Failed to get popular locations');
+
+    }
+
+  }
+    
 }
 
 export default PropertyService;

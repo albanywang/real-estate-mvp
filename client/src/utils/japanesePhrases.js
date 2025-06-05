@@ -8,6 +8,8 @@ const japanesePhrases = {
     sell: '売却',
     agents: '不動産会社',
     signIn: 'ログイン',
+    advertisement: '広告',
+    help: 'ヘルプ',
 
     // Filters
     findYourPerfectHome: '理想の住まいを探す',

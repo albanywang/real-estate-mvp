@@ -1,16 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Building, Hash, Navigation } from 'lucide-react';
 
-const PropertySearchComponent = () => {
+const PropertySearchComponent = ({ 
+  onLocationSelect, 
+  onClearSearch, 
+  selectedLocation 
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [properties, setProperties] = useState([]);
   const [popularLocations, setPopularLocations] = useState([]);
   const debounceRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  // Initialize search query from selected location
+  useEffect(() => {
+    if (selectedLocation) {
+      setSearchQuery(selectedLocation.display_text);
+    } else {
+      setSearchQuery('');
+    }
+  }, [selectedLocation]);
 
   // Fetch popular locations on component mount
   useEffect(() => {
@@ -72,7 +82,6 @@ const PropertySearchComponent = () => {
 
   // Handle suggestion selection
   const handleSuggestionSelect = async (suggestion) => {
-    setSelectedLocation(suggestion);
     setSearchQuery(suggestion.display_text);
     setShowDropdown(false);
     setSuggestions([]);
@@ -98,7 +107,8 @@ const PropertySearchComponent = () => {
 
       const data = await response.json();
       if (data.success) {
-        setProperties(data.data);
+        // Call the parent component's callback with location and properties
+        onLocationSelect(location, data.data);
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
@@ -107,19 +117,32 @@ const PropertySearchComponent = () => {
     }
   };
 
+  // Handle clearing the search
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSelectedLocation(null);
+    setSuggestions([]);
+    setShowDropdown(false);
+    
+    // Call parent component's clear callback
+    if (onClearSearch) {
+      onClearSearch();
+    }
+  };
+
   // Get icon for suggestion type
   const getSuggestionIcon = (type) => {
     switch (type) {
       case 'zipcode':
-        return <Hash className="w-4 h-4 text-blue-500" />;
+        return <span style={{ fontSize: '16px', color: '#2196f3' }}>📮</span>;
       case 'city':
-        return <Building className="w-4 h-4 text-green-500" />;
+        return <span style={{ fontSize: '16px', color: '#4caf50' }}>🏙️</span>;
       case 'area':
-        return <MapPin className="w-4 h-4 text-purple-500" />;
+        return <span style={{ fontSize: '16px', color: '#9c27b0' }}>📍</span>;
       case 'address':
-        return <Navigation className="w-4 h-4 text-orange-500" />;
+        return <span style={{ fontSize: '16px', color: '#ff9800' }}>🧭</span>;
       default:
-        return <MapPin className="w-4 h-4 text-gray-500" />;
+        return <span style={{ fontSize: '16px', color: '#757575' }}>📍</span>;
     }
   };
 
@@ -148,32 +171,106 @@ const PropertySearchComponent = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-4xl mx-auto">
       {/* Search Input */}
-      <div className="relative mb-6" ref={searchInputRef}>
+      <div className="relative" ref={searchInputRef}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <span style={{ 
+            position: 'absolute', 
+            left: '12px', 
+            top: '50%', 
+            transform: 'translateY(-50%)', 
+            fontSize: '20px',
+            color: '#9ca3af'
+          }}>
+            🔍
+          </span>
           <input
             type="text"
             value={searchQuery}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             placeholder="Search by city, postal code, or address..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
+            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
+            style={{
+              width: '100%',
+              paddingLeft: '2.5rem',
+              paddingRight: '3rem',
+              padding: '0.75rem',
+              border: '1px solid #d1d5db',
+              borderRadius: '0.5rem',
+              fontSize: '1.125rem',
+              outline: 'none'
+            }}
           />
+          
+          {/* Clear button */}
+          {(searchQuery || selectedLocation) && (
+            <button
+              onClick={handleClearSearch}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                padding: '4px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s',
+                fontSize: '16px',
+                color: '#9ca3af'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+          
+          {/* Loading spinner */}
           {isLoading && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+            <div style={{
+              position: 'absolute',
+              right: '2.5rem',
+              top: '50%',
+              transform: 'translateY(-50%)'
+            }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                border: '2px solid #e5e7eb',
+                borderTop: '2px solid #3b82f6',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
             </div>
           )}
         </div>
 
         {/* Dropdown Suggestions */}
         {showDropdown && (suggestions.length > 0 || popularLocations.length > 0) && (
-          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-80 overflow-y-auto z-50">
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '0.5rem',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            marginTop: '0.25rem',
+            maxHeight: '20rem',
+            overflowY: 'auto',
+            zIndex: 50
+          }}>
             {!searchQuery && popularLocations.length > 0 && (
-              <div className="p-3 border-b border-gray-100">
-                <p className="text-sm text-gray-500 font-medium mb-2">Popular Locations</p>
+              <div style={{ padding: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', margin: '0 0 0.5rem 0' }}>
+                  Popular Locations
+                </p>
               </div>
             )}
             
@@ -181,12 +278,28 @@ const PropertySearchComponent = () => {
               <button
                 key={`${suggestion.type}-${suggestion.value}-${index}`}
                 onClick={() => handleSuggestionSelect(suggestion)}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 border-b border-gray-50 last:border-b-0"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  textAlign: 'left',
+                  background: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  borderBottom: '1px solid #f9fafb',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
               >
                 {getSuggestionIcon(suggestion.type)}
-                <div className="flex-1">
-                  <p className="text-gray-900 font-medium">{suggestion.display_text}</p>
-                  <p className="text-sm text-gray-500 capitalize">
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: 0, color: '#111827', fontWeight: '500' }}>
+                    {suggestion.display_text}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280', textTransform: 'capitalize' }}>
                     {suggestion.type} • {suggestion.property_count} properties
                   </p>
                 </div>
@@ -198,64 +311,53 @@ const PropertySearchComponent = () => {
 
       {/* Selected Location Info */}
       {selectedLocation && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center space-x-2">
-            {getSuggestionIcon(selectedLocation.type)}
-            <span className="font-medium text-blue-900">
-              Showing properties in: {selectedLocation.display_text}
-            </span>
-            <span className="text-sm text-blue-600">
-              ({properties.length} properties found)
-            </span>
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '0.75rem',
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '0.5rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {getSuggestionIcon(selectedLocation.type)}
+              <span style={{ fontWeight: '500', color: '#1e40af' }}>
+                {selectedLocation.display_text}
+              </span>
+              <span style={{ fontSize: '0.875rem', color: '#2563eb' }}>
+                ({selectedLocation.property_count || 0} properties)
+              </span>
+            </div>
+            <button
+              onClick={handleClearSearch}
+              style={{
+                color: '#2563eb',
+                background: 'none',
+                border: 'none',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                padding: '0.25rem 0.5rem'
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
+              onMouseLeave={(e) => e.target.style.color = '#2563eb'}
+            >
+              Clear
+            </button>
           </div>
         </div>
       )}
 
-      {/* Properties Grid */}
-      {properties.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <div key={property.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              {property.images && property.images.length > 0 && (
-                <img
-                  src={property.images[0]}
-                  alt={property.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-              )}
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">
-                  {property.title}
-                </h3>
-                <p className="text-2xl font-bold text-blue-600 mb-2">
-                  ¥{property.price?.toLocaleString()}
-                </p>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p className="flex items-center space-x-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{property.address}</span>
-                  </p>
-                  <p>Layout: {property.layout || 'N/A'}</p>
-                  <p>Area: {property.area}㎡</p>
-                  <p>Type: {property.propertyType}</p>
-                  {property.yearBuilt && <p>Built: {property.yearBuilt}</p>}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* No Results */}
-      {selectedLocation && properties.length === 0 && !isLoading && (
-        <div className="text-center py-12">
-          <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
-          <p className="text-gray-500">
-            Try searching for a different location or adjusting your filters.
-          </p>
-        </div>
-      )}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

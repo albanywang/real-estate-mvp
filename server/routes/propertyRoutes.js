@@ -123,6 +123,11 @@ class PropertyRoutes {
     this.router.get('/property-types', this.getPropertyTypes.bind(this));
     this.router.get('/enums', this.getEnums.bind(this));
     
+    // NEW LOCATION SEARCH ROUTES
+    this.router.get('/search/locations', this.searchLocations.bind(this));
+    this.router.get('/search/popular-locations', this.getPopularLocations.bind(this));
+    this.router.get('/search/suggestions/:type', this.getLocationSuggestions.bind(this));
+
     // Debug routes (temporary)
     this.router.get('/debug/raw', this.debugRaw.bind(this));
     this.router.get('/debug/count', this.debugCount.bind(this));
@@ -134,6 +139,9 @@ class PropertyRoutes {
     this.router.post('/filter', this.filterProperties.bind(this));
     this.router.post('/bulk-import', this.upload.single('csv'), this.bulkImport.bind(this));
 
+    // NEW LOCATION SEARCH POST ROUTE
+    this.router.post('/search/by-location', this.searchByLocation.bind(this));
+
     // PUT routes
     this.router.put('/:id', this.upload.array('images', 20), this.updateProperty.bind(this));
 
@@ -144,6 +152,197 @@ class PropertyRoutes {
     this.router.get('/:id/exists', this.checkPropertyExists.bind(this));
   }
 
+  /**
+   * GET /properties/search/locations
+   * Search for location suggestions (city, postcode, address)
+   */
+  async searchLocations(req, res) {
+    try {
+      const { q: query, limit = 10 } = req.query;
+    
+      if (!query || query.trim().length < 2) {
+        return res.json({
+          success: true,
+          data: [],
+          count: 0
+        });
+      }
+
+      const suggestions = await this.propertyService.searchLocations(query, parseInt(limit));
+    
+      res.json({
+        success: true,
+        data: suggestions,
+        count: suggestions.length
+      });
+    } catch (error) {
+      console.error('Search locations error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search locations',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * POST /properties/search/by-location
+   * Get properties based on selected location
+   */
+  async searchByLocation(req, res) {
+    try {
+      const { location, filters = {} } = req.body;
+    
+      if (!location || !location.type || !location.value) {
+        return res.status(400).json({
+          success: false,
+          message: 'Location data is required'
+        });
+      }
+
+      const properties = await this.propertyService.getPropertiesByLocation(location, filters);
+    
+      res.json({
+        success: true,
+        data: properties,
+        count: properties.length,
+        location: {
+          type: location.type,
+          display_text: location.display_text,
+          value: location.value
+        }
+      });
+    } catch (error) {
+      console.error('Search by location error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search properties by location',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/search/popular-locations
+   * Get popular locations for initial suggestions
+   */
+  async getPopularLocations(req, res) {
+    try {
+      const { limit = 20 } = req.query;
+    
+      const locations = await this.propertyService.getPopularLocations(parseInt(limit));
+    
+      res.json({
+        success: true,
+        data: locations,
+        count: locations.length
+      });
+    } catch (error) {
+      console.error('Get popular locations error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get popular locations',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /properties/search/suggestions/:type
+   * Get specific type suggestions (cities, areas, zipcodes)
+   */
+  async getLocationSuggestions(req, res) {
+    try {
+      const { type } = req.params;
+      const { limit = 50 } = req.query;
+    
+      let query = '';
+      let params = [parseInt(limit)];
+    
+      switch (type) {
+        case 'cities':
+          query = `
+            SELECT DISTINCT
+              'city' as type,
+              area_level_4 as value,
+              CONCAT(area_level_4, ', ', area_level_2) as display_text,
+              area_level_1,
+              area_level_2,
+              area_level_3,
+              area_level_4,
+              COUNT(*) as property_count
+            FROM properties
+            WHERE status = 'for sale' AND area_level_4 IS NOT NULL
+            GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
+            ORDER BY property_count DESC, area_level_4 ASC
+            LIMIT $1
+          `;
+          break;
+        
+        case 'areas':
+          query = `
+            SELECT DISTINCT
+              'area' as type,
+              area_level_3 as value,
+              CONCAT(area_level_3, ', ', area_level_2) as display_text,
+              area_level_1,
+              area_level_2,
+              area_level_3,
+              COUNT(*) as property_count
+            FROM properties
+            WHERE status = 'for sale' AND area_level_3 IS NOT NULL
+            GROUP BY area_level_1, area_level_2, area_level_3
+            ORDER BY property_count DESC, area_level_3 ASC
+            LIMIT $1
+          `;
+          break;
+        
+        case 'zipcodes':
+          query = `
+            SELECT DISTINCT
+              'zipcode' as type,
+              zipcode as value,
+              CONCAT(zipcode, ' - ', area_level_4, ', ', area_level_2) as display_text,
+              area_level_1,
+              area_level_2,
+              area_level_3,
+              area_level_4,
+              zipcode,
+              COUNT(*) as property_count
+            FROM properties
+            WHERE status = 'for sale' AND zipcode IS NOT NULL
+            GROUP BY zipcode, area_level_1, area_level_2, area_level_3, area_level_4
+            ORDER BY property_count DESC, zipcode ASC
+            LIMIT $1
+          `;
+          break;
+        
+        default:
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid suggestion type. Use: cities, areas, or zipcodes'
+          });
+      }
+    
+      // Use the repository's database pool to execute query
+      const pool = this.propertyRepo.getPool();
+      const result = await pool.query(query, params);
+    
+      res.json({
+        success: true,
+        data: result.rows,
+        count: result.rows.length,
+        type: type
+      });
+    } catch (error) {
+      console.error('Get suggestions error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get suggestions',
+        error: error.message
+      });
+    }
+  }
   /**
    * GET /properties - Get all properties with optional filtering
    */

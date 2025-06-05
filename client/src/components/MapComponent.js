@@ -18,7 +18,6 @@ const MapComponent = (props) => {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
 
-
   useEffect(() => {
     if (!mapInstanceRef.current) {
       // Initialize map centered on Tokyo
@@ -73,6 +72,7 @@ const MapComponent = (props) => {
       console.warn("No properties with valid location data");
       return;
     }
+
     // Add markers for properties
     validProperties.forEach(property => {
       // Create custom HTML for the marker
@@ -99,16 +99,19 @@ const MapComponent = (props) => {
         riseOnHover: true
       }).addTo(mapInstanceRef.current);
 
-      marker.bindPopup(`
-          <div class="map-popup">
-            <img src="${property.images?.[0] || ''}" alt="${property.title || ''}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image';" />
-            <h3>${property.title}</h3>
-            <div class="map-popup-price">${formatTraditionalPrice(property.price)}</div>
-            <p>${property.layout || ''} ${property.area ? `| ${formatArea(property.area)}` : ''}</p>
-            <p>${property.address}</p>
-            <button class="map-popup-detail-btn" onclick="window.openPropertyDetail(${property.id})">詳細を見る</button>
-          </div>
-        `);
+      // Add click event directly to the marker
+      marker.on('click', function(e) {
+        // Prevent event bubbling
+        L.DomEvent.stopPropagation(e);
+        
+        // Update selected property
+        setSelectedProperty(property.id);
+        
+        // Directly call the detail function
+        if (typeof openPropertyDetail === 'function') {
+          openPropertyDetail(property);
+        }
+      });
 
       // When marker is added to map, get the element for hover effect
       marker.on('add', function () {
@@ -129,7 +132,7 @@ const MapComponent = (props) => {
                 }
               });
 
-              // Add click event with proper debouncing and state handling
+              // Add click event - directly trigger property detail (backup for custom HTML)
               let isProcessingClick = false;
               markerElement.addEventListener('click', function(e) {
                 // Prevent event bubbling to avoid double triggers
@@ -139,26 +142,18 @@ const MapComponent = (props) => {
                 if (isProcessingClick) return;
                 isProcessingClick = true;
                 
-                // First, open the popup directly without triggering a state update
-                marker.openPopup();
+                // Update selected property
+                setSelectedProperty(property.id);
                 
-                // Delay the state update to avoid flickering
+                // Directly call the detail function
+                if (typeof openPropertyDetail === 'function') {
+                  openPropertyDetail(property);
+                }
+                
+                // Reset processing flag
                 setTimeout(() => {
-                  // Check if this property is already selected
-                  if (selectedProperty !== property.id) {
-                    setSelectedProperty(property.id);
-                  }
-                  
-                  // Call the detail function last
-                  if (typeof openPropertyDetail === 'function') {
-                    openPropertyDetail(property);
-                  }
-                  
-                  // Reset processing flag after everything is done
-                  setTimeout(() => {
-                    isProcessingClick = false;
-                  }, 300);
-                }, 50);
+                  isProcessingClick = false;
+                }, 300);
               });
 
               break;
@@ -167,29 +162,17 @@ const MapComponent = (props) => {
         }, 100);
       });
 
-      // When popup opens, update selected state
-      marker.on('popupopen', function () {
-        setSelectedProperty(property.id);
-      });
+      // REMOVED: popupopen event listener - No longer needed
 
-      // Highlight selected property
+      // Highlight selected property by centering view
       if (property.id === selectedProperty) {
-        marker.openPopup();
         mapInstanceRef.current.setView(property.location, 15);
       }
 
       markersRef.current.push(marker);
     });
 
-    // Also update your window function
-    window.openPropertyDetail = (id) => {
-      const property = properties.find(p => p.id === id);
-      if (property && typeof openPropertyDetail === 'function') {
-        setSelectedProperty(id);
-        openPropertyDetail(property);
-      }
-    };
-
+    // Clean up window function if needed
     return () => {
       // Clean up when component unmounts
       if (mapInstanceRef.current) {
