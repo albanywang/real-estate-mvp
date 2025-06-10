@@ -12,7 +12,10 @@ const TopFiltersPanel = ({
   selectedLocation,
   searchMode = 'all',
   // Options for dropdowns
-  propertyTypes = [],
+  priceOptions = [],
+  areaOptions = [],
+  propertyStatusOptions = [],
+  propertyTypeOptions = [],
   isLoading = false,
   // Statistics for showing ranges
   priceRange = { min: 0, max: 100000000 },
@@ -23,17 +26,18 @@ const TopFiltersPanel = ({
 
   // Handle filter changes
   const handleFilterChange = useCallback((name, value) => {
+    console.log(`🔍 Filter changed: ${name} = ${value}`);
     const newFilters = {
       ...filters,
       [name]: value
     };
     setFilters(newFilters);
-    // Auto-apply filters for immediate feedback
-    setTimeout(() => applyFilters(), 100);
-  }, [filters, setFilters, applyFilters]);
+    // Removed applyFilters call here; handled by useEffect in App.jsx
+  }, [filters, setFilters]);
 
   // Clear all filters except location
   const clearAllFilters = useCallback(() => {
+    console.log('🧹 Clearing all filters');
     const clearedFilters = {
       propertyType: '',
       propertyStatus: '',
@@ -52,72 +56,19 @@ const TopFiltersPanel = ({
       hasAutoLock: false
     };
     setFilters(clearedFilters);
-    applyFilters();
-  }, [setFilters, applyFilters]);
+    // Removed applyFilters call here; handled by useEffect in App.jsx
+  }, [setFilters]);
 
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => 
     value !== '' && value !== false
   );
 
-  // Count active filters
-  const activeFilterCount = Object.values(filters).filter(value => 
-    value !== '' && value !== false
-  ).length;
-
   // Format price display
   const formatPrice = (price) => {
     if (!price) return '';
     return `¥${parseInt(price).toLocaleString()}万`;
   };
-
-  // Price range options (in 万円)
-  const priceOptions = [
-    { value: '', label: 'Any Price' },
-    { value: '1000', label: '¥1,000万+' },
-    { value: '2000', label: '¥2,000万+' },
-    { value: '3000', label: '¥3,000万+' },
-    { value: '5000', label: '¥5,000万+' },
-    { value: '7000', label: '¥7,000万+' },
-    { value: '10000', label: '¥1億+' }
-  ];
-
-  const maxPriceOptions = [
-    { value: '', label: 'No Max' },
-    { value: '2000', label: '¥2,000万' },
-    { value: '3000', label: '¥3,000万' },
-    { value: '5000', label: '¥5,000万' },
-    { value: '7000', label: '¥7,000万' },
-    { value: '10000', label: '¥1億' },
-    { value: '15000', label: '¥1.5億' }
-  ];
-
-  // Area options (in ㎡)
-  const areaOptions = [
-    { value: '', label: 'Any Size' },
-    { value: '30', label: '30㎡+' },
-    { value: '50', label: '50㎡+' },
-    { value: '70', label: '70㎡+' },
-    { value: '100', label: '100㎡+' },
-    { value: '150', label: '150㎡+' }
-  ];
-
-  const maxAreaOptions = [
-    { value: '', label: 'No Max' },
-    { value: '50', label: '50㎡' },
-    { value: '70', label: '70㎡' },
-    { value: '100', label: '100㎡' },
-    { value: '150', label: '150㎡' },
-    { value: '200', label: '200㎡' }
-  ];
-
-  // Property status options
-  const propertyStatusOptions = [
-    { value: '', label: 'For Sale' },
-    { value: 'for sale', label: 'For Sale' },
-    { value: 'under contract', label: 'Under Contract' },
-    { value: 'sold', label: 'Recently Sold' }
-  ];
 
   return (
     <div style={{
@@ -145,6 +96,35 @@ const TopFiltersPanel = ({
               onClearSearch={onClearLocationSearch}
               selectedLocation={selectedLocation}
             />
+          </div>
+
+          {/* Property Type Dropdown */}
+          <div style={{ flex: '0 0 auto', minWidth: '150px' }}>
+            <select
+              value={filters.propertyType || ''}
+              onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                background: '#fff',
+                cursor: 'pointer',
+                appearance: 'none',
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
+            >
+              {propertyTypeOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Property Status Dropdown */}
@@ -199,36 +179,6 @@ const TopFiltersPanel = ({
             >
               <option value="">{japanesePhrases.priceRange}</option>
               {priceOptions.slice(1).map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Max Price Dropdown */}
-          <div style={{ flex: '0 0 auto', minWidth: '120px' }}>
-            <select
-              value={filters.maxPrice || ''}
-              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                background: '#fff',
-                cursor: 'pointer',
-                appearance: 'none',
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              <option value="">Max Price</option>
-              {maxPriceOptions.slice(1).map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -325,6 +275,19 @@ const TopFiltersPanel = ({
               </span>
             )}
 
+            {filters.propertyType && (
+              <span style={{
+                background: '#f3f4f6',
+                color: '#374151',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '1rem',
+                fontSize: '0.75rem',
+                fontWeight: '500'
+              }}>
+                Type: {propertyTypeOptions.find(opt => opt.value === filters.propertyType)?.label || 'Unknown Type'}
+              </span>
+            )}
+
             {filters.propertyStatus && (
               <span style={{
                 background: '#f3f4f6',
@@ -334,7 +297,7 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                Status: {filters.propertyStatus}
+                Status: {propertyStatusOptions.find(opt => opt.value === filters.propertyStatus)?.label || 'Unknown Status'}
               </span>
             )}
 
@@ -351,19 +314,6 @@ const TopFiltersPanel = ({
               </span>
             )}
 
-            {filters.maxPrice && (
-              <span style={{
-                background: '#fef3c7',
-                color: '#92400e',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '1rem',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                Max: {formatPrice(filters.maxPrice)}
-              </span>
-            )}
-
             {filters.minArea && (
               <span style={{
                 background: '#ecfdf5',
@@ -373,7 +323,7 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                Min: {filters.minArea}㎡
+                Area: {areaOptions.find(opt => opt.value === filters.minArea)?.label || (filters.minArea === 'under30' ? '30㎡-' : `${filters.minArea}㎡+`)}
               </span>
             )}
           </div>
@@ -397,47 +347,6 @@ const TopFiltersPanel = ({
               gap: '1rem'
             }}>
               
-              {/* Property Type */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem'
-                }}>
-                  Property Type
-                </label>
-                <select
-                  value={filters.propertyType || ''}
-                  onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    background: '#fff'
-                  }}
-                >
-                  <option value="">Any Type</option>
-                  {propertyTypes.length > 0 ? (
-                    propertyTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="中古マンション">Used Apartment</option>
-                      <option value="新築マンション">New Apartment</option>
-                      <option value="中古一戸建て">Used House</option>
-                      <option value="新築一戸建て">New House</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
               {/* Layout */}
               <div>
                 <label style={{

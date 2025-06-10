@@ -1,11 +1,9 @@
-// Updated App.js with top filters layout (Zillow style)
-
 import React, { useState, useEffect } from 'react';
 import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
 import PropertyDetailPopup from './PropertyDetailPopup';
 import MapComponent from './MapComponent';
 import PropertyCard from './PropertyCard';
-import TopFiltersPanel from './TopFiltersPanel'; // Import the new top filters
+import TopFiltersPanel from './TopFiltersPanel';
 import LoginPopup from './LoginPopup';
 import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
@@ -46,6 +44,52 @@ const App = () => {
     hasAC: false,
     hasAutoLock: false
   });
+
+  // Price range options (in 万円)
+  const priceOptions = [
+    { value: '', label: 'Any Price' },
+    { value: '1000', label: '¥1,000万+' },
+    { value: '2000', label: '¥2,000万+' },
+    { value: '3000', label: '¥3,000万+' },
+    { value: '5000', label: '¥5,000万+' },
+    { value: '7000', label: '¥7,000万+' },
+    { value: '10000', label: '¥1億+' }
+  ];
+
+  // Area options (in ㎡)
+  const areaOptions = [
+    { value: 'under30', label: '30㎡-' },
+    { value: '30', label: '30㎡+' },    
+    { value: '50', label: '50㎡+' },
+    { value: '70', label: '70㎡+' },
+    { value: '100', label: '100㎡+' },
+    { value: '150', label: '150㎡+' }
+  ];
+
+  // Property status options
+  const propertyStatusOptions = [
+    { value: '', label: '購入' },
+    { value: 'for sale', label: '購入' },
+    { value: 'for rent', label: '賃貸' },
+    { value: 'sold', label: '売却' }
+  ];
+
+  // Property type options
+  const propertyTypeOptions = [
+    { value: '', label: '物件種別' },
+    { value: '中古マンション', label: '中古マンション' },
+    { value: '新築マンション', label: '新築マンション' },
+    { value: '中古一戸建て', label: '中古一戸建て' },
+    { value: '新築一戸建て', label: '新築一戸建て' }
+  ];
+
+  // Normalize API data propertyType values
+  const propertyTypeMapping = {
+    '新築一戸建': '新築一戸建て',
+    '中古一戸建': '中古一戸建て',
+    '新築マンション': '新築マンション',
+    '中古マンション': '中古マンション'
+  };
 
   // Initialize fullscreen image viewer
   useEffect(() => {
@@ -101,7 +145,14 @@ const App = () => {
           throw new Error(result.error);
         }
         
-        const propertiesArray = Array.isArray(result.properties) ? result.properties : [];
+        const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
+          ...p,
+          propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+        })) : [];
+        
+        // Log unique propertyType values for debugging
+        const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertyType))];
+        console.log('🔍 Unique propertyType values in data:', uniquePropertyTypes);
         
         console.log(`📍 Setting ${propertiesArray.length} properties`);
         
@@ -137,12 +188,22 @@ const App = () => {
     console.log('📍 Location selected:', location);
     console.log('🏠 Properties for location:', locationBasedProperties);
     
+    // Normalize propertyType for location-based properties
+    const normalizedLocationProperties = locationBasedProperties.map(p => ({
+      ...p,
+      propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+    }));
+    
+    // Log unique propertyType values for location-based properties
+    const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertyType))];
+    console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
+    
     setSelectedLocation(location);
-    setLocationProperties(locationBasedProperties);
+    setLocationProperties(normalizedLocationProperties);
     setSearchMode('location');
     
     // Apply existing filters to the location-based properties
-    applyFiltersToProperties(locationBasedProperties);
+    applyFiltersToProperties(normalizedLocationProperties);
   };
 
   // Handle clearing location search
@@ -155,6 +216,12 @@ const App = () => {
     
     // Go back to showing all properties with current filters
     applyFiltersToProperties(properties);
+  };
+
+  // Normalize propertyType for comparison
+  const normalizePropertyType = (type) => {
+    if (!type) return '';
+    return type.trim().replace(/\s+/g, '');
   };
 
   // Apply filters to properties
@@ -176,7 +243,13 @@ const App = () => {
     
     // Apply all filters
     if (filters.propertyType) {
-      filtered = filtered.filter(p => p.propertyType === filters.propertyType);
+      const normalizedFilterType = normalizePropertyType(filters.propertyType);
+      filtered = filtered.filter(p => {
+        const normalizedPropertyType = normalizePropertyType(p.propertyType);
+        const match = normalizedPropertyType === normalizedFilterType;
+        console.log(`🔍 PropertyType check: ${normalizedPropertyType} === ${normalizedFilterType} -> ${match}`);
+        return match;
+      });
     }
     
     if (filters.propertyStatus) {
@@ -247,13 +320,23 @@ const App = () => {
     
     console.log(`🔍 Filtered ${propertiesToFilter.length} properties down to ${filtered.length}`);
     
+    // Log the propertyType of filtered properties for debugging
+    console.log('🔍 Filtered properties propertyType values:', filtered.map(p => p.propertyType));
+    
     setFilteredProperties(filtered);
   };
 
   // Apply filters function
   const applyFilters = () => {
+    console.log('🔍 Triggering applyFilters with filters:', filters);
     applyFiltersToProperties();
   };
+
+  // Trigger applyFilters when filters change
+  useEffect(() => {
+    console.log('🔍 Filters updated, applying filters:', filters);
+    applyFilters();
+  }, [filters]);
 
   // Update filters when location search results change
   useEffect(() => {
@@ -280,7 +363,14 @@ const App = () => {
         throw new Error(result.error);
       }
       
-      const propertiesArray = Array.isArray(result.properties) ? result.properties : [];
+      const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
+        ...p,
+        propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+      })) : [];
+      
+      // Log unique propertyType values for debugging
+      const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertyType))];
+      console.log('🔍 Unique propertyType values in retry data:', uniquePropertyTypes);
       
       setProperties(propertiesArray);
       
@@ -347,18 +437,18 @@ const App = () => {
           top: 0,
           zIndex: 1001,
           height: '64px',
-          width: '100%', // Full screen width
+          width: '100%',
         }}
       >
         <div
           className="header-container"
           style={{
-            width: '100%', // Full width
-            padding: '0 1rem', // Minimal padding
+            width: '100%',
+            padding: '0 1rem',
             height: '100%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between', // Distribute content
+            justifyContent: 'space-between',
           }}
         >
           {/* Left Navigation */}
@@ -368,7 +458,7 @@ const App = () => {
               display: 'flex',
               gap: '1rem',
               flexShrink: 0,
-              minWidth: '250px', // Increased to accommodate Japanese text
+              minWidth: '250px',
               alignItems: 'center',
             }}
           >
@@ -402,7 +492,7 @@ const App = () => {
           <div
             className="logo-container"
             style={{
-              flex: 1, // Take available space to center
+              flex: 1,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
@@ -429,14 +519,13 @@ const App = () => {
           </div>
 
           {/* Right Side - Development Info */}
-          {/* Left Navigation */}
           <div
             className="right-nav"
             style={{
               display: 'flex',
               gap: '1rem',
               flexShrink: 0,
-              minWidth: '250px', // Increased to accommodate Japanese text
+              minWidth: '250px',
               alignItems: 'center',
             }}
           >
@@ -471,20 +560,18 @@ const App = () => {
         onClearLocationSearch={handleClearLocationSearch}
         selectedLocation={selectedLocation}
         searchMode={searchMode}
-        propertyTypes={[
-          { value: '中古マンション', label: japanesePhrases.usedApartment || 'Used Apartment' },
-          { value: '新築マンション', label: japanesePhrases.newApartment || 'New Apartment' },
-          { value: '中古一戸建て', label: japanesePhrases.usedHouse || 'Used House' },
-          { value: '新築一戸建て', label: japanesePhrases.newHouse || 'New House' }
-        ]}
+        priceOptions={priceOptions}
+        areaOptions={areaOptions}
+        propertyStatusOptions={propertyStatusOptions}
+        propertyTypeOptions={propertyTypeOptions}
         isLoading={isLoading}
-        priceRange={{ min: 0, max: 50000 }} // 0 to 5億円 in 万円
+        priceRange={{ min: 0, max: 50000 }}
         areaRange={{ min: 20, max: 300 }}
       />
 
       {/* Main Content Area */}
       <div style={{ 
-        height: 'calc(100vh - 184px)', // Subtract header (64px) + filter panel (~120px)
+        height: 'calc(100vh - 184px)',
         display: 'flex'
       }}>
         
@@ -704,7 +791,7 @@ const App = () => {
                         openPropertyDetail(property);
                       }}
                       phrases={japanesePhrases}
-                      compact={true} // Add compact prop for smaller cards
+                      compact={true}
                     />
                   </div>
                 ))}
