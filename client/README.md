@@ -7,7 +7,7 @@ A full-stack application for searching and listing Japanese real estate properti
 ```
 project-root/
 ├── api/
-│   └── propertyRoutes.js         # API routes for property data
+│   └── PropertyRoutes.js         # API routes for property data
 ├── components/
 │   └── PropertySearch.jsx        # React component for property search
 ├── contexts/
@@ -71,6 +71,8 @@ node utils/setupDatabase.js
 ### 4. Start the Server
 
 ```bash
+npm cache clean --force
+npm install
 npm start
 ```
 

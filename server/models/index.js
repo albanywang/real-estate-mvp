@@ -47,7 +47,7 @@ export {
 /**
  * In your routes (example):
  */
-// routes/propertyRoutes.js
+// routes/PropertyRoutes.js
 // import { Property, PropertyFactory, PropertySearch } from '../models/index.js';
 // 
 // router.post('/properties', async (req, res) => {
@@ -89,7 +89,7 @@ your-project/
 ├── api/
 │   └── PropertyService.js
 ├── routes/
-│   └── propertyRoutes.js
+│   └── PropertyRoutes.js
 └── utils/
     └── db.js
 */

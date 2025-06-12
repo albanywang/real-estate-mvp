@@ -127,6 +127,7 @@ class PropertyRoutes {
     this.router.get('/search/locations', this.searchLocations.bind(this));
     this.router.get('/search/popular-locations', this.getPopularLocations.bind(this));
     this.router.get('/search/suggestions/:type', this.getLocationSuggestions.bind(this));
+    this.router.get('/search/address', this.searchPropertiesByAddress.bind(this));
 
     // Debug routes (temporary)
     this.router.get('/debug/raw', this.debugRaw.bind(this));
@@ -218,6 +219,41 @@ class PropertyRoutes {
         success: false,
         message: 'Failed to search properties by location',
         error: error.message
+      });
+    }
+  }
+
+/**
+   * GET /properties/search/address
+   * Search properties by address query
+   */
+  async searchPropertiesByAddress(req, res) {
+    try {
+      const { q: query, limit = 50 } = req.query;
+      if (!query || query.trim().length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Query parameter "q" is required and must be at least 2 characters',
+          properties: [],
+          count: 0
+        });
+      }
+
+      const result = await this.propertyService.searchPropertiesByAddress(query, {}, parseInt(limit));
+      res.json({
+        success: true,
+        properties: result.properties,
+        count: result.count,
+        location: result.location
+      });
+    } catch (error) {
+      console.error('Search properties by address error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search properties by address',
+        error: error.message,
+        properties: [],
+        count: 0
       });
     }
   }

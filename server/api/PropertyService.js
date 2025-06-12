@@ -174,6 +174,45 @@ class PropertyService {
   }
 
   /**
+   * Search properties by address query (zipcode, city, area, or address)
+   * @param {string} query - Search term (e.g., "Tokyo", "100-0001")
+   * @param {Object} filters - Optional filters (e.g., minPrice, maxPrice)
+   * @param {number} limit - Maximum number of results
+   * @returns {Promise<Array>} Array of properties
+   */
+  async searchPropertiesByAddress(query, filters = {}, limit = 50) {
+    try {
+      if (!query || query.trim().length < 2) {
+        return { properties: [], count: 0 };
+      }
+
+      // First, find matching locations
+      const locations = await this.searchLocations(query, 1); // Limit to 1 for best match
+      if (!locations || locations.length === 0) {
+        return { properties: [], count: 0 };
+      }
+
+      // Get properties for the top matching location
+      const topLocation = locations[0];
+      const properties = await this.getPropertiesByLocation(topLocation, filters);
+
+      return {
+        properties: properties.map(prop => new Property(prop).toJSON()),
+        count: properties.length,
+        location: {
+          type: topLocation.type,
+          value: topLocation.value,
+          display_text: topLocation.display_text
+        }
+      };
+    } catch (error) {
+      console.error('Error searching properties by address:', error);
+      throw new Error(`Failed to search properties by address: ${error.message}`);
+    }
+  }
+
+
+  /**
    * Get a single property by ID with enhanced data
    * @param {string} id - Property ID
    * @returns {Promise<Object|null>} Enhanced property data or null
@@ -966,17 +1005,14 @@ class PropertyService {
   async searchLocations(query, limit = 10) {
 
     if (!query || query.trim().length < 2) {
-
       return [];
-
+    }
+    if (!this.db) {
+      console.error('Database pool not initialized');
+      throw new Error('Database connection not available');
     }
 
- 
-
     const searchTerm = `%${query.trim()}%`;
-
-   
-
     try {
 
       const suggestions = await this.db.query(`
@@ -1149,13 +1185,13 @@ class PropertyService {
 
  
 
-      return suggestions.rows;
+      return suggestions.rows || [];
 
     } catch (error) {
 
       console.error('Error searching locations:', error);
 
-      throw new Error('Failed to search locations');
+      throw new Error(`Failed to search locations: ${error.message}`);
 
     }
 

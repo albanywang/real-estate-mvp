@@ -11,8 +11,8 @@ import rateLimit from 'express-rate-limit';
 
 // Import your custom modules
 import PropertyRepository from './data/PropertyRepository.js';
-import PropertyRoutes from './routes/PropertyRoutes.js';
 import PropertyService from './api/PropertyService.js';
+import PropertyRoutes from './routes/PropertyRoutes.js';
 
 // Initialize environment variables first
 dotenv.config();
@@ -29,13 +29,13 @@ class Server {
     this.app = express();
     this.port = process.env.PORT || 3001;
     this.env = process.env.NODE_ENV || 'development';
-    
+
     // Initialize repositories, services, and routes
     this.propertyRepo = null;
     this.propertyService = null;
-    this.propertyRoutes = null;
+    this.PropertyRoutes = null;
     this.server = null;
-    
+
     // Bind methods
     this.gracefulShutdown = this.gracefulShutdown.bind(this);
   }
@@ -46,13 +46,13 @@ class Server {
   async initializeRepositories() {
     try {
       console.log('🔧 Initializing repositories...');
-      
+
       // Initialize repository
       this.propertyRepo = new PropertyRepository();
-      
+
       // Test database connection
       await this.testDatabaseConnection();
-      
+
       console.log('✅ Repositories initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize repositories:', error);
@@ -66,19 +66,19 @@ class Server {
   async initializeServices() {
     try {
       console.log('🔧 Initializing services...');
-      
+
       if (!this.propertyRepo) {
         throw new Error('PropertyRepository must be initialized before services');
       }
-      
+
       // Initialize service with repository
       this.propertyService = new PropertyService(this.propertyRepo);
-      
+
       // Validate service is properly set up
       if (!this.propertyService.isRepositoryAvailable()) {
         throw new Error('PropertyService repository validation failed');
       }
-      
+
       console.log('✅ Services initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize services:', error);
@@ -143,7 +143,7 @@ class Server {
 
     // CORS configuration
     const corsOptions = {
-      origin: this.env === 'production' 
+      origin: this.env === 'production'
         ? process.env.ALLOWED_ORIGINS?.split(',') || false
         : true,
       credentials: true,
@@ -152,7 +152,7 @@ class Server {
     this.app.use(cors(corsOptions));
 
     // Body parsing
-    this.app.use(express.json({ 
+    this.app.use(express.json({
       limit: '10mb',
       verify: (req, res, buf) => {
         try {
@@ -166,10 +166,10 @@ class Server {
         }
       }
     }));
-    
-    this.app.use(express.urlencoded({ 
-      extended: true, 
-      limit: '10mb' 
+
+    this.app.use(express.urlencoded({
+      extended: true,
+      limit: '10mb'
     }));
 
     // Request logging in development
@@ -219,11 +219,11 @@ class Server {
           '.gif': 'image/gif',
           '.webp': 'image/webp'
         };
-        
+
         if (mimeTypes[ext]) {
           res.setHeader('Content-Type', mimeTypes[ext]);
         }
-        
+
         // Cache control
         if (this.env === 'production') {
           res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
@@ -236,7 +236,7 @@ class Server {
       this.app.use((req, res, next) => {
         if (req.path.includes('/images/')) {
           console.log('🖼️  Image request received:', req.path);
-          
+
           // Check if file exists asynchronously
           const imagePath = path.join(__dirname, 'public', req.path);
           fs.access(imagePath)
@@ -266,7 +266,7 @@ class Server {
 
     // Initialize routes with repository and service
     console.log('Initializing PropertyRoutes with service...');
-    this.propertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService);
+    this.PropertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService);
 
     // Health check endpoint
     this.app.get('/health', (req, res) => {
@@ -325,7 +325,7 @@ class Server {
     });
 
     // Property routes
-    this.app.use('/api/properties', this.propertyRoutes.getRouter());
+    this.app.use('/api/properties', this.PropertyRoutes.getRouter());
 
     console.log('✅ API routes setup complete');
   }
@@ -358,16 +358,16 @@ class Server {
 
       // Don't expose error details in production
       const isDevelopment = this.env === 'development';
-      
+
       res.status(error.status || 500).json({
         success: false,
         error: isDevelopment ? error.message : 'Internal server error',
         timestamp: new Date().toISOString(),
         path: req.originalUrl,
         method: req.method,
-        ...(isDevelopment && { 
+        ...(isDevelopment && {
           stack: error.stack,
-          details: error 
+          details: error
         })
       });
     });
@@ -382,7 +382,7 @@ class Server {
     // Handle shutdown signals
     process.on('SIGTERM', this.gracefulShutdown);
     process.on('SIGINT', this.gracefulShutdown);
-    
+
     // Handle uncaught exceptions
     process.on('uncaughtException', (error) => {
       console.error('Uncaught Exception:', error);
@@ -452,7 +452,7 @@ class Server {
         console.log(`📍 API available at http://localhost:${this.port}/api`);
         console.log(`📍 Health check at http://localhost:${this.port}/health`);
         console.log(`📍 Documentation at http://localhost:${this.port}/api/docs`);
-        
+
         if (this.env === 'development') {
           console.log('🔧 Development mode - Debug logging enabled');
           console.log('🖼️  Image debugging enabled for /images/ requests');

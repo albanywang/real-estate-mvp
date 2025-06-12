@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropertySearchComponent from './PropertySearchComponent';
 import japanesePhrases from '../utils/japanesePhrases';
 
@@ -6,36 +6,32 @@ const TopFiltersPanel = ({
   filters, 
   setFilters, 
   applyFilters,
-  // Location search props
   onLocationSelect,
   onClearLocationSearch,
   selectedLocation,
   searchMode = 'all',
-  // Options for dropdowns
   priceOptions = [],
   areaOptions = [],
   propertyStatusOptions = [],
   propertyTypeOptions = [],
   isLoading = false,
-  // Statistics for showing ranges
   priceRange = { min: 0, max: 100000000 },
-  areaRange = { min: 0, max: 500 }
+  areaRange = { min: 0, max: 500 },
+  onAddressSearch // No default value
 }) => {
-
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Handle filter changes
+  // Debug prop to ensure onAddressSearch is received
+  useEffect(() => {
+    console.log('TopFiltersPanel props:', { onAddressSearch, type: typeof onAddressSearch });
+  }, [onAddressSearch]);
+
   const handleFilterChange = useCallback((name, value) => {
     console.log(`🔍 Filter changed: ${name} = ${value}`);
-    const newFilters = {
-      ...filters,
-      [name]: value
-    };
+    const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
-    // Removed applyFilters call here; handled by useEffect in App.jsx
   }, [filters, setFilters]);
 
-  // Clear all filters except location
   const clearAllFilters = useCallback(() => {
     console.log('🧹 Clearing all filters');
     const clearedFilters = {
@@ -56,15 +52,12 @@ const TopFiltersPanel = ({
       hasAutoLock: false
     };
     setFilters(clearedFilters);
-    // Removed applyFilters call here; handled by useEffect in App.jsx
   }, [setFilters]);
 
-  // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(value => 
     value !== '' && value !== false
   );
 
-  // Format price display
   const formatPrice = (price) => {
     if (!price) return '';
     return `¥${parseInt(price).toLocaleString()}万`;
@@ -76,7 +69,6 @@ const TopFiltersPanel = ({
       borderBottom: '1px solid #e5e7eb',
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
     }}>
-      {/* Main Filter Bar */}
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
@@ -88,17 +80,14 @@ const TopFiltersPanel = ({
           gap: '1rem',
           flexWrap: 'wrap'
         }}>
-          
-          {/* Search Component - Takes up most space */}
           <div style={{ flex: '1 1 400px', minWidth: '300px' }}>
             <PropertySearchComponent
               onLocationSelect={onLocationSelect}
               onClearSearch={onClearLocationSearch}
               selectedLocation={selectedLocation}
+              onAddressSearch={onAddressSearch} // Line 38: Ensure this is correct
             />
           </div>
-
-          {/* Property Type Dropdown */}
           <div style={{ flex: '0 0 auto', minWidth: '150px' }}>
             <select
               value={filters.propertyType || ''}
@@ -126,8 +115,6 @@ const TopFiltersPanel = ({
               ))}
             </select>
           </div>
-
-          {/* Property Status Dropdown */}
           <div style={{ flex: '0 0 auto', minWidth: '140px' }}>
             <select
               value={filters.propertyStatus || ''}
@@ -155,8 +142,6 @@ const TopFiltersPanel = ({
               ))}
             </select>
           </div>
-
-          {/* Min Price Dropdown */}
           <div style={{ flex: '0 0 auto', minWidth: '120px' }}>
             <select
               value={filters.minPrice || ''}
@@ -185,8 +170,6 @@ const TopFiltersPanel = ({
               ))}
             </select>
           </div>
-
-          {/* Area Size Dropdown */}
           <div style={{ flex: '0 0 auto', minWidth: '110px' }}>
             <select
               value={filters.minArea || ''}
@@ -215,8 +198,6 @@ const TopFiltersPanel = ({
               ))}
             </select>
           </div>
-
-          {/* Clear Filters Button */}
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
@@ -235,8 +216,6 @@ const TopFiltersPanel = ({
             </button>
           )}
         </div>
-
-        {/* Quick Filter Tags */}
         {(selectedLocation || hasActiveFilters) && (
           <div style={{
             marginTop: '0.75rem',
@@ -246,7 +225,6 @@ const TopFiltersPanel = ({
             flexWrap: 'wrap'
           }}>
             <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Active filters:</span>
-            
             {selectedLocation && (
               <span style={{
                 background: '#dbeafe',
@@ -274,7 +252,6 @@ const TopFiltersPanel = ({
                 </button>
               </span>
             )}
-
             {filters.propertyType && (
               <span style={{
                 background: '#f3f4f6',
@@ -287,7 +264,6 @@ const TopFiltersPanel = ({
                 Type: {propertyTypeOptions.find(opt => opt.value === filters.propertyType)?.label || 'Unknown Type'}
               </span>
             )}
-
             {filters.propertyStatus && (
               <span style={{
                 background: '#f3f4f6',
@@ -300,7 +276,6 @@ const TopFiltersPanel = ({
                 Status: {propertyStatusOptions.find(opt => opt.value === filters.propertyStatus)?.label || 'Unknown Status'}
               </span>
             )}
-
             {filters.minPrice && (
               <span style={{
                 background: '#fef3c7',
@@ -313,7 +288,6 @@ const TopFiltersPanel = ({
                 Min: {formatPrice(filters.minPrice)}
               </span>
             )}
-
             {filters.minArea && (
               <span style={{
                 background: '#ecfdf5',
@@ -329,8 +303,6 @@ const TopFiltersPanel = ({
           </div>
         )}
       </div>
-
-      {/* Advanced Filters Panel (Collapsible) */}
       {showAdvancedFilters && (
         <div style={{
           borderTop: '1px solid #e5e7eb',
@@ -346,8 +318,6 @@ const TopFiltersPanel = ({
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '1rem'
             }}>
-              
-              {/* Layout */}
               <div>
                 <label style={{
                   display: 'block',
@@ -382,8 +352,6 @@ const TopFiltersPanel = ({
                   <option value="4LDK">4LDK+</option>
                 </select>
               </div>
-
-              {/* Year Built Range */}
               <div>
                 <label style={{
                   display: 'block',
@@ -423,8 +391,6 @@ const TopFiltersPanel = ({
                   />
                 </div>
               </div>
-
-              {/* Features */}
               <div>
                 <label style={{
                   display: 'block',

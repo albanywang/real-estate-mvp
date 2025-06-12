@@ -183,6 +183,64 @@ const App = () => {
     loadProperties();
   }, []);
 
+  // Add this function to your App.js
+  const handleAddressSearch = async (searchTerm) => {
+    console.log('🔍 Searching database for address:', searchTerm);
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Call your API to search by address/area code
+      // Replace this URL with your actual API endpoint
+      const response = await fetch(`/api/properties/search/address?q=${encodeURIComponent(searchTerm)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Address search results:', result);
+      
+      const searchProperties = Array.isArray(result.properties) ? result.properties.map(p => ({
+        ...p,
+        propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+      })) : [];
+      
+      // Update state with search results
+      setLocationProperties(searchProperties);
+      setSearchMode('location');
+      
+      // Set selected location info
+      setSelectedLocation({
+        display_text: searchTerm,
+        type: 'address_search',
+        property_count: searchProperties.length
+      });
+      
+      // Apply current filters to search results
+      applyFiltersToProperties(searchProperties);
+      
+      console.log(`📍 Found ${searchProperties.length} properties for "${searchTerm}"`);
+      
+    } catch (error) {
+      console.error('❌ Address search failed:', error);
+      setError(`Search failed: ${error.message}`);
+      
+      // Clear search results on error
+      setLocationProperties([]);
+      setFilteredProperties([]);
+      
+    } finally {
+      setIsLoading(false);
+    }
+  };  
+
   // Handle location selection from PropertySearchComponent
   const handleLocationSelect = (location, locationBasedProperties) => {
     console.log('📍 Location selected:', location);
@@ -567,6 +625,7 @@ const App = () => {
         isLoading={isLoading}
         priceRange={{ min: 0, max: 50000 }}
         areaRange={{ min: 20, max: 300 }}
+        onAddressSearch={handleAddressSearch}
       />
 
       {/* Main Content Area */}
