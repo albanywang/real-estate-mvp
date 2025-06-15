@@ -26,7 +26,55 @@ const App = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationProperties, setLocationProperties] = useState([]);
   const [searchMode, setSearchMode] = useState('all'); // 'all' or 'location'
-  
+  const [sortOption, setSortOption] = useState('createdAt-desc');
+
+  const sortOptions = [
+    { value: 'createdAt-desc', label: '登録: 新しい順' },
+    { value: 'createdAt-asc', label: '登録: 古い順' },
+    { value: 'price-asc', label: '低価格から' },
+    { value: 'price-desc', label: '高価格から' },
+    { value: 'area-asc', label: 'エリア小から' },
+    { value: 'area-desc', label: 'エリア大から' },
+    { value: 'yearBuilt-asc', label: '建築年: 古い順' },
+    { value: 'yearBuilt-desc', label: '建築年: 新い順' }
+  ];
+
+  const sortProperties = (props) => {
+    if (!props || !Array.isArray(props)) return props;
+    
+    const [field, direction] = sortOption.split('-');
+    const sorted = [...props];
+    
+    sorted.sort((a, b) => {
+      let valueA, valueB;
+      
+      switch (field) {
+        case 'price':
+          valueA = parseFloat(a.price) || 0;
+          valueB = parseFloat(b.price) || 0;
+          break;
+        case 'area':
+          valueA = parseFloat(a.area) || 0;
+          valueB = parseFloat(b.area) || 0;
+          break;
+        case 'yearBuilt':
+          valueA = parseInt(a.yearBuilt?.replace(/[^0-9]/g, '') || '0');
+          valueB = parseInt(b.yearBuilt?.replace(/[^0-9]/g, '') || '0');
+          break;
+        case 'createdAt':
+          valueA = new Date(a.createdAt).getTime();
+          valueB = new Date(b.createdAt).getTime();
+          break;
+        default:
+          return 0;
+      }
+      
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    });
+    
+    return sorted;
+  };
+
   const [filters, setFilters] = useState({
     propertyType: '',
     propertyStatus: '',
@@ -376,6 +424,8 @@ const App = () => {
       filtered = filtered.filter(p => p.facilitiesServices && p.facilitiesServices.includes('オートロック'));
     }
     
+    // Apply sorting
+    filtered = sortProperties(filtered);
     console.log(`🔍 Filtered ${propertiesToFilter.length} properties down to ${filtered.length}`);
     
     // Log the propertyType of filtered properties for debugging
@@ -394,7 +444,7 @@ const App = () => {
   useEffect(() => {
     console.log('🔍 Filters updated, applying filters:', filters);
     applyFilters();
-  }, [filters]);
+  }, [filters, sortOption]);
 
   // Update filters when location search results change
   useEffect(() => {
@@ -813,19 +863,27 @@ const App = () => {
                     fontWeight: '600',
                     color: '#1f2937'
                   }}>
-                    {filteredProperties.length} Properties Found
+                    {filteredProperties.length} 物件
                   </p>
-                  <button style={{
-                    background: 'none',
-                    border: '1px solid #d1d5db',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    color: '#6b7280'
-                  }}>
-                    Sort ▼
-                  </button>
+                <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    style={{
+                      padding: '0.25rem 0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                      background: 'white',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               

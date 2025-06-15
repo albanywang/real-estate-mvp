@@ -37,7 +37,7 @@ export const formatTraditionalPrice = (price) => {
  
   if (price >= 100000000) {
     const okuValue = price / 100000000;
-    return `${okuValue.toFixed(2)}億円`;
+    return `${okuValue.toFixed(2)}億`;
   } else {
     const man = Math.floor(price / 10000);
     return `${man.toLocaleString()}万`;

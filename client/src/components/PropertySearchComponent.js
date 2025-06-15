@@ -8,14 +8,13 @@ const PropertySearchComponent = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [popularLocations, setPopularLocations] = useState([]);
   const [fetchError, setFetchError] = useState(null);
   const debounceRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  // Initialize search query from selected location
   useEffect(() => {
     if (selectedLocation) {
       setSearchQuery(selectedLocation.display_text);
@@ -24,7 +23,6 @@ const PropertySearchComponent = ({
     }
   }, [selectedLocation]);
 
-  // Fetch popular locations on component mount
   useEffect(() => {
     fetchPopularLocations();
   }, []);
@@ -41,7 +39,6 @@ const PropertySearchComponent = ({
     }
   };
 
-  // Debounced search function
   const searchLocations = async (query) => {
     if (!query || query.trim().length < 2) {
       setSuggestions([]);
@@ -82,50 +79,23 @@ const PropertySearchComponent = ({
     }
   };
 
-  // Handle input change with debouncing
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-
-    // Clear previous debounce timer
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    // Set new debounce timer
-    debounceRef.current = setTimeout(() => {
-      searchLocations(value);
-    }, 300);
-  };
-
-  // Handle suggestion selection
   const handleSuggestionSelect = async (suggestion) => {
     setSearchQuery(suggestion.display_text);
     setShowDropdown(false);
     setSuggestions([]);
-
-    // Fetch properties for selected location
     await fetchPropertiesByLocation(suggestion);
   };
 
-  // Fetch properties based on selected location
   const fetchPropertiesByLocation = async (location, filters = {}) => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/properties/search/by-location', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          location: location,
-          filters: filters
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location, filters })
       });
-
       const data = await response.json();
       if (data.success) {
-        // Call the parent component's callback with location and properties
         onLocationSelect(location, data.data);
       }
     } catch (error) {
@@ -135,60 +105,37 @@ const PropertySearchComponent = ({
     }
   };
 
-  // NEW: Handle address search (when user presses Enter or clicks search)
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    
-    if (searchQuery.trim() && typeof onAddressSearch === 'function') {
-      console.log('🔍 Performing address search:', searchQuery.trim());
-      setShowDropdown(false);
-      try {
-        await onAddressSearch(searchQuery.trim());
-      } catch (error) {
-        console.error('❌ Error in address search:', error);
-      }
+    if (searchQuery.trim()) {
+      console.log('🔍 Performing location search:', searchQuery.trim());
+      await searchLocations(searchQuery.trim());
     } else {
-      console.warn('⚠️ onAddressSearch is not a function or search query is empty');
+      console.warn('⚠️ Search query is empty');
     }
   };
 
-  // Update the handleKeyPress function to use the new name
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit(e);
-    }
+    if (e.key === 'Enter') handleSearchSubmit(e);
   };
 
-  // Handle clearing the search
   const handleClearSearch = () => {
     setSearchQuery('');
-    setSelectedLocation(null);
     setSuggestions([]);
     setShowDropdown(false);
-    
-    // Call parent component's clear callback
-    if (onClearSearch) {
-      onClearSearch();
-    }
+    if (onClearSearch) onClearSearch();
   };
 
-  // Get icon for suggestion type
   const getSuggestionIcon = (type) => {
     switch (type) {
-      case 'zipcode':
-        return <span style={{ fontSize: '16px', color: '#2196f3' }}>📮</span>;
-      case 'city':
-        return <span style={{ fontSize: '16px', color: '#4caf50' }}>🏙️</span>;
-      case 'area':
-        return <span style={{ fontSize: '16px', color: '#9c27b0' }}>📍</span>;
-      case 'address':
-        return <span style={{ fontSize: '16px', color: '#ff9800' }}>🧭</span>;
-      default:
-        return <span style={{ fontSize: '16px', color: '#757575' }}>📍</span>;
+      case 'zipcode': return <span style={{ fontSize: '16px', color: '#2196f3' }}>📮</span>;
+      case 'city': return <span style={{ fontSize: '16px', color: '#4caf50' }}>🏙️</span>;
+      case 'area': return <span style={{ fontSize: '16px', color: '#9c27b0' }}>📍</span>;
+      case 'address': return <span style={{ fontSize: '16px', color: '#ff9800' }}>🧭</span>;
+      default: return <span style={{ fontSize: '16px', color: '#757575' }}>📍</span>;
     }
   };
 
-  // Handle input focus
   const handleInputFocus = () => {
     if (!searchQuery && popularLocations.length > 0) {
       setSuggestions(popularLocations);
@@ -198,23 +145,18 @@ const PropertySearchComponent = ({
     }
   };
 
-  // Handle clicking outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Search Form with Submit */}
       <form onSubmit={handleSearchSubmit}>
         <div className="relative" ref={searchInputRef}>
           <div className="relative">
@@ -225,21 +167,24 @@ const PropertySearchComponent = ({
               transform: 'translateY(-50%)', 
               fontSize: '20px',
               color: '#9ca3af'
-            }}>
-              🔍
+            }}>              
             </span>
             <input
               type="text"
               value={searchQuery}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (debounceRef.current) clearTimeout(debounceRef.current);
+                debounceRef.current = setTimeout(() => searchLocations(e.target.value), 300);
+              }}
               onFocus={handleInputFocus}
               onKeyPress={handleKeyPress}
-              placeholder="Search by city, postal code, or address..."
-              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
+              placeholder="市区町村、郵便番号、または住所で検索..."
+              className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
               style={{
                 width: '100%',
-                paddingLeft: '2.5rem',
-                paddingRight: searchQuery || selectedLocation ? '6rem' : '3rem', // Extra space for search button
+                paddingLeft: '3rem',
+                paddingRight: '2.5rem',
                 padding: '0.75rem',
                 border: '1px solid #d1d5db',
                 borderRadius: '0.5rem',
@@ -247,37 +192,28 @@ const PropertySearchComponent = ({
                 outline: 'none'
               }}
             />
-            
-            {/* Search Button */}
             <button
               type="submit"
               style={{
                 position: 'absolute',
-                right: (searchQuery || selectedLocation) ? '2.5rem' : '12px',
+                right: '8px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                padding: '6px 12px',
-                background: '#3b82f6',
-                color: 'white',
+                background: 'none',
                 border: 'none',
-                borderRadius: '0.375rem',
                 cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500'
+                fontSize: '18px',
+                color: '#9ca3af'
               }}
-              title="Search database"
-            >
-              Search
-            </button>
-            
-            {/* Clear button */}
+              title="Search"
+            >🔍</button>
             {(searchQuery || selectedLocation) && (
               <button
                 type="button"
                 onClick={handleClearSearch}
                 style={{
                   position: 'absolute',
-                  right: '12px',
+                  right: '40px',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   padding: '4px',
@@ -292,16 +228,12 @@ const PropertySearchComponent = ({
                 onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
                 onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                 title="Clear search"
-              >
-                ✕
-              </button>
+              >✕</button>
             )}
-            
-            {/* Loading spinner */}
             {isLoading && (
               <div style={{
                 position: 'absolute',
-                right: (searchQuery || selectedLocation) ? '7rem' : '4rem',
+                right: '68px',
                 top: '50%',
                 transform: 'translateY(-50%)'
               }}>
@@ -316,8 +248,6 @@ const PropertySearchComponent = ({
               </div>
             )}
           </div>
-
-          {/* Dropdown Suggestions */}
           {showDropdown && (suggestions.length > 0 || popularLocations.length > 0) && (
             <div style={{
               position: 'absolute',
@@ -336,11 +266,10 @@ const PropertySearchComponent = ({
               {!searchQuery && popularLocations.length > 0 && (
                 <div style={{ padding: '0.75rem', borderBottom: '1px solid #f3f4f6' }}>
                   <p style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', margin: '0 0 0.5rem 0' }}>
-                    Popular Locations
+                    人気の物件
                   </p>
                 </div>
               )}
-              
               {(searchQuery ? suggestions : popularLocations).map((suggestion, index) => (
                 <button
                   key={`${suggestion.type}-${suggestion.value}-${index}`}
@@ -374,51 +303,42 @@ const PropertySearchComponent = ({
               ))}
             </div>
           )}
+          {fetchError && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: '0',
+              background: '#fee2e2',
+              color: '#dc2626',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.375rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              marginTop: '0.5rem',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              maxWidth: '300px'
+            }}>
+              <span>{fetchError}</span>
+              <button
+                onClick={() => setFetchError(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  color: '#dc2626',
+                  padding: '0 0.25rem'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       </form>
-
-      {/* Selected Location Info */}
-      {selectedLocation && (
-        <div style={{
-          marginTop: '0.75rem',
-          padding: '0.75rem',
-          background: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '0.5rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {getSuggestionIcon(selectedLocation.type)}
-              <span style={{ fontWeight: '500', color: '#1e40af' }}>
-                {selectedLocation.display_text}
-              </span>
-              <span style={{ fontSize: '0.875rem', color: '#2563eb' }}>
-                ({selectedLocation.property_count || 0} properties)
-              </span>
-            </div>
-            <button
-              onClick={handleClearSearch}
-              style={{
-                color: '#2563eb',
-                background: 'none',
-                border: 'none',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                padding: '0.25rem 0.5rem'
-              }}
-              onMouseEnter={(e) => e.target.style.color = '#1d4ed8'}
-              onMouseLeave={(e) => e.target.style.color = '#2563eb'}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
 
       <style jsx>{`
         @keyframes spin {

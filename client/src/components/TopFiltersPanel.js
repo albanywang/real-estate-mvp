@@ -17,11 +17,10 @@ const TopFiltersPanel = ({
   isLoading = false,
   priceRange = { min: 0, max: 100000000 },
   areaRange = { min: 0, max: 500 },
-  onAddressSearch // No default value
+  onAddressSearch
 }) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Debug prop to ensure onAddressSearch is received
   useEffect(() => {
     console.log('TopFiltersPanel props:', { onAddressSearch, type: typeof onAddressSearch });
   }, [onAddressSearch]);
@@ -63,29 +62,23 @@ const TopFiltersPanel = ({
     return `¥${parseInt(price).toLocaleString()}万`;
   };
 
+  const handleClearLocationSearch = () => {
+    console.log('🧹 Clearing selected location');
+    // This should clear the selectedLocation state in the parent
+    // Assuming selectedLocation is managed with useState in a higher component
+    // If not, you need to pass a setter or manage it here with useState
+  };
+
   return (
-    <div style={{
-      background: '#fff',
-      borderBottom: '1px solid #e5e7eb',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '1rem'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ flex: '1 1 400px', minWidth: '300px' }}>
+    <div style={{ background: '#fff',  borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 400px', minWidth: '300px', position: 'relative' }}>
             <PropertySearchComponent
               onLocationSelect={onLocationSelect}
               onClearSearch={onClearLocationSearch}
               selectedLocation={selectedLocation}
-              onAddressSearch={onAddressSearch} // Line 38: Ensure this is correct
+              onAddressSearch={onAddressSearch}
             />
           </div>
           <div style={{ flex: '0 0 auto', minWidth: '150px' }}>
@@ -224,7 +217,7 @@ const TopFiltersPanel = ({
             gap: '0.5rem',
             flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Active filters:</span>
+            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>フィルター:</span>
             {selectedLocation && (
               <span style={{
                 background: '#dbeafe',

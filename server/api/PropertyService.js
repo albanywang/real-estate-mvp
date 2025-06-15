@@ -15,6 +15,8 @@ import {
   PropertyEnums
 } from '../models/index.js';
 
+import { Pool } from 'pg';
+
 class PropertyService {
   /**
    * Create PropertyService instance
@@ -28,6 +30,19 @@ class PropertyService {
     // Explicitly set the repository property
     this.propertyRepo = propertyRepository;
     
+    // Initialize database pool
+    this.db = this.propertyRepo.getPool();
+    if (!this.db) {
+      console.warn('PropertyRepository.getPool() returned null, creating new Pool');
+      this.db = new Pool({
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        password: process.env.DB_PASSWORD,
+        port: process.env.DB_PORT || 5432,
+      });
+    }
+
     // Bind methods to ensure 'this' context
     this.getAllProperties = this.getAllProperties.bind(this);
     this.searchProperties = this.searchProperties.bind(this);
@@ -38,6 +53,23 @@ class PropertyService {
     this.getPropertyStatistics = this.getPropertyStatistics.bind(this);
     this.getAvailableOptions = this.getAvailableOptions.bind(this);
     this.filterProperties = this.filterProperties.bind(this);
+    this.searchLocations = this.searchLocations.bind(this);
+    this.getPropertiesByLocation = this.getPropertiesByLocation.bind(this);
+    this.getPopularLocations = this.getPopularLocations.bind(this);
+
+    // Test database connection
+    this.testConnection();
+
+  }
+
+  async testConnection() {
+    try {
+      const result = await this.db.query('SELECT NOW()');
+      console.log('✅ PropertyService DB connection successful:', result.rows[0]);
+    } catch (error) {
+      console.error('❌ PropertyService DB connection failed:', error);
+      throw error;
+    }
   }
 
   /**
@@ -1003,7 +1035,7 @@ class PropertyService {
    */
 
   async searchLocations(query, limit = 10) {
-
+    console.log('searchLocations called with:', { query, limit });
     if (!query || query.trim().length < 2) {
       return [];
     }
@@ -1206,7 +1238,7 @@ class PropertyService {
    */
 
   async getPropertiesByLocation(locationData, filters = {}) {
-
+    console.log('getPropertiesByLocation called with:', { locationData, filters });
     const { type, value, area_level_1, area_level_2, area_level_3, area_level_4, zipcode } = locationData;
 
    
@@ -1339,54 +1371,53 @@ class PropertyService {
 
       const result = await this.db.query(`
 
-        SELECT
-
+      SELECT
           id,
-
           title,
-
-          price,
-
-          pricePerSquareMeter,
-
+          price::numeric as price,
+          pricepersquaremeter::numeric as "pricePerSquareMeter",
           address,
-
           layout,
-
-          area,
-
-          floorInfo,
-
+          area::numeric as area,
+          floorinfo as "floorInfo",
           structure,
-
-          propertyType,
-
-          yearBuilt,
-
-          images,
-
-          zipcode,
-
-          area_level_1,
-
-          area_level_2,
-
-          area_level_3,
-
-          area_level_4,
-
-          ST_X(location) as longitude,
-
-          ST_Y(location) as latitude,
-
+          managementfee::numeric as "managementFee",
+          areaofuse as "areaOfUse",
           transportation,
-
-          balconyArea,
-
-          managementFee,
-
-          createdAt
-
+          ST_AsGeoJSON(location)::jsonb AS location,
+          propertytype as "propertyType",
+          yearbuilt as "yearBuilt",
+          balconyarea::numeric as "balconyArea",
+          totalunits as "totalUnits",
+          repairreservefund::numeric as "repairReserveFund",
+          landleasefee::numeric as "landLeaseFee",
+          rightfee as "rightFee",
+          depositguarantee::numeric as "depositGuarantee",
+          maintenancefees as "maintenanceFees",
+          otherfees::numeric as "otherFees",
+          bicycleparking as "bicycleParking",
+          bikestorage as "bikeStorage",
+          sitearea as "siteArea",
+          pets,
+          landrights as "landRights",
+          managementform as "managementForm",
+          landlawnotification as "landLawNotification",
+          currentsituation as "currentSituation",
+          extraditionpossibledate as "extraditionPossibleDate",
+          transactionmode as "transactionMode",
+          propertynumber as "propertyNumber",
+          informationreleasedate as "informationReleaseDate",
+          nextscheduledupdatedate as "nextScheduledUpdateDate",
+          remarks,
+          evaluationcertificate as "evaluationCertificate",
+          parking,
+          kitchen,
+          bathtoilet as "bathToilet",
+          facilitiesservices as "facilitiesServices",
+          others,
+          images,
+          createdat as "createdAt",
+          updatedat as "updatedAt"
         FROM properties
 
         WHERE ${whereConditions.join(' AND ')}
@@ -1397,9 +1428,13 @@ class PropertyService {
 
       `, queryParams);
 
- 
+      // Enrich properties with business logic
+      const enrichedProperties = result.rows.map(propData => {
+        const property = new Property(propData);
+        return this.enrichPropertyData(property).toJSON();
+      });
 
-      return result.rows;
+      return enrichedProperties;
 
     } catch (error) {
 
@@ -1420,7 +1455,7 @@ class PropertyService {
    */
 
   async getPopularLocations(limit = 20) {
-
+    console.log('getPopularLocations called with:', { limit });
     try {
 
       const result = await this.db.query(`

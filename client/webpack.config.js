@@ -47,10 +47,16 @@ module.exports = {
     new Dotenv()
   ],
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
-    hot: true,
-    port: 3000
+    static: path.join(__dirname, 'public'),
+    port: 3000,
+    open: true,
+    historyApiFallback: true, // For React Router
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 };
