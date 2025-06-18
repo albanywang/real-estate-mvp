@@ -95,19 +95,21 @@ const App = () => {
 
   // Price range options (in 万円)
   const priceOptions = [
-    { value: '', label: 'Any Price' },
-    { value: '1000', label: '¥1,000万+' },
-    { value: '2000', label: '¥2,000万+' },
-    { value: '3000', label: '¥3,000万+' },
-    { value: '5000', label: '¥5,000万+' },
-    { value: '7000', label: '¥7,000万+' },
-    { value: '10000', label: '¥1億+' }
+    { value: '', label: '価格帯' },
+    { value: 'under1000', label: '1,000万-' },
+    { value: '1000plus', label: '1,000万+' },
+    { value: '2000', label: '2,000万+' },
+    { value: '3000', label: '3,000万+' },
+    { value: '5000', label: '5,000万+' },
+    { value: '7000', label: '7,000万+' },
+    { value: '10000', label: '1億+' }
   ];
 
   // Area options (in ㎡)
   const areaOptions = [
+    { value: '', label: '専有面積' },
     { value: 'under30', label: '30㎡-' },
-    { value: '30', label: '30㎡+' },    
+    { value: '30plus', label: '30㎡+' },    
     { value: '50', label: '50㎡+' },
     { value: '70', label: '70㎡+' },
     { value: '100', label: '100㎡+' },

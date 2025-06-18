@@ -20,6 +20,9 @@ const TopFiltersPanel = ({
   onAddressSearch
 }) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  // Add state for selected area option
+  const [selectedAreaOption, setSelectedAreaOption] = useState('');
+  const [selectedPriceOption, setSelectedPriceOption] = useState('');
 
   useEffect(() => {
     console.log('TopFiltersPanel props:', { onAddressSearch, type: typeof onAddressSearch });
@@ -29,6 +32,36 @@ const TopFiltersPanel = ({
     console.log(`🔍 Filter changed: ${name} = ${value}`);
     const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
+  }, [filters, setFilters]);
+
+  // Add new handleAreaChange function
+  const handleAreaChange = useCallback((value) => {
+    console.log(`🔍 Area filter changed: ${value}`);
+    const newFilters = { ...filters, minArea: '', maxArea: '' };
+    if (value === 'under30') {
+      newFilters.maxArea = '30';
+    } else if (value === '30plus') {
+      newFilters.minArea = '30';
+    } else if (value) {
+      newFilters.minArea = value;
+    }
+    setFilters(newFilters);
+    setSelectedAreaOption(value); // Track selected option
+  }, [filters, setFilters]);
+  
+  // Add handlePriceChange function
+  const handlePriceChange = useCallback((value) => {
+    console.log(`🔍 Price filter changed: ${value}`);
+    const newFilters = { ...filters, minPrice: '', maxPrice: '' };
+    if (value === 'under1000') {
+      newFilters.maxPrice = '1000';
+    } else if (value === '1000plus') {
+      newFilters.minPrice = '1000';
+    } else if (value) {
+      newFilters.minPrice = value;
+    }
+    setFilters(newFilters);
+    setSelectedPriceOption(value);
   }, [filters, setFilters]);
 
   const clearAllFilters = useCallback(() => {
@@ -51,6 +84,8 @@ const TopFiltersPanel = ({
       hasAutoLock: false
     };
     setFilters(clearedFilters);
+    setSelectedAreaOption(''); 
+    setSelectedPriceOption('');
   }, [setFilters]);
 
   const hasActiveFilters = Object.values(filters).some(value => 
@@ -59,7 +94,7 @@ const TopFiltersPanel = ({
 
   const formatPrice = (price) => {
     if (!price) return '';
-    return `¥${parseInt(price).toLocaleString()}万`;
+    return `${parseInt(price).toLocaleString()}万`;
   };
 
   const handleClearLocationSearch = () => {
@@ -137,8 +172,8 @@ const TopFiltersPanel = ({
           </div>
           <div style={{ flex: '0 0 auto', minWidth: '120px' }}>
             <select
-              value={filters.minPrice || ''}
-              onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+              value={selectedPriceOption}
+              onChange={(e) => handlePriceChange( e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -155,8 +190,7 @@ const TopFiltersPanel = ({
                 paddingRight: '2.5rem'
               }}
             >
-              <option value="">{japanesePhrases.priceRange}</option>
-              {priceOptions.slice(1).map(option => (
+              {priceOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -165,8 +199,8 @@ const TopFiltersPanel = ({
           </div>
           <div style={{ flex: '0 0 auto', minWidth: '110px' }}>
             <select
-              value={filters.minArea || ''}
-              onChange={(e) => handleFilterChange('minArea', e.target.value)}
+              value={selectedAreaOption}
+              onChange={(e) => handleAreaChange(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -182,8 +216,7 @@ const TopFiltersPanel = ({
                 backgroundSize: '1.5em 1.5em',
                 paddingRight: '2.5rem'
               }}
-            >
-              <option value="">{japanesePhrases.area}</option>              
+            >          
               {areaOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -278,9 +311,21 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                Min: {formatPrice(filters.minPrice)}
+                {formatPrice(filters.minPrice)} 以上
               </span>
             )}
+            {filters.maxPrice && (
+              <span style={{
+                background: '#fef3c7',
+                color: '#92400e',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '1rem',
+                fontSize: '0.75rem',
+                fontWeight: '500'
+              }}>
+                {formatPrice(filters.maxPrice)} まで
+              </span>
+            )}            
             {filters.minArea && (
               <span style={{
                 background: '#ecfdf5',
@@ -290,9 +335,21 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                Area: {areaOptions.find(opt => opt.value === filters.minArea)?.label || (filters.minArea === 'under30' ? '30㎡-' : `${filters.minArea}㎡+`)}
+                {areaOptions.find(opt => opt.value === filters.minArea)?.label || (filters.minArea === 'under30' ? '30㎡-' : `${filters.minArea}㎡+`)} 以上
               </span>
             )}
+            {filters.maxArea && (
+              <span style={{
+                background: '#ecfdf5',
+                color: '#065f46',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '1rem',
+                fontSize: '0.75rem',
+                fontWeight: '500'
+              }}>
+                {filters.maxArea}㎡ まで
+              </span>
+            )}            
           </div>
         )}
       </div>
