@@ -12,6 +12,9 @@
         "lint:fix": "eslint src/**/*.{js,jsx} --fix",
         "format": "prettier --write src/**/*.{js,jsx,css}"
     },
+    "engines": {
+    "node": ">=22.16.0"
+    },    
     "dependencies": {
         "@craco/craco": "^7.1.0",
         "axios": "^1.6.2",
