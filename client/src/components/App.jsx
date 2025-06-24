@@ -129,14 +129,15 @@ const App = () => {
     { value: '', label: '物件種別' },
     { value: '中古マンション', label: '中古マンション' },
     { value: '新築マンション', label: '新築マンション' },
-    { value: '中古一戸建て', label: '中古一戸建て' },
-    { value: '新築一戸建て', label: '新築一戸建て' }
+    { value: '中古戸建', label: '中古戸建' },
+    { value: '新築戸建', label: '新築戸建' },
+    { value: 'ビル', label: 'ビル' }
   ];
 
   // Normalize API data propertyType values
   const propertyTypeMapping = {
-    '新築一戸建': '新築一戸建て',
-    '中古一戸建': '中古一戸建て',
+    '新築一戸建': '新築戸建',
+    '中古一戸建': '中古戸建',
     '新築マンション': '新築マンション',
     '中古マンション': '中古マンション'
   };
