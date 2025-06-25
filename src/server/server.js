@@ -18,6 +18,12 @@ import PropertyRoutes from './routes/PropertyRoutes.js';
 // Initialize environment variables first
 dotenv.config();
 
+// Create Supabase client - ADD THIS HERE
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
 // Get dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -267,7 +273,7 @@ class Server {
 
     // Initialize routes with repository and service
     console.log('Initializing PropertyRoutes with service...');
-    this.PropertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService);
+    this.PropertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService, supabase);
 
     // Health check endpoint
     this.app.get('/health', (req, res) => {

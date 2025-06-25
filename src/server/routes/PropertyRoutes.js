@@ -44,13 +44,14 @@ function formatDateToString(date) {
  * PropertyRoutes - Handles all property-related HTTP routes
  */
 class PropertyRoutes {
-  constructor(propertyRepository, propertyService = null) {
+  constructor(propertyRepository, propertyService = null, supabaseClient = null) {
     // Validate repository
     if (!propertyRepository) {
       throw new Error('PropertyRepository is required');
     }
 
     this.propertyRepo = propertyRepository;
+    this.supabase = supabaseClient;
     
     // Initialize service - create new one if not provided
     if (propertyService) {
@@ -287,87 +288,62 @@ class PropertyRoutes {
    * GET /properties/search/suggestions/:type
    * Get specific type suggestions (cities, areas, zipcodes)
    */
+
   async getLocationSuggestions(req, res) {
     try {
       const { type } = req.params;
       const { limit = 50 } = req.query;
-    
-      let query = '';
-      let params = [parseInt(limit)];
-    
+
+      let data;
+      
       switch (type) {
         case 'cities':
-          query = `
-            SELECT DISTINCT
-              'city' as type,
-              area_level_4 as value,
-              CONCAT(area_level_4, ', ', area_level_2) as display_text,
-              area_level_1,
-              area_level_2,
-              area_level_3,
-              area_level_4,
-              COUNT(*) as property_count
-            FROM properties
-            WHERE status = 'for sale' AND area_level_4 IS NOT NULL
-            GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
-            ORDER BY property_count DESC, area_level_4 ASC
-            LIMIT $1
-          `;
+          const { data: citiesData, error: citiesError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3, area_level_4')
+            .eq('status', 'for sale')
+            .not('area_level_4', 'is', null)
+            .limit(limit);
+          
+          if (citiesError) throw citiesError;
+          data = citiesData;
           break;
-        
+          
         case 'areas':
-          query = `
-            SELECT DISTINCT
-              'area' as type,
-              area_level_3 as value,
-              CONCAT(area_level_3, ', ', area_level_2) as display_text,
-              area_level_1,
-              area_level_2,
-              area_level_3,
-              COUNT(*) as property_count
-            FROM properties
-            WHERE status = 'for sale' AND area_level_3 IS NOT NULL
-            GROUP BY area_level_1, area_level_2, area_level_3
-            ORDER BY property_count DESC, area_level_3 ASC
-            LIMIT $1
-          `;
+          const { data: areasData, error: areasError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3')
+            .eq('status', 'for sale')
+            .not('area_level_3', 'is', null)
+            .limit(limit);
+          
+          if (areasError) throw areasError;
+          data = areasData;
           break;
-        
+          
         case 'zipcodes':
-          query = `
-            SELECT DISTINCT
-              'zipcode' as type,
-              zipcode as value,
-              CONCAT(zipcode, ' - ', area_level_4, ', ', area_level_2) as display_text,
-              area_level_1,
-              area_level_2,
-              area_level_3,
-              area_level_4,
-              zipcode,
-              COUNT(*) as property_count
-            FROM properties
-            WHERE status = 'for sale' AND zipcode IS NOT NULL
-            GROUP BY zipcode, area_level_1, area_level_2, area_level_3, area_level_4
-            ORDER BY property_count DESC, zipcode ASC
-            LIMIT $1
-          `;
+          const { data: zipData, error: zipError } = await this.supabase
+            .from('properties')
+            .select('zipcode, area_level_1, area_level_2, area_level_3, area_level_4')
+            .eq('status', 'for sale')
+            .not('zipcode', 'is', null)
+            .limit(limit);
+          
+          if (zipError) throw zipError;
+          data = zipData;
           break;
-        
+          
         default:
           return res.status(400).json({
             success: false,
             message: 'Invalid suggestion type. Use: cities, areas, or zipcodes'
           });
       }
-    
-      // Use the repository's database pool to execute query
-      const pool = this.propertyRepo.getPool();
-      const result = await pool.query(query, params);
-    
+
       res.json({
         success: true,
-        data: result.rows,
-        count: result.rows.length,
+        data: data,
+        count: data.length,
         type: type
       });
     } catch (error) {
@@ -379,6 +355,7 @@ class PropertyRoutes {
       });
     }
   }
+
   /**
    * GET /properties - Get all properties with optional filtering
    */
@@ -1099,20 +1076,22 @@ class PropertyRoutes {
   /**
    * DEBUG: Get raw database data
    */
-  async debugRaw(req, res) {
+async debugRaw(req, res) {
     try {
       console.log('🔍 Debug raw called');
-      const pool = this.propertyRepo.getPool();
       
-      // Direct query to see raw data
-      const result = await pool.query('SELECT * FROM properties LIMIT 10');
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('*')
+        .limit(10);
+      
+      if (error) throw error;
       
       res.json({
         success: true,
-        rawData: result.rows,
-        count: result.rows.length,
-        columns: result.fields?.map(f => f.name) || [],
-        message: `Found ${result.rows.length} raw records`
+        rawData: data,
+        count: data.length,
+        message: `Found ${data.length} raw records`
       });
       
     } catch (error) {
@@ -1120,7 +1099,6 @@ class PropertyRoutes {
       res.json({
         success: false,
         error: error.message,
-        errorCode: error.code,
         message: 'Database query failed'
       });
     }

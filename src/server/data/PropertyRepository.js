@@ -10,7 +10,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 class PropertyRepository {
-  constructor() {
+  constructor(supabaseClient) {
+    this.supabase = supabaseClient;
     this.tableName = 'properties';
     
     // Configure PostgreSQL connection pool
@@ -23,6 +24,74 @@ class PropertyRepository {
     });
   }
 
+  // Add search locations method
+  async searchLocations(query, limit = 10) {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
+      .or(`area_level_4.ilike.%${query}%,area_level_3.ilike.%${query}%,zipcode.ilike.%${query}%`)
+      .eq('status', 'for sale')
+      .limit(limit);
+    
+    if (error) throw error;
+    return data;
+  }
+  
+  // Add simple search method
+  async simpleSearch({ limit = 20, offset = 0 }) {
+    const { data, error, count } = await this.supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact' })
+      .order('createdat', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return {
+      properties: data,
+      pagination: {
+        total: count,
+        count: data.length,
+        hasMore: offset + data.length < count,
+        offset,
+        limit
+      }
+    };
+  }  
+  
+  async count() {
+    const { count, error } = await this.supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+    return count;
+  }
+
+  // Add exists method
+  async exists(id) {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return !!data;
+  }
+  
+    // Add findById method
+  async findById(id) {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+  
   /**
    * Get all properties with optional filtering
    * @param {Object} filters - Filter criteria
