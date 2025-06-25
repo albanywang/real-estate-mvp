@@ -177,12 +177,17 @@ class Server {
 
     // CORS configuration
     const corsOptions = {
-      origin: this.env === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || false
-        : true,
+      origin: [
+        'https://real-estate-client-i3v9.onrender.com', // Your client URL
+        'http://localhost:3000', // For local development
+        'http://localhost:3001'  // For local development
+      ],
       credentials: true,
-      optionsSuccessStatus: 200
+      optionsSuccessStatus: 200,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
     };
+
     this.app.use(cors(corsOptions));
 
     // Body parsing
