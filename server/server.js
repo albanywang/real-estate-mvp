@@ -8,11 +8,12 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import { createClient } from '@supabase/supabase-js';
 
 // Import your custom modules
 import PropertyRepository from './data/PropertyRepository.js';
 import PropertyService from './api/PropertyService.js';
-import PropertyRoutes from './routes/PropertyRoutes.js';
+import PropertyRoutes from './server/routes/PropertyRoutes.js';
 
 // Initialize environment variables first
 dotenv.config();
