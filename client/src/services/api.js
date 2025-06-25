@@ -1,5 +1,10 @@
 // src/services/api.js
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_API_BASE_URL 
+  ? `${process.env.REACT_API_BASE_URL}/api`
+  : 'http://localhost:3001/api';
+
+// For image URLs, we need the base server URL without /api
+const SERVER_BASE_URL = process.env.REACT_API_BASE_URL || 'http://localhost:3001';
 
 /**
  * Fetch properties with optional filters
@@ -290,7 +295,7 @@ export const fetchPropertyStatistics = async () => {
  */
 export const getImageUrl = (imagePath) => {
   if (!imagePath) {
-    return 'http://localhost:3001/images/placeholder.jpg'; // Default placeholder
+    return `${SERVER_BASE_URL}/images/placeholder.jpg`; // Default placeholder
   }
  
   // If it's already a full URL, return as is
@@ -302,7 +307,7 @@ export const getImageUrl = (imagePath) => {
   const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
  
   // Return the full URL to the image on the backend server
-  return `http://localhost:3001${normalizedPath}`;
+  return `${SERVER_BASE_URL}${normalizedPath}`;
 };
 
 /**
@@ -310,7 +315,7 @@ export const getImageUrl = (imagePath) => {
  */
 export const testApiConnection = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL.replace('/api', '')}/health`, {
+    const response = await fetch(`${SERVER_BASE_URL}/health`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -336,6 +341,8 @@ export const testApiConnection = async () => {
 export const debugAPI = async () => {
   console.log('🔍 API Debug Information:');
   console.log('API Base URL:', API_BASE_URL);
+  console.log('Server Base URL:', SERVER_BASE_URL);
+  console.log('Environment:', process.env.NODE_ENV);
   
   // Test connection
   const isHealthy = await testApiConnection();
