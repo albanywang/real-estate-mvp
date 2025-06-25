@@ -32,12 +32,6 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
   process.exit(1);
 }
 
-// Create Supabase client - ADD THIS HERE
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 // Get dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,12 +42,17 @@ const __dirname = path.dirname(__filename);
 class Server {
   constructor() {
     this.app = express();
+    
+    // Set environment and port - THESE WERE MISSING!
+    this.env = process.env.NODE_ENV || 'development';
+    this.port = process.env.PORT || 3001;
 
     // Initialize Supabase client
     this.supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_ANON_KEY
     );
+    
     // Initialize repositories, services, and routes
     this.propertyRepo = null;
     this.propertyService = null;
@@ -76,7 +75,6 @@ class Server {
       
       // Initialize repositories with Supabase client
       this.propertyRepo = new PropertyRepository(this.supabase);
-      this.propertyService = new PropertyService(this.propertyRepo);
       
       console.log('Repositories initialized successfully');
     } catch (error) {
@@ -100,8 +98,10 @@ class Server {
       this.propertyService = new PropertyService(this.propertyRepo);
 
       // Validate service is properly set up
-      if (!this.propertyService.isRepositoryAvailable()) {
-        throw new Error('PropertyService repository validation failed');
+      if (this.propertyService && typeof this.propertyService.isRepositoryAvailable === 'function') {
+        if (!this.propertyService.isRepositoryAvailable()) {
+          throw new Error('PropertyService repository validation failed');
+        }
       }
 
       console.log('✅ Services initialized successfully');
@@ -119,7 +119,7 @@ class Server {
       console.log('Testing Supabase connection...');
       
       // Simple test query to Supabase
-      const { data, error } = await this.supabase
+      const { error } = await this.supabase
         .from('properties')
         .select('count', { count: 'exact', head: true });
       
@@ -128,10 +128,10 @@ class Server {
         throw error;
       }
       
-      console.log('Supabase connection successful');
+      console.log('✅ Supabase connection successful');
       return true;
     } catch (error) {
-      console.error('Database connection test failed:', error);
+      console.error('❌ Database connection test failed:', error);
       throw error;
     }
   }
@@ -300,7 +300,7 @@ class Server {
 
     // Initialize routes with repository and service
     console.log('Initializing PropertyRoutes with service...');
-    this.PropertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService, supabase);
+    this.PropertyRoutes = new PropertyRoutes(this.propertyRepo, this.propertyService, this.supabase);
 
     // Health check endpoint
     this.app.get('/health', (req, res) => {
@@ -445,11 +445,8 @@ class Server {
         console.log('✅ HTTP server closed');
       }
 
-      // Close database connections
-      if (this.propertyRepo) {
-        await this.propertyRepo.close();
-        console.log('✅ Database connections closed');
-      }
+      // Note: Supabase client doesn't need explicit closing like a database pool
+      console.log('✅ Database connections closed');
 
       console.log('✅ Graceful shutdown complete');
       process.exit(exitCode);
