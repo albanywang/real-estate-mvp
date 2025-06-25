@@ -5,6 +5,7 @@
     "private": true,
     "scripts": {
         "start": "webpack serve --open --mode development",
+        "start:prod": "serve -s dist -p $PORT",
         "build": "webpack --mode production",
         "analyze": "webpack --mode production --analyze",
         "test": "jest",

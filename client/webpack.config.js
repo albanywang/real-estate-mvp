@@ -47,8 +47,10 @@ module.exports = {
     new Dotenv()
   ],
   devServer: {
+    allowedHosts: 'all', // This fixes the Invalid Host header
+    host: '0.0.0.0',
+    port: process.env.PORT || 3000,
     static: path.join(__dirname, 'public'),
-    port: 3000,
     open: true,
     historyApiFallback: true, // For React Router
     proxy: {
