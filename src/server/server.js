@@ -142,6 +142,16 @@ class Server {
   setupMiddleware() {
     console.log('🔧 Setting up middleware...');
 
+    // Fix CORP issues for all static assets - ADD THIS FIRST
+    this.app.use((req, res, next) => {
+      // Set CORP header for all image requests
+      if (req.path.startsWith('/images/') || req.path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET');
+      }
+      next();
+    });    
     // Security middleware
     if (this.env === 'production') {
       this.app.use(helmet({
@@ -242,7 +252,12 @@ class Server {
     this.app.use(express.static(path.join(__dirname, 'public'), {
       maxAge: this.env === 'production' ? '1y' : 0,
       etag: true,
-      lastModified: true
+      lastModified: true,
+      setHeaders: (res, filePath) => {
+        // Always set CORP header for cross-origin access
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      }
     }));
 
     // Serve images with proper headers and debugging
@@ -255,7 +270,7 @@ class Server {
         // Also add CORS headers for images
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET');  
-              
+
         // Set proper content type for images
         const ext = path.extname(filePath).toLowerCase();
         const mimeTypes = {
