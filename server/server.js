@@ -13,7 +13,7 @@ import { createClient } from '@supabase/supabase-js';
 // Import your custom modules
 import PropertyRepository from './data/PropertyRepository.js';
 import PropertyService from './api/PropertyService.js';
-import PropertyRoutes from './server/routes/PropertyRoutes.js';
+import PropertyRoutes from './routes/PropertyRoutes.js';
 
 // Initialize environment variables first
 dotenv.config();
