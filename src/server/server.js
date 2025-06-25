@@ -249,6 +249,13 @@ class Server {
     this.app.use('/images', express.static(path.join(__dirname, 'public', 'images'), {
       maxAge: this.env === 'production' ? '30d' : 0,
       setHeaders: (res, filePath) => {
+        // Fix CORP issue - Allow cross-origin requests for images
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+        // Also add CORS headers for images
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET');  
+              
         // Set proper content type for images
         const ext = path.extname(filePath).toLowerCase();
         const mimeTypes = {
