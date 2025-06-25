@@ -15,8 +15,6 @@ import {
   PropertyEnums
 } from '../models/index.js';
 
-import { Pool } from 'pg';
-
 class PropertyService {
   /**
    * Create PropertyService instance
@@ -30,17 +28,10 @@ class PropertyService {
     // Explicitly set the repository property
     this.propertyRepo = propertyRepository;
     
-    // Initialize database pool
-    this.db = this.propertyRepo.getPool();
-    if (!this.db) {
-      console.warn('PropertyRepository.getPool() returned null, creating new Pool');
-      this.db = new Pool({
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        database: process.env.DB_NAME,
-        password: process.env.DB_PASSWORD,
-        port: process.env.DB_PORT || 5432,
-      });
+    // Get Supabase client from repository
+    this.supabase = this.propertyRepo.supabase;
+    if (!this.supabase) {
+      throw new Error('Supabase client not available in PropertyRepository');
     }
 
     // Bind methods to ensure 'this' context
@@ -57,17 +48,21 @@ class PropertyService {
     this.getPropertiesByLocation = this.getPropertiesByLocation.bind(this);
     this.getPopularLocations = this.getPopularLocations.bind(this);
 
-    // Test database connection
+    // Test Supabase connection
     this.testConnection();
-
   }
 
   async testConnection() {
     try {
-      const result = await this.db.query('SELECT NOW()');
-      console.log('✅ PropertyService DB connection successful:', result.rows[0]);
+      const { error } = await this.supabase
+        .from('properties')
+        .select('count', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      
+      console.log('✅ PropertyService Supabase connection successful');
     } catch (error) {
-      console.error('❌ PropertyService DB connection failed:', error);
+      console.error('❌ PropertyService Supabase connection failed:', error);
       throw error;
     }
   }
@@ -85,7 +80,7 @@ class PropertyService {
    * @returns {boolean} True if repository is available
    */
   isRepositoryAvailable() {
-    return this.propertyRepo && typeof this.propertyRepo === 'object';
+    return this.propertyRepo && this.supabase && typeof this.propertyRepo === 'object';
   }
 
   /**
@@ -95,14 +90,14 @@ class PropertyService {
    */
   validateRepository() {
     const requiredMethods = [
-      'search', 'findById', 'create', 'update', 'delete', 
+      'simpleSearch', 'findById', 'createProperty', 'updateProperty', 'deleteProperty', 
       'getStatistics', 'getDistinctLayouts', 'getDistinctPropertyTypes', 
       'filter', 'exists'
     ];
 
     for (const method of requiredMethods) {
-      if (!this.propertyRepo[method] || typeof this.propertyRepo[method] !== 'function') {
-        throw new Error(`PropertyRepository is missing required method: ${method}`);
+      if (this.propertyRepo[method] && typeof this.propertyRepo[method] !== 'function') {
+        console.warn(`PropertyRepository method ${method} is not a function, but service will continue`);
       }
     }
   }
@@ -119,39 +114,40 @@ class PropertyService {
         throw new Error('PropertyRepository is not available');
       }
 
-      // Validate repository methods
-      this.validateRepository();
+      // Use Supabase directly for simple property retrieval
+      const limit = Math.min(Number(filterParams.limit) || 20, 100);
+      const offset = Number(filterParams.offset) || 0;
 
-      // Create and validate search parameters
-      const search = new PropertySearch(filterParams);
-      const validation = search.validate();
-      
-      if (!validation.isValid) {
-        throw new Error(`Invalid search parameters: ${validation.errors.join(', ')}`);
-      }
+      const { data, error, count } = await this.supabase
+        .from('properties')
+        .select('*', { count: 'exact' })
+        .order('createdat', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-      // Get properties from repository
-      const result = await this.propertyRepo.search(search.toSearchParams());
-      
-      // Ensure result is properly structured
-      if (!result || !Array.isArray(result.properties)) {
-        throw new Error('Invalid response from repository');
-      }
+      if (error) throw error;
 
-      // Create property instances with business logic
-      const properties = result.properties.map(propData => {
+      // Process properties with business logic
+      const properties = data.map(propData => {
         const property = new Property(propData);
         return this.enrichPropertyData(property);
       });
 
+      const pagination = {
+        total: count,
+        count: data.length,
+        hasMore: offset + data.length < count,
+        offset,
+        limit
+      };
+
       // Create collection with enhanced data
-      const collection = new PropertyCollection(properties, result.pagination);
+      const collection = new PropertyCollection(properties, pagination);
 
       return {
         properties: collection.properties.map(prop => prop.toJSON()),
         pagination: collection.pagination,
         summary: collection.getSummary(),
-        searchCriteria: search.toSearchParams()
+        searchCriteria: filterParams
       };
 
     } catch (error) {
@@ -175,24 +171,59 @@ class PropertyService {
         throw new Error(`Invalid search parameters: ${validation.errors.join(', ')}`);
       }
 
-      // Perform repository search
-      const result = await this.propertyRepo.search(search.toSearchParams());
+      // Use Supabase for search
+      let query = this.supabase.from('properties').select('*');
+
+      // Apply filters
+      const params = search.toSearchParams();
       
+      if (params.minPrice) {
+        query = query.gte('price', params.minPrice);
+      }
+      if (params.maxPrice) {
+        query = query.lte('price', params.maxPrice);
+      }
+      if (params.propertyType) {
+        query = query.eq('propertytype', params.propertyType);
+      }
+      if (params.layout) {
+        query = query.eq('layout', params.layout);
+      }
+      if (params.minArea) {
+        query = query.gte('area', params.minArea);
+      }
+      if (params.maxArea) {
+        query = query.lte('area', params.maxArea);
+      }
+
+      // Apply sorting
+      const sortColumn = params.sortBy || 'createdat';
+      const ascending = params.sortOrder === 'ASC';
+      query = query.order(sortColumn, { ascending });
+
+      // Apply pagination
+      const limit = Math.min(params.limit || 20, 100);
+      const offset = params.offset || 0;
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
       // Process properties with business logic
-      const enrichedProperties = result.properties.map(propData => {
+      const enrichedProperties = data.map(propData => {
         const property = new Property(propData);
         return this.enrichPropertyData(property);
       });
 
       // Create collection
-      const collection = new PropertyCollection(enrichedProperties, result.pagination);
+      const collection = new PropertyCollection(enrichedProperties);
 
       // Generate search analytics
       const analytics = this.generateSearchAnalytics(collection, search);
 
       return {
         properties: collection.properties.map(prop => prop.toJSON()),
-        pagination: collection.pagination,
+        pagination: { total: data.length, offset, limit },
         summary: collection.getSummary(),
         analytics,
         searchCriteria: search.toSearchParams(),
@@ -218,23 +249,24 @@ class PropertyService {
         return { properties: [], count: 0 };
       }
 
-      // First, find matching locations
-      const locations = await this.searchLocations(query, 1); // Limit to 1 for best match
-      if (!locations || locations.length === 0) {
-        return { properties: [], count: 0 };
-      }
+      // Search using Supabase
+      let supabaseQuery = this.supabase
+        .from('properties')
+        .select('*')
+        .or(`area_level_4.ilike.%${query}%,area_level_3.ilike.%${query}%,zipcode.ilike.%${query}%,address.ilike.%${query}%`)
+        .eq('status', 'for sale')
+        .limit(limit);
 
-      // Get properties for the top matching location
-      const topLocation = locations[0];
-      const properties = await this.getPropertiesByLocation(topLocation, filters);
+      const { data, error } = await supabaseQuery;
+      if (error) throw error;
 
       return {
-        properties: properties.map(prop => new Property(prop).toJSON()),
-        count: properties.length,
+        properties: data.map(prop => new Property(prop).toJSON()),
+        count: data.length,
         location: {
-          type: topLocation.type,
-          value: topLocation.value,
-          display_text: topLocation.display_text
+          type: 'search',
+          value: query,
+          display_text: query
         }
       };
     } catch (error) {
@@ -242,7 +274,6 @@ class PropertyService {
       throw new Error(`Failed to search properties by address: ${error.message}`);
     }
   }
-
 
   /**
    * Get a single property by ID with enhanced data
@@ -255,15 +286,20 @@ class PropertyService {
         throw new Error('Property ID is required');
       }
 
-      // Get property from repository
-      const propertyData = await this.propertyRepo.findById(id);
-      
-      if (!propertyData) {
-        return null;
+      // Get property using Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null; // Not found
+        throw error;
       }
 
       // Create property instance
-      const property = new Property(propertyData);
+      const property = new Property(data);
       
       // Enrich with additional data
       const enrichedProperty = this.enrichPropertyData(property);
@@ -311,11 +347,17 @@ class PropertyService {
       // Calculate derived fields
       this.calculateDerivedFields(property);
 
-      // Create in repository
-      const createdProperty = await this.propertyRepo.create(property.toJSON());
+      // Create in Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .insert([property.toJSON()])
+        .select()
+        .single();
+
+      if (error) throw error;
       
       // Create property instance from created data
-      const result = new Property(createdProperty);
+      const result = new Property(data);
       const enrichedResult = this.enrichPropertyData(result);
 
       // Log creation event (for analytics/audit)
@@ -354,9 +396,17 @@ class PropertyService {
       }
 
       // Check if property exists
-      const existingProperty = await this.propertyRepo.findById(id);
-      if (!existingProperty) {
-        throw new Error('Property not found');
+      const { data: existingProperty, error: fetchError } = await this.supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          throw new Error('Property not found');
+        }
+        throw fetchError;
       }
 
       // Handle image updates
@@ -386,16 +436,23 @@ class PropertyService {
       // Recalculate derived fields
       this.calculateDerivedFields(updatedProperty);
 
-      // Update in repository
-      const result = await this.propertyRepo.update(id, processedUpdateData);
+      // Update in Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .update(processedUpdateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
       
       // Create enriched property instance
-      const finalProperty = new Property(result);
+      const finalProperty = new Property(data);
       const enrichedProperty = this.enrichPropertyData(finalProperty);
 
       // Log update event
       this.logPropertyEvent('updated', id, {
-        changes: this.getChanges(existingProperty, result)
+        changes: this.getChanges(existingProperty, data)
       });
 
       return {
@@ -404,7 +461,7 @@ class PropertyService {
           isValid: true,
           warnings: validation.warnings || []
         },
-        changes: this.getChanges(existingProperty, result)
+        changes: this.getChanges(existingProperty, data)
       };
 
     } catch (error) {
@@ -430,9 +487,17 @@ class PropertyService {
       }
 
       // Get property before deletion for validation and logging
-      const property = await this.propertyRepo.findById(id);
-      if (!property) {
-        throw new Error('Property not found');
+      const { data: property, error: fetchError } = await this.supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          throw new Error('Property not found');
+        }
+        throw fetchError;
       }
 
       // Business rule validation for deletion
@@ -442,7 +507,12 @@ class PropertyService {
       }
 
       // Perform deletion
-      const deletedProperty = await this.propertyRepo.delete(id);
+      const { error: deleteError } = await this.supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) throw deleteError;
 
       // Log deletion event
       this.logPropertyEvent('deleted', id, {
@@ -452,7 +522,7 @@ class PropertyService {
 
       return {
         success: true,
-        deletedProperty,
+        deletedProperty: property,
         message: 'Property deleted successfully'
       };
 
@@ -474,8 +544,27 @@ class PropertyService {
    */
   async getPropertyStatistics(filterParams = {}) {
     try {
-      // Get basic statistics from repository
-      const basicStats = await this.propertyRepo.getStatistics();
+      // Get basic statistics using Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('price, area, propertytype, createdat');
+
+      if (error) throw error;
+
+      // Calculate statistics
+      const basicStats = {
+        totalProperties: data.length,
+        averagePrice: data.reduce((sum, p) => sum + (p.price || 0), 0) / data.length || 0,
+        averageArea: data.reduce((sum, p) => sum + (p.area || 0), 0) / data.length || 0,
+        priceRange: {
+          min: Math.min(...data.map(p => p.price || 0)),
+          max: Math.max(...data.map(p => p.price || 0))
+        },
+        areaRange: {
+          min: Math.min(...data.map(p => p.area || 0)),
+          max: Math.max(...data.map(p => p.area || 0))
+        }
+      };
       
       // Create statistics instance
       const statistics = new PropertyStatistics(basicStats);
@@ -521,10 +610,14 @@ class PropertyService {
    */
   async getAvailableOptions() {
     try {
-      const [layouts, propertyTypes] = await Promise.all([
-        this.propertyRepo.getDistinctLayouts(),
-        this.propertyRepo.getDistinctPropertyTypes()
+      // Get distinct values using Supabase
+      const [layoutsResult, typesResult] = await Promise.all([
+        this.supabase.from('properties').select('layout').not('layout', 'is', null),
+        this.supabase.from('properties').select('propertytype').not('propertytype', 'is', null)
       ]);
+
+      const layouts = [...new Set(layoutsResult.data?.map(item => item.layout) || [])];
+      const propertyTypes = [...new Set(typesResult.data?.map(item => item.propertytype) || [])];
 
       return {
         layouts,
@@ -559,11 +652,33 @@ class PropertyService {
         throw new Error(`Invalid filter parameters: ${validation.errors.join(', ')}`);
       }
 
-      // Use repository filter method
-      const properties = await this.propertyRepo.filter(filterParams);
+      // Build Supabase query
+      let query = this.supabase.from('properties').select('*');
+
+      if (filterParams.minPrice) {
+        query = query.gte('price', filterParams.minPrice);
+      }
+      if (filterParams.maxPrice) {
+        query = query.lte('price', filterParams.maxPrice);
+      }
+      if (filterParams.propertyType) {
+        query = query.eq('propertytype', filterParams.propertyType);
+      }
+      if (filterParams.layout) {
+        query = query.eq('layout', filterParams.layout);
+      }
+      if (filterParams.minArea) {
+        query = query.gte('area', filterParams.minArea);
+      }
+      if (filterParams.maxArea) {
+        query = query.lte('area', filterParams.maxArea);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
       
       // Process properties with business logic
-      const enrichedProperties = properties.map(propData => {
+      const enrichedProperties = data.map(propData => {
         const property = new Property(propData);
         return this.enrichPropertyData(property);
       });
@@ -583,18 +698,206 @@ class PropertyService {
     }
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
+  /**
+   * Search for locations based on user input (city, postcode, or address)
+   * Returns suggestions for dropdown
+   */
+  async searchLocations(query, limit = 10) {
+    console.log('searchLocations called with:', { query, limit });
+    if (!query || query.trim().length < 2) {
+      return [];
+    }
+
+    try {
+      // Use Supabase to search locations
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode, address')
+        .or(`area_level_4.ilike.%${query}%,area_level_3.ilike.%${query}%,zipcode.ilike.%${query}%,address.ilike.%${query}%`)
+        .eq('status', 'for sale')
+        .limit(limit);
+
+      if (error) throw error;
+
+      // Process results into location suggestions
+      const suggestions = [];
+      const seen = new Set();
+
+      data.forEach(row => {
+        // Add zipcode suggestions
+        if (row.zipcode && row.zipcode.toLowerCase().includes(query.toLowerCase())) {
+          const key = `zipcode-${row.zipcode}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'zipcode',
+              value: row.zipcode,
+              display_text: `${row.zipcode} - ${row.area_level_4}, ${row.area_level_2}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4,
+              zipcode: row.zipcode
+            });
+          }
+        }
+
+        // Add city suggestions
+        if (row.area_level_4 && row.area_level_4.toLowerCase().includes(query.toLowerCase())) {
+          const key = `city-${row.area_level_4}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'city',
+              value: row.area_level_4,
+              display_text: `${row.area_level_4}, ${row.area_level_2}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4
+            });
+          }
+        }
+
+        // Add area suggestions
+        if (row.area_level_3 && row.area_level_3.toLowerCase().includes(query.toLowerCase())) {
+          const key = `area-${row.area_level_3}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'area',
+              value: row.area_level_3,
+              display_text: `${row.area_level_3}, ${row.area_level_2}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3
+            });
+          }
+        }
+      });
+
+      return suggestions.slice(0, limit);
+
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      throw new Error(`Failed to search locations: ${error.message}`);
+    }
+  }
 
   /**
-   * Enrich property data with calculated fields and business logic
-   * @private
-   * @param {Property} property - Property instance
-   * @returns {Property} Enhanced property
+   * Get properties based on selected location suggestion
    */
+  async getPropertiesByLocation(locationData, filters = {}) {
+    console.log('getPropertiesByLocation called with:', { locationData, filters });
+    
+    try {
+      const { type, value, area_level_1, area_level_2, area_level_3, area_level_4, zipcode } = locationData;
+
+      // Build Supabase query based on location type
+      let query = this.supabase.from('properties').select('*').eq('status', 'for sale');
+
+      switch (type) {
+        case 'zipcode':
+          query = query.eq('zipcode', zipcode);
+          break;
+        case 'city':
+          query = query.eq('area_level_4', area_level_4);
+          break;
+        case 'area':
+          query = query.eq('area_level_3', area_level_3);
+          break;
+        case 'address':
+          query = query.ilike('address', `%${value}%`);
+          break;
+      }
+
+      // Add additional filters
+      if (filters.minPrice) {
+        query = query.gte('price', filters.minPrice);
+      }
+      if (filters.maxPrice) {
+        query = query.lte('price', filters.maxPrice);
+      }
+      if (filters.propertyType) {
+        query = query.eq('propertytype', filters.propertyType);
+      }
+      if (filters.minArea) {
+        query = query.gte('area', filters.minArea);
+      }
+      if (filters.maxArea) {
+        query = query.lte('area', filters.maxArea);
+      }
+
+      query = query.order('createdat', { ascending: false }).limit(50);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Enrich properties with business logic
+      const enrichedProperties = data.map(propData => {
+        const property = new Property(propData);
+        return this.enrichPropertyData(property).toJSON();
+      });
+
+      return enrichedProperties;
+
+    } catch (error) {
+      console.error('Error getting properties by location:', error);
+      throw new Error('Failed to get properties');
+    }
+  }
+
+  /**
+   * Get popular locations for initial suggestions
+   */
+  async getPopularLocations(limit = 20) {
+    console.log('getPopularLocations called with:', { limit });
+    try {
+      // Get popular locations using Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('area_level_1, area_level_2, area_level_3, area_level_4')
+        .eq('status', 'for sale')
+        .not('area_level_4', 'is', null)
+        .limit(limit * 3); // Get more to deduplicate
+
+      if (error) throw error;
+
+      // Count occurrences and create popular locations
+      const locationCounts = {};
+      data.forEach(row => {
+        const key = `${row.area_level_4}-${row.area_level_2}`;
+        if (!locationCounts[key]) {
+          locationCounts[key] = {
+            type: 'city',
+            value: row.area_level_4,
+            display_text: `${row.area_level_4}, ${row.area_level_2}`,
+            area_level_1: row.area_level_1,
+            area_level_2: row.area_level_2,
+            area_level_3: row.area_level_3,
+            area_level_4: row.area_level_4,
+            property_count: 0
+          };
+        }
+        locationCounts[key].property_count++;
+      });
+
+      // Sort by count and return top results
+      return Object.values(locationCounts)
+        .sort((a, b) => b.property_count - a.property_count)
+        .slice(0, limit);
+
+    } catch (error) {
+      console.error('Error getting popular locations:', error);
+      throw new Error('Failed to get popular locations');
+    }
+  }
+
+  // ============================================================================
+  // PRIVATE HELPER METHODS - Keep all the existing helper methods
+  // ============================================================================
+
   enrichPropertyData(property) {
-    // Calculate price per square meter if not set
     if (!property.pricePerSquareMeter && property.price && property.area) {
       property.pricePerSquareMeter = property.calculatePricePerSquareMeter();
     }
@@ -611,12 +914,6 @@ class PropertyService {
     return property;
   }
 
-  /**
-   * Comprehensive validation for property creation
-   * @private
-   * @param {Property} property - Property to validate
-   * @returns {Object} Validation result
-   */
   validatePropertyForCreation(property) {
     const validation = property.validate();
     const customValidation = this.performCustomValidation(property);
@@ -628,13 +925,6 @@ class PropertyService {
     };
   }
 
-  /**
-   * Validation for property updates
-   * @private
-   * @param {Property} updatedProperty - Updated property
-   * @param {Object} existingProperty - Existing property data
-   * @returns {Object} Validation result
-   */
   validatePropertyForUpdate(updatedProperty, existingProperty) {
     const validation = this.validatePropertyForCreation(updatedProperty);
     
@@ -648,12 +938,6 @@ class PropertyService {
     };
   }
 
-  /**
-   * Custom business validation rules
-   * @private
-   * @param {Property} property - Property to validate
-   * @returns {Object} Validation result
-   */
   performCustomValidation(property) {
     const errors = [];
     const warnings = [];
@@ -689,11 +973,6 @@ class PropertyService {
     return { isValid: errors.length === 0, errors, warnings };
   }
 
-  /**
-   * Apply business rules when creating property
-   * @private
-   * @param {Property} property - Property to modify
-   */
   applyCreationBusinessRules(property) {
     // Set default transaction mode if not specified
     if (!property.transactionMode) {
@@ -711,12 +990,6 @@ class PropertyService {
     }
   }
 
-  /**
-   * Apply business rules when updating property
-   * @private
-   * @param {Property} updatedProperty - Updated property
-   * @param {Object} existingProperty - Existing property data
-   */
   applyUpdateBusinessRules(updatedProperty, existingProperty) {
     // Preserve creation timestamp
     updatedProperty.createdAt = existingProperty.createdAt;
@@ -731,11 +1004,6 @@ class PropertyService {
     }
   }
 
-  /**
-   * Calculate derived fields
-   * @private
-   * @param {Property} property - Property to calculate fields for
-   */
   calculateDerivedFields(property) {
     // Calculate price per square meter
     if (property.price && property.area && !property.pricePerSquareMeter) {
@@ -749,29 +1017,22 @@ class PropertyService {
     property._propertyAge = property.getPropertyAge();
   }
 
-  /**
-   * Find similar properties
-   * @private
-   * @param {Property} property - Reference property
-   * @param {number} limit - Maximum number of similar properties
-   * @returns {Promise<Array<Property>>} Similar properties
-   */
   async findSimilarProperties(property, limit = 5) {
     try {
-      const searchParams = {
-        propertyType: property.propertyType,
-        minPrice: Math.floor(property.price * 0.8),
-        maxPrice: Math.ceil(property.price * 1.2),
-        minArea: Math.floor(property.area * 0.8),
-        maxArea: Math.ceil(property.area * 1.2),
-        layout: property.layout,
-        limit
-      };
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('*')
+        .eq('propertytype', property.propertyType)
+        .gte('price', Math.floor(property.price * 0.8))
+        .lte('price', Math.ceil(property.price * 1.2))
+        .gte('area', Math.floor(property.area * 0.8))
+        .lte('area', Math.ceil(property.area * 1.2))
+        .neq('id', property.id)
+        .limit(limit);
 
-      const result = await this.propertyRepo.search(searchParams);
-      return result.properties
-        .filter(prop => prop.id !== property.id)
-        .map(propData => new Property(propData));
+      if (error) throw error;
+
+      return data.map(propData => new Property(propData));
 
     } catch (error) {
       console.error('Error finding similar properties:', error);
@@ -779,15 +1040,18 @@ class PropertyService {
     }
   }
 
-  /**
-   * Get market comparison data
-   * @private
-   * @param {Property} property - Property to compare
-   * @returns {Promise<Object|null>} Market comparison data
-   */
   async getMarketComparison(property) {
     try {
-      const stats = await this.propertyRepo.getStatistics();
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('price, area');
+
+      if (error) throw error;
+
+      const stats = {
+        averagePrice: data.reduce((sum, p) => sum + (p.price || 0), 0) / data.length || 0,
+        averageArea: data.reduce((sum, p) => sum + (p.area || 0), 0) / data.length || 0
+      };
       
       return {
         averagePrice: stats.averagePrice,
@@ -803,12 +1067,6 @@ class PropertyService {
     }
   }
 
-  /**
-   * Generate property-specific insights
-   * @private
-   * @param {Property} property - Property to analyze
-   * @returns {Promise<Array>} Market insights
-   */
   async getMarketInsights(property) {
     const insights = [];
 
@@ -834,7 +1092,7 @@ class PropertyService {
   }
 
   // ============================================================================
-  // UTILITY METHODS - All return simple values to avoid compile errors
+  // UTILITY METHODS
   // ============================================================================
 
   categorizeProperty(property) {
@@ -866,7 +1124,7 @@ class PropertyService {
 
   generateSearchAnalytics(collection, search) {
     return {
-      totalResults: collection.pagination.total,
+      totalResults: collection.pagination?.total || collection.properties.length,
       averagePrice: collection.getSummary().averagePrice,
       priceRange: collection.getSummary().priceRange,
       commonFeatures: this.extractCommonFeatures(collection.properties),
@@ -1025,497 +1283,6 @@ class PropertyService {
   extractCommonFeatures(properties) { 
     return ['parking', 'pets_allowed', 'modern_kitchen'];
   }
-
-  /**
-
-   * Search for locations based on user input (city, postcode, or address)
-
-   * Returns suggestions for dropdown
-
-   */
-
-  async searchLocations(query, limit = 10) {
-    console.log('searchLocations called with:', { query, limit });
-    if (!query || query.trim().length < 2) {
-      return [];
-    }
-    if (!this.db) {
-      console.error('Database pool not initialized');
-      throw new Error('Database connection not available');
-    }
-
-    const searchTerm = `%${query.trim()}%`;
-    try {
-
-      const suggestions = await this.db.query(`
-
-        WITH location_suggestions AS (
-
-          -- Search by zipcode
-
-          SELECT DISTINCT
-
-            'zipcode' as type,
-
-            zipcode as value,
-
-            CONCAT(zipcode, ' - ', area_level_4, ', ', area_level_2) as display_text,
-
-            area_level_1,
-
-            area_level_2,
-
-            area_level_3,
-
-            area_level_4,
-
-            zipcode,
-
-            COUNT(*) as property_count
-
-          FROM properties
-
-          WHERE zipcode ILIKE $1
-
-            AND status = 'for sale'
-
-          GROUP BY zipcode, area_level_1, area_level_2, area_level_3, area_level_4
-
-         
-
-          UNION ALL
-
-         
-
-          -- Search by area_level_4 (ward/city)
-
-          SELECT DISTINCT
-
-            'city' as type,
-
-            area_level_4 as value,
-
-            CONCAT(area_level_4, ', ', area_level_2, ' (', area_level_3, ')') as display_text,
-
-            area_level_1,
-
-            area_level_2,
-
-            area_level_3,
-
-            area_level_4,
-
-            NULL as zipcode,
-
-            COUNT(*) as property_count
-
-          FROM properties
-
-          WHERE area_level_4 ILIKE $1
-
-            AND status = 'for sale'
-
-          GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
-
-         
-
-          UNION ALL
-
-         
-
-          -- Search by area_level_3 (special ward area)
-
-          SELECT DISTINCT
-
-            'area' as type,
-
-            area_level_3 as value,
-
-            CONCAT(area_level_3, ', ', area_level_2) as display_text,
-
-            area_level_1,
-
-            area_level_2,
-
-            area_level_3,
-
-            NULL as area_level_4,
-
-            NULL as zipcode,
-
-            COUNT(*) as property_count
-
-          FROM properties
-
-          WHERE area_level_3 ILIKE $1
-
-            AND status = 'for sale'
-
-          GROUP BY area_level_1, area_level_2, area_level_3
-
-         
-
-          UNION ALL
-
-         
-
-          -- Search by address
-
-          SELECT DISTINCT
-
-            'address' as type,
-
-            address as value,
-
-            address as display_text,
-
-            area_level_1,
-
-            area_level_2,
-
-            area_level_3,
-
-            area_level_4,
-
-            zipcode,
-
-            1 as property_count
-
-          FROM properties
-
-          WHERE address ILIKE $1
-
-            AND status = 'for sale'
-
-        )
-
-        SELECT *
-
-        FROM location_suggestions
-
-        ORDER BY
-
-          CASE type
-
-            WHEN 'zipcode' THEN 1
-
-            WHEN 'city' THEN 2
-
-            WHEN 'area' THEN 3
-
-            WHEN 'address' THEN 4
-
-          END,
-
-          property_count DESC,
-
-          display_text ASC
-
-        LIMIT $2
-
-      `, [searchTerm, limit]);
-
- 
-
-      return suggestions.rows || [];
-
-    } catch (error) {
-
-      console.error('Error searching locations:', error);
-
-      throw new Error(`Failed to search locations: ${error.message}`);
-
-    }
-
-  }
-
- 
-
-  /**
-
-   * Get properties based on selected location suggestion
-
-   */
-
-  async getPropertiesByLocation(locationData, filters = {}) {
-    console.log('getPropertiesByLocation called with:', { locationData, filters });
-    const { type, value, area_level_1, area_level_2, area_level_3, area_level_4, zipcode } = locationData;
-
-   
-
-    let whereConditions = ['status = $1'];
-
-    let queryParams = ['for sale'];
-
-    let paramIndex = 2;
-
- 
-
-    // Build WHERE clause based on location type
-
-    switch (type) {
-
-      case 'zipcode':
-
-        whereConditions.push(`zipcode = $${paramIndex}`);
-
-        queryParams.push(zipcode);
-
-        paramIndex++;
-
-        break;
-
-     
-
-      case 'city':
-
-        whereConditions.push(`area_level_4 = $${paramIndex}`);
-
-        queryParams.push(area_level_4);
-
-        paramIndex++;
-
-        break;
-
-     
-
-      case 'area':
-
-        whereConditions.push(`area_level_3 = $${paramIndex}`);
-
-        queryParams.push(area_level_3);
-
-        paramIndex++;
-
-        break;
-
-     
-
-      case 'address':
-
-        whereConditions.push(`address ILIKE $${paramIndex}`);
-
-        queryParams.push(`%${value}%`);
-
-        paramIndex++;
-
-        break;
-
-    }
-
- 
-
-    // Add additional filters
-
-    if (filters.minPrice) {
-
-      whereConditions.push(`price >= $${paramIndex}`);
-
-      queryParams.push(filters.minPrice);
-
-      paramIndex++;
-
-    }
-
- 
-
-    if (filters.maxPrice) {
-
-      whereConditions.push(`price <= $${paramIndex}`);
-
-      queryParams.push(filters.maxPrice);
-
-      paramIndex++;
-
-    }
-
- 
-
-    if (filters.propertyType) {
-
-      whereConditions.push(`propertyType = $${paramIndex}`);
-
-      queryParams.push(filters.propertyType);
-
-      paramIndex++;
-
-    }
-
- 
-
-    if (filters.minArea) {
-
-      whereConditions.push(`area >= $${paramIndex}`);
-
-      queryParams.push(filters.minArea);
-
-      paramIndex++;
-
-    }
-
- 
-
-    if (filters.maxArea) {
-
-      whereConditions.push(`area <= $${paramIndex}`);
-
-      queryParams.push(filters.maxArea);
-
-      paramIndex++;
-
-    }
-
- 
-
-    try {
-
-      const result = await this.db.query(`
-
-      SELECT
-          id,
-          title,
-          price::numeric as price,
-          pricepersquaremeter::numeric as "pricePerSquareMeter",
-          address,
-          layout,
-          area::numeric as area,
-          floorinfo as "floorInfo",
-          structure,
-          managementfee::numeric as "managementFee",
-          areaofuse as "areaOfUse",
-          transportation,
-          ST_AsGeoJSON(location)::jsonb AS location,
-          propertytype as "propertyType",
-          yearbuilt as "yearBuilt",
-          balconyarea::numeric as "balconyArea",
-          totalunits as "totalUnits",
-          repairreservefund::numeric as "repairReserveFund",
-          landleasefee::numeric as "landLeaseFee",
-          rightfee as "rightFee",
-          depositguarantee::numeric as "depositGuarantee",
-          maintenancefees as "maintenanceFees",
-          otherfees::numeric as "otherFees",
-          bicycleparking as "bicycleParking",
-          bikestorage as "bikeStorage",
-          sitearea as "siteArea",
-          pets,
-          landrights as "landRights",
-          managementform as "managementForm",
-          landlawnotification as "landLawNotification",
-          currentsituation as "currentSituation",
-          extraditionpossibledate as "extraditionPossibleDate",
-          transactionmode as "transactionMode",
-          propertynumber as "propertyNumber",
-          informationreleasedate as "informationReleaseDate",
-          nextscheduledupdatedate as "nextScheduledUpdateDate",
-          remarks,
-          evaluationcertificate as "evaluationCertificate",
-          parking,
-          kitchen,
-          bathtoilet as "bathToilet",
-          facilitiesservices as "facilitiesServices",
-          others,
-          images,
-          createdat as "createdAt",
-          updatedat as "updatedAt"
-        FROM properties
-
-        WHERE ${whereConditions.join(' AND ')}
-
-        ORDER BY createdAt DESC
-
-        LIMIT 50
-
-      `, queryParams);
-
-      // Enrich properties with business logic
-      const enrichedProperties = result.rows.map(propData => {
-        const property = new Property(propData);
-        return this.enrichPropertyData(property).toJSON();
-      });
-
-      return enrichedProperties;
-
-    } catch (error) {
-
-      console.error('Error getting properties by location:', error);
-
-      throw new Error('Failed to get properties');
-
-    }
-
-  }
-
- 
-
-  /**
-
-   * Get popular locations for initial suggestions
-
-   */
-
-  async getPopularLocations(limit = 20) {
-    console.log('getPopularLocations called with:', { limit });
-    try {
-
-      const result = await this.db.query(`
-
-        WITH popular_areas AS (
-
-          SELECT
-
-            'city' as type,
-
-            area_level_4 as value,
-
-            CONCAT(area_level_4, ', ', area_level_2) as display_text,
-
-            area_level_1,
-
-            area_level_2,
-
-            area_level_3,
-
-            area_level_4,
-
-            NULL as zipcode,
-
-            COUNT(*) as property_count
-
-          FROM properties
-
-          WHERE status = 'for sale'
-
-            AND area_level_4 IS NOT NULL
-
-          GROUP BY area_level_1, area_level_2, area_level_3, area_level_4
-
-          HAVING COUNT(*) >= 5
-
-          ORDER BY property_count DESC
-
-          LIMIT $1
-
-        )
-
-        SELECT * FROM popular_areas
-
-      `, [limit]);
-
- 
-
-      return result.rows;
-
-    } catch (error) {
-
-      console.error('Error getting popular locations:', error);
-
-      throw new Error('Failed to get popular locations');
-
-    }
-
-  }
-    
 }
 
 export default PropertyService;
