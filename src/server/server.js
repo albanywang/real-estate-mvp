@@ -18,6 +18,20 @@ import PropertyRoutes from './routes/PropertyRoutes.js';
 // Initialize environment variables first
 dotenv.config();
 
+// Debug environment variables
+console.log('Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set' : 'Missing');
+console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+
+// Validate required environment variables
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  console.error('Missing required environment variables:');
+  if (!process.env.SUPABASE_URL) console.error('- SUPABASE_URL is missing');
+  if (!process.env.SUPABASE_ANON_KEY) console.error('- SUPABASE_ANON_KEY is missing');
+  process.exit(1);
+}
+
 // Create Supabase client - ADD THIS HERE
 const supabase = createClient(
   process.env.SUPABASE_URL,
