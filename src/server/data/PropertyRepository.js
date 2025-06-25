@@ -13,15 +13,6 @@ class PropertyRepository {
   constructor(supabaseClient) {
     this.supabase = supabaseClient;
     this.tableName = 'properties';
-    
-    // Configure PostgreSQL connection pool
-    this.pool = new Pool({
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_DATABASE,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT,
-    });
   }
 
   // Add search locations method
@@ -79,7 +70,7 @@ class PropertyRepository {
     if (error && error.code !== 'PGRST116') throw error;
     return !!data;
   }
-  
+
     // Add findById method
   async findById(id) {
     const { data, error } = await this.supabase

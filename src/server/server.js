@@ -48,9 +48,12 @@ const __dirname = path.dirname(__filename);
 class Server {
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || 3001;
-    this.env = process.env.NODE_ENV || 'development';
 
+    // Initialize Supabase client
+    this.supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
+    );
     // Initialize repositories, services, and routes
     this.propertyRepo = null;
     this.propertyService = null;
@@ -66,17 +69,18 @@ class Server {
    */
   async initializeRepositories() {
     try {
-      console.log('🔧 Initializing repositories...');
-
-      // Initialize repository
-      this.propertyRepo = new PropertyRepository();
-
-      // Test database connection
+      console.log('Initializing repositories...');
+      
+      // Test Supabase connection
       await this.testDatabaseConnection();
-
-      console.log('✅ Repositories initialized successfully');
+      
+      // Initialize repositories with Supabase client
+      this.propertyRepo = new PropertyRepository(this.supabase);
+      this.propertyService = new PropertyService(this.propertyRepo);
+      
+      console.log('Repositories initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize repositories:', error);
+      console.error('Failed to initialize repositories:', error);
       throw error;
     }
   }
@@ -112,13 +116,22 @@ class Server {
    */
   async testDatabaseConnection() {
     try {
-      const pool = this.propertyRepo.getPool();
-      const client = await pool.connect();
-      await client.query('SELECT 1');
-      client.release();
-      console.log('✅ Database connection successful');
+      console.log('Testing Supabase connection...');
+      
+      // Simple test query to Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('count', { count: 'exact', head: true });
+      
+      if (error) {
+        console.error('Supabase connection failed:', error);
+        throw error;
+      }
+      
+      console.log('Supabase connection successful');
+      return true;
     } catch (error) {
-      console.error('❌ Database connection failed:', error);
+      console.error('Database connection test failed:', error);
       throw error;
     }
   }
