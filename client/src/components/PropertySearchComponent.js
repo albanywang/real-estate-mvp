@@ -58,20 +58,23 @@ const PropertySearchComponent = ({
     try {
       const response = await fetch(`/api/properties/search/locations?q=${encodeURIComponent(query)}&limit=10`);
       
-      // Parse response only ONCE - this fixes the "Body has already been consumed" error
-      let data;
-      const contentType = response.headers.get('content-type');
+      // DEBUG: Log what we're actually getting
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      console.log('Content-Type:', response.headers.get('content-type'));
+      console.log('Status:', response.status);
       
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const textResponse = await response.text();
-        console.error('Non-JSON response:', textResponse);
-        throw new Error(`Server returned non-JSON response: ${response.status}`);
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse failed:', parseError);
+        throw new Error(`Server returned non-JSON: ${responseText.substring(0, 200)}...`);
       }
       
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
+        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || 'Unknown error'}`);
       }
 
       if (data.success) {
