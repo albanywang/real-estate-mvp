@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { searchLocations, getPopularLocations, searchPropertiesByLocation } from '../services/api';
+
 
 const PropertySearchComponent = ({ 
   onLocationSelect, 
@@ -29,20 +31,42 @@ const PropertySearchComponent = ({
 
   const fetchPopularLocations = async () => {
     try {
-      const response = await fetch('/api/properties/search/popular-locations');
-      
-      // Parse response only ONCE
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
-      }
-      
-      if (data.success) {
-        setPopularLocations(data.data);
+      const result = await getPopularLocations();
+      if (result.success) {
+        setPopularLocations(result.data);
       }
     } catch (error) {
       console.error('Error fetching popular locations:', error);
+    }
+  };
+
+
+  const searchLocationsAPI = async (query) => {
+    if (!query || query.trim().length < 2) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const result = await searchLocations(query, 10);
+      
+      if (result.success) {
+        setSuggestions(result.data || []);
+        setShowDropdown(true);
+        console.log('✅ Location suggestions:', result.data);
+      } else {
+        throw new Error(result.error || 'API response indicates failure');
+      }
+    } catch (error) {
+      console.error('Error searching locations:', error.message);
+      setFetchError(error.message);
+      setSuggestions([]);
+      setShowDropdown(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,21 +128,9 @@ const PropertySearchComponent = ({
   const fetchPropertiesByLocation = async (location, filters = {}) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/properties/search/by-location', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location, filters })
-      });
-      
-      // Parse response only ONCE
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
-      }
-      
-      if (data.success) {
-        onLocationSelect(location, data.data);
+      const result = await searchPropertiesByLocation(location, filters);
+      if (result.success) {
+        onLocationSelect(location, result.data);
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
