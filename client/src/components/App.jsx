@@ -866,7 +866,7 @@ const App = () => {
                     fontWeight: '600',
                     color: '#1f2937'
                   }}>
-                    {filteredProperties.length} 物件
+                    {filteredProperties.length} 最新物件
                   </p>
                 <select
                     value={sortOption}
