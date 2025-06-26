@@ -170,12 +170,110 @@ class PropertyRoutes {
         });
       }
 
-      const suggestions = await this.propertyService.searchLocations(query, parseInt(limit));
-    
+      // Use Supabase to search for location suggestions
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode, address')
+        .or(`area_level_4.ilike.%${query.trim()}%,area_level_3.ilike.%${query.trim()}%,zipcode.ilike.%${query.trim()}%,address.ilike.%${query.trim()}%`)
+        .eq('status', 'for sale')
+        .limit(parseInt(limit) * 3); // Get more to deduplicate
+
+      if (error) {
+        console.error('Supabase error in searchLocations:', error);
+        throw error;
+      }
+
+      // Process results into location suggestions
+      const suggestions = [];
+      const seen = new Set();
+
+      data.forEach(row => {
+        // Add zipcode suggestions
+        if (row.zipcode && row.zipcode.toLowerCase().includes(query.toLowerCase())) {
+          const key = `zipcode-${row.zipcode}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'zipcode',
+              value: row.zipcode,
+              display_text: `${row.zipcode} - ${row.area_level_4 || ''}, ${row.area_level_2 || ''}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4,
+              zipcode: row.zipcode,
+              property_count: 1 // We'll calculate this properly if needed
+            });
+          }
+        }
+
+        // Add city suggestions
+        if (row.area_level_4 && row.area_level_4.toLowerCase().includes(query.toLowerCase())) {
+          const key = `city-${row.area_level_4}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'city',
+              value: row.area_level_4,
+              display_text: `${row.area_level_4}, ${row.area_level_2 || ''}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4,
+              property_count: 1
+            });
+          }
+        }
+
+        // Add area suggestions
+        if (row.area_level_3 && row.area_level_3.toLowerCase().includes(query.toLowerCase())) {
+          const key = `area-${row.area_level_3}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'area',
+              value: row.area_level_3,
+              display_text: `${row.area_level_3}, ${row.area_level_2 || ''}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              property_count: 1
+            });
+          }
+        }
+
+        // Add address suggestions
+        if (row.address && row.address.toLowerCase().includes(query.toLowerCase())) {
+          const key = `address-${row.address}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            suggestions.push({
+              type: 'address',
+              value: row.address,
+              display_text: row.address,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4,
+              zipcode: row.zipcode,
+              property_count: 1
+            });
+          }
+        }
+      });
+
+      // Limit results and sort by type priority
+      const sortedSuggestions = suggestions
+        .sort((a, b) => {
+          const typePriority = { zipcode: 1, city: 2, area: 3, address: 4 };
+          return typePriority[a.type] - typePriority[b.type];
+        })
+        .slice(0, parseInt(limit));
+
       res.json({
         success: true,
-        data: suggestions,
-        count: suggestions.length
+        data: sortedSuggestions,
+        count: sortedSuggestions.length
       });
     } catch (error) {
       console.error('Search locations error:', error);
@@ -191,6 +289,7 @@ class PropertyRoutes {
    * POST /properties/search/by-location
    * Get properties based on selected location
    */
+
   async searchByLocation(req, res) {
     try {
       const { location, filters = {} } = req.body;
@@ -202,15 +301,73 @@ class PropertyRoutes {
         });
       }
 
-      const properties = await this.propertyService.getPropertiesByLocation(location, filters);
-    
+      // Build Supabase query based on location type
+      let query = this.supabase
+        .from('properties')
+        .select('*')
+        .eq('status', 'for sale');
+
+      // Apply location filter
+      switch (location.type) {
+        case 'zipcode':
+          if (location.zipcode) {
+            query = query.eq('zipcode', location.zipcode);
+          }
+          break;
+        case 'city':
+          if (location.area_level_4) {
+            query = query.eq('area_level_4', location.area_level_4);
+          }
+          break;
+        case 'area':
+          if (location.area_level_3) {
+            query = query.eq('area_level_3', location.area_level_3);
+          }
+          break;
+        case 'address':
+          query = query.ilike('address', `%${location.value}%`);
+          break;
+        default:
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid location type'
+          });
+      }
+
+      // Apply additional filters
+      if (filters.minPrice) {
+        query = query.gte('price', filters.minPrice);
+      }
+      if (filters.maxPrice) {
+        query = query.lte('price', filters.maxPrice);
+      }
+      if (filters.propertyType) {
+        query = query.eq('propertytype', filters.propertyType);
+      }
+      if (filters.minArea) {
+        query = query.gte('area', filters.minArea);
+      }
+      if (filters.maxArea) {
+        query = query.lte('area', filters.maxArea);
+      }
+
+      // Apply ordering and limit
+      query = query.order('createdat', { ascending: false }).limit(50);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Supabase error in searchByLocation:', error);
+        throw error;
+      }
+
       res.json({
         success: true,
-        data: properties,
-        count: properties.length,
+        data: data || [],
+        count: data ? data.length : 0,
         location: {
           type: location.type,
-          display_text: location.display_text,
+          display_text: location.display_text || location.value,
           value: location.value
         }
       });
@@ -223,7 +380,6 @@ class PropertyRoutes {
       });
     }
   }
-
 /**
    * GET /properties/search/address
    * Search properties by address query
@@ -266,13 +422,51 @@ class PropertyRoutes {
   async getPopularLocations(req, res) {
     try {
       const { limit = 20 } = req.query;
-    
-      const locations = await this.propertyService.getPopularLocations(parseInt(limit));
-    
+
+      // Get popular locations using Supabase
+      const { data, error } = await this.supabase
+        .from('properties')
+        .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
+        .eq('status', 'for sale')
+        .not('area_level_4', 'is', null)
+        .limit(parseInt(limit) * 3); // Get more to process
+
+      if (error) {
+        console.error('Supabase error in getPopularLocations:', error);
+        throw error;
+      }
+
+      // Count occurrences and create popular locations
+      const locationCounts = {};
+      
+      data.forEach(row => {
+        if (row.area_level_4) {
+          const key = `${row.area_level_4}-${row.area_level_2}`;
+          if (!locationCounts[key]) {
+            locationCounts[key] = {
+              type: 'city',
+              value: row.area_level_4,
+              display_text: `${row.area_level_4}, ${row.area_level_2 || ''}`,
+              area_level_1: row.area_level_1,
+              area_level_2: row.area_level_2,
+              area_level_3: row.area_level_3,
+              area_level_4: row.area_level_4,
+              property_count: 0
+            };
+          }
+          locationCounts[key].property_count++;
+        }
+      });
+
+      // Sort by count and return top results
+      const popularLocations = Object.values(locationCounts)
+        .sort((a, b) => b.property_count - a.property_count)
+        .slice(0, parseInt(limit));
+
       res.json({
         success: true,
-        data: locations,
-        count: locations.length
+        data: popularLocations,
+        count: popularLocations.length
       });
     } catch (error) {
       console.error('Get popular locations error:', error);
