@@ -7,6 +7,30 @@ const API_BASE_URL = process.env.REACT_API_BASE_URL
 const SERVER_BASE_URL = process.env.REACT_API_BASE_URL || 'http://localhost:3001';
 
 /**
+ * Helper function to safely parse response
+ */
+const parseResponse = async (response) => {
+  const contentType = response.headers.get('content-type');
+  
+  try {
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      const text = await response.text();
+      // Try to parse as JSON anyway
+      try {
+        return JSON.parse(text);
+      } catch {
+        // If not JSON, return as error object
+        return { error: text, success: false };
+      }
+    }
+  } catch (error) {
+    return { error: error.message, success: false };
+  }
+};
+
+/**
  * Fetch properties with optional filters
  */
 export const fetchProperties = async (filters = {}) => {
@@ -32,8 +56,8 @@ export const fetchProperties = async (filters = {}) => {
       }
     });
 
-    // Read response body only ONCE
-    const result = await response.json();
+    // Safely parse response only ONCE
+    const result = await parseResponse(response);
     console.log('API response:', result); // Debug log
    
     if (!response.ok) {
@@ -85,8 +109,8 @@ export const fetchPropertyById = async (id) => {
       }
     });
     
-    // Read response body only ONCE
-    const result = await response.json();
+    // Safely parse response only ONCE
+    const result = await parseResponse(response);
     
     if (!response.ok) {
       if (response.status === 404) {
@@ -131,8 +155,8 @@ export const createProperty = async (propertyData, images = []) => {
       body: formData // Don't set Content-Type header for FormData
     });
     
-    // Read response body only ONCE
-    const result = await response.json();
+    // Safely parse response only ONCE
+    const result = await parseResponse(response);
     
     if (!response.ok) {
       throw new Error(`Create failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
@@ -174,8 +198,8 @@ export const updateProperty = async (id, propertyData, images = []) => {
       body: formData
     });
     
-    // Read response body only ONCE
-    const result = await response.json();
+    // Safely parse response only ONCE
+    const result = await parseResponse(response);
     
     if (!response.ok) {
       throw new Error(`Update failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
