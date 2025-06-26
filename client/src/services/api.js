@@ -31,15 +31,15 @@ export const fetchProperties = async (filters = {}) => {
         'Accept': 'application/json'
       }
     });
-   
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API error response:', errorText);
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-   
+
+    // Read response body only ONCE
     const result = await response.json();
     console.log('API response:', result); // Debug log
+   
+    if (!response.ok) {
+      console.error('API error response:', result);
+      throw new Error(`API error: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     // Handle the API response structure
     if (result.success) {
@@ -85,14 +85,15 @@ export const fetchPropertyById = async (id) => {
       }
     });
     
+    // Read response body only ONCE
+    const result = await response.json();
+    
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Property not found');
       }
-      throw new Error(`API error: ${response.status}`);
+      throw new Error(`API error: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
     }
-    
-    const result = await response.json();
     
     if (result.success) {
       return result.data; // Return the property object
@@ -130,12 +131,12 @@ export const createProperty = async (propertyData, images = []) => {
       body: formData // Don't set Content-Type header for FormData
     });
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Create failed: ${response.status} - ${errorText}`);
-    }
-    
+    // Read response body only ONCE
     const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`Create failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     if (result.success) {
       return result.data;
@@ -173,12 +174,12 @@ export const updateProperty = async (id, propertyData, images = []) => {
       body: formData
     });
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Update failed: ${response.status} - ${errorText}`);
-    }
-    
+    // Read response body only ONCE
     const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`Update failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     if (result.success) {
       return result.data;
@@ -204,11 +205,12 @@ export const deleteProperty = async (id) => {
       }
     });
     
-    if (!response.ok) {
-      throw new Error(`Delete failed: ${response.status}`);
-    }
-    
+    // Read response body only ONCE
     const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`Delete failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     if (result.success) {
       return result;
@@ -234,11 +236,12 @@ export const fetchPropertyOptions = async () => {
       }
     });
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch options: ${response.status}`);
-    }
-    
+    // Read response body only ONCE
     const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch options: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     if (result.success) {
       return result.data;
@@ -268,11 +271,12 @@ export const fetchPropertyStatistics = async () => {
       }
     });
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch statistics: ${response.status}`);
-    }
-    
+    // Read response body only ONCE
     const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch statistics: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+    }
     
     if (result.success) {
       return result.data;
@@ -322,11 +326,13 @@ export const testApiConnection = async () => {
       }
     });
     
+    // Read response body only ONCE
+    const result = await response.json();
+    
     if (!response.ok) {
-      throw new Error(`Health check failed: ${response.status}`);
+      throw new Error(`Health check failed: ${response.status} - ${result.error || result.message || 'Health check failed'}`);
     }
     
-    const result = await response.json();
     console.log('API Health Check:', result);
     
     return result.success && result.status === 'healthy';
