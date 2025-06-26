@@ -392,6 +392,108 @@ export const debugAPI = async () => {
   }
 };
 
+  /**
+   * Search locations (cities, areas, zipcodes)
+   */
+  export const searchLocations = async (query, limit = 10) => {
+    try {
+      if (!query || query.trim().length < 2) {
+        return [];
+      }
+
+      const response = await fetch(`${API_BASE_URL}/properties/search/locations?q=${encodeURIComponent(query)}&limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      // Parse response only ONCE
+      const result = await parseResponse(response);
+
+      if (!response.ok) {
+        throw new Error(`Search locations failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+      }
+
+      if (result.success) {
+        return result.data || [];
+      } else {
+        throw new Error(result.error || 'Failed to search locations');
+      }
+
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      return [];
+    }
+  };
+
+  /**
+   * Get popular locations
+   */
+  export const getPopularLocations = async (limit = 20) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/properties/search/popular-locations?limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      // Parse response only ONCE
+      const result = await parseResponse(response);
+
+      if (!response.ok) {
+        throw new Error(`Get popular locations failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+      }
+
+      if (result.success) {
+        return result.data || [];
+      } else {
+        throw new Error(result.error || 'Failed to get popular locations');
+      }
+
+    } catch (error) {
+      console.error('Error getting popular locations:', error);
+      return [];
+    }
+  };
+
+  /**
+   * Search properties by location
+   */
+  export const searchPropertiesByLocation = async (locationData, filters = {}) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/properties/search/by-location`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          location: locationData,
+          filters: filters
+        })
+      });
+
+      // Parse response only ONCE
+      const result = await parseResponse(response);
+
+      if (!response.ok) {
+        throw new Error(`Search by location failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
+      }
+
+      if (result.success) {
+        return result.data || [];
+      } else {
+        throw new Error(result.error || 'Failed to search by location');
+      }
+
+    } catch (error) {
+      console.error('Error searching properties by location:', error);
+      return [];
+    }
+  };
+
 // Export debug function for console usage
 if (typeof window !== 'undefined') {
   window.debugAPI = debugAPI;
