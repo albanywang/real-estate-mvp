@@ -30,7 +30,14 @@ const PropertySearchComponent = ({
   const fetchPopularLocations = async () => {
     try {
       const response = await fetch('/api/properties/search/popular-locations');
+      
+      // Parse response only ONCE
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
+      }
+      
       if (data.success) {
         setPopularLocations(data.data);
       }
@@ -50,16 +57,21 @@ const PropertySearchComponent = ({
     setFetchError(null);
     try {
       const response = await fetch(`/api/properties/search/locations?q=${encodeURIComponent(query)}&limit=10`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorText}`);
-      }
+      
+      // Parse response only ONCE - this fixes the "Body has already been consumed" error
       let data;
-      try {
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
         data = await response.json();
-      } catch (jsonError) {
-        const rawBody = await response.text();
-        throw new Error(`JSON parse error: ${jsonError.message}, Raw response: ${rawBody}`);
+      } else {
+        const textResponse = await response.text();
+        console.error('Non-JSON response:', textResponse);
+        throw new Error(`Server returned non-JSON response: ${response.status}`);
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
       }
 
       if (data.success) {
@@ -94,7 +106,14 @@ const PropertySearchComponent = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ location, filters })
       });
+      
+      // Parse response only ONCE
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || data.message || 'Unknown error'}`);
+      }
+      
       if (data.success) {
         onLocationSelect(location, data.data);
       }
