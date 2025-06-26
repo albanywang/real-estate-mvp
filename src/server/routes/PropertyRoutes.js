@@ -129,6 +129,7 @@ class PropertyRoutes {
     this.router.get('/search/popular-locations', this.getPopularLocations.bind(this));
     this.router.get('/search/suggestions/:type', this.getLocationSuggestions.bind(this));
     this.router.get('/search/address', this.searchPropertiesByAddress.bind(this));
+    this.router.post('/search/by-location', this.searchByLocation.bind(this));
 
     // Debug routes (temporary)
     this.router.get('/debug/raw', this.debugRaw.bind(this));
