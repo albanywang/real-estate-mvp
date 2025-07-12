@@ -134,13 +134,6 @@ const App = () => {
     { value: 'ビル', label: 'ビル' }
   ];
 
-  // Normalize API data propertyType values
-  const propertyTypeMapping = {
-    '新築戸建': '新築戸建',
-    '新築戸建': '新築戸建',
-    '新築マンション': '新築マンション',
-    '中古マンション': '中古マンション'
-  };
 
   // Initialize fullscreen image viewer
   useEffect(() => {
@@ -196,10 +189,7 @@ const App = () => {
           throw new Error(result.error);
         }
         
-        const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
-          ...p,
-          propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
-        })) : [];
+        const propertiesArray = Array.isArray(result.properties) ? result.properties : [];
         
         // Log unique propertyType values for debugging
         const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
@@ -258,11 +248,7 @@ const App = () => {
       const result = await response.json();
       console.log('✅ Address search results:', result);
       
-      const searchProperties = Array.isArray(result.properties) ? result.properties.map(p => ({
-        ...p,
-        propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
-      })) : [];
-      
+     
       // Update state with search results
       setLocationProperties(searchProperties);
       setSearchMode('location');
@@ -297,11 +283,6 @@ const App = () => {
     console.log('📍 Location selected:', location);
     console.log('🏠 Properties for location:', locationBasedProperties);
     
-    // Normalize propertyType for location-based properties
-    const normalizedLocationProperties = locationBasedProperties.map(p => ({
-      ...p,
-      propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
-    }));
     
     // Log unique propertyType values for location-based properties
     const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertytype))];
@@ -474,10 +455,6 @@ const App = () => {
         throw new Error(result.error);
       }
       
-      const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
-        ...p,
-        propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
-      })) : [];
       
       // Log unique propertyType values for debugging
       const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
@@ -927,7 +904,7 @@ const App = () => {
       />
       
       <PropertyDetailPopup
-        property={selectedProperty}
+        property={detailProperty}
         isOpen={isDetailPopupOpen}
         onClose={closePropertyDetail}
         phrases={japanesePhrases}
