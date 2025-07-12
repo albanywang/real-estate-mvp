@@ -12,6 +12,14 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
   // Reset image index and errors when property changes
   useEffect(() => {
     if (property) {
+      console.log('🏠 PropertyDetailPopup received property:', {
+        id: property.id,
+        title: property.title,
+        propertyType: property.propertyType,
+        yearBuilt: property.yearBuilt,
+        transactionMode: property.transactionMode,
+        propertyNumber: property.propertyNumber
+      });      
       setCurrentImageIndex(0);
       setImageLoadErrors(new Set());
       setIsImageLoading(false);
@@ -397,8 +405,8 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 <td>{property.managementForm || '－'}</td>
               </tr>  
               <tr>
-                <th>{phrases?.landLawNotofication || japanesePhrases.landLawNotofication}</th>
-                <td colSpan="3">{property.landLawNotofication || '－'}</td>
+                <th>{phrases?.landLawNotification  || japanesePhrases.landLawNotification }</th>
+                <td colSpan="3">{property.landLawNotification  || '－'}</td>
               </tr>                                 
             </tbody>
           </table>

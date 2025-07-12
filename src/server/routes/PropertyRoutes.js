@@ -422,7 +422,7 @@ class PropertyRoutes {
    */
   async getPopularLocations(req, res) {
     try {
-      const { limit = 20 } = req.query;
+      const { limit = 50 } = req.query;
 
       // Get popular locations using Supabase
       const { data, error } = await this.supabase

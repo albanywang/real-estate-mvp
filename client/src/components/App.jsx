@@ -927,7 +927,7 @@ const App = () => {
       />
       
       <PropertyDetailPopup
-        property={detailProperty}
+        property={selectedProperty}
         isOpen={isDetailPopupOpen}
         onClose={closePropertyDetail}
         phrases={japanesePhrases}

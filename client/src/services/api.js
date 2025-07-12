@@ -430,7 +430,7 @@ export const debugAPI = async () => {
   /**
    * Get popular locations
    */
-  export const getPopularLocations = async (limit = 20) => {
+  export const getPopularLocations = async (limit = 50) => {
     try {
       const response = await fetch(`${API_BASE_URL}/properties/search/popular-locations?limit=${limit}`, {
         method: 'GET',
