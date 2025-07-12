@@ -51,17 +51,34 @@ const PropertySearchComponent = ({
       return;
     }
 
+    console.log('🔍 Starting location search for:', query);
     setIsLoading(true);
     setFetchError(null);
     try {
+      console.log('📡 Calling searchLocations API with:', { query, limit: 10 });
       const result = await searchLocations(query, 10);
+
+      // Log the full response
+      console.log('📡 Full API response:', result);
+      console.log('📡 Response type:', typeof result);
+      console.log('📡 Response.success:', result?.success);
+      console.log('📡 Response.data:', result?.data);
+      console.log('📡 Response.error:', result?.error);
+      console.log('📡 Response.message:', result?.message);
       
       if (result.success) {
         setSuggestions(result.data || []);
         setShowDropdown(true);
         console.log('✅ Location suggestions:', result.data);
       } else {
-        throw new Error(result.error || 'API response indicates failure');
+        const errorMsg = result?.error || result?.message || 'API response indicates failure';
+        console.error('❌ API call failed:', {
+          success: result?.success,
+          error: result?.error,
+          message: result?.message,
+          fullResponse: result
+        });
+        throw new Error(errorMsg);      
       }
     } catch (error) {
       console.error('Error searching locations:', error.message);

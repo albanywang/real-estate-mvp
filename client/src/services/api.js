@@ -397,11 +397,20 @@ export const debugAPI = async () => {
    */
   export const searchLocations = async (query, limit = 10) => {
     try {
+      console.log('🔍 searchLocations called with:', { query, limit });
+      
       if (!query || query.trim().length < 2) {
-        return [];
+        return {
+          success: true,
+          data: [],
+          count: 0
+        };
       }
 
-      const response = await fetch(`${API_BASE_URL}/properties/search/locations?q=${encodeURIComponent(query)}&limit=${limit}`, {
+      const url = `${API_BASE_URL}/properties/search/locations?q=${encodeURIComponent(query)}&limit=${limit}`;
+      console.log('📡 Fetching from URL:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -410,20 +419,44 @@ export const debugAPI = async () => {
 
       // Parse response only ONCE
       const result = await parseResponse(response);
+      console.log('📡 Raw API response:', result);
 
       if (!response.ok) {
+        console.error('❌ HTTP Error:', response.status, result);
         throw new Error(`Search locations failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
       }
 
-      if (result.success) {
-        return result.data || [];
+      // Check if result has success property
+      if (result && typeof result.success !== 'undefined') {
+        if (result.success) {
+          console.log('✅ Search locations successful:', result);
+          return {
+            success: true,
+            data: result.data || [],
+            count: result.count || 0
+          };
+        } else {
+          console.error('❌ API returned success: false:', result);
+          throw new Error(result.message || result.error || 'API response indicates failure');
+        }
       } else {
-        throw new Error(result.error || 'Failed to search locations');
+        // Fallback: treat result as data array if no success property
+        console.log('⚠️ No success property, treating as data array:', result);
+        return {
+          success: true,
+          data: Array.isArray(result) ? result : [],
+          count: Array.isArray(result) ? result.length : 0
+        };
       }
 
     } catch (error) {
-      console.error('Error searching locations:', error);
-      return [];
+      console.error('❌ Error in searchLocations:', error);
+      return {
+        success: false,
+        data: [],
+        count: 0,
+        error: error.message
+      };
     }
   };
 
@@ -432,7 +465,12 @@ export const debugAPI = async () => {
    */
   export const getPopularLocations = async (limit = 50) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/properties/search/popular-locations?limit=${limit}`, {
+      console.log('🔍 getPopularLocations called with limit:', limit);
+      
+      const url = `${API_BASE_URL}/properties/search/popular-locations?limit=${limit}`;
+      console.log('📡 Fetching popular locations from:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -441,20 +479,38 @@ export const debugAPI = async () => {
 
       // Parse response only ONCE
       const result = await parseResponse(response);
+      console.log('📡 Popular locations response:', result);
 
       if (!response.ok) {
+        console.error('❌ Popular locations HTTP Error:', response.status, result);
         throw new Error(`Get popular locations failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
       }
 
-      if (result.success) {
-        return result.data || [];
+      if (result && result.success) {
+        console.log('✅ Popular locations successful:', result);
+        return {
+          success: true,
+          data: result.data || [],
+          count: result.count || 0
+        };
       } else {
-        throw new Error(result.error || 'Failed to get popular locations');
+        console.error('❌ Popular locations API returned success: false:', result);
+        return {
+          success: false,
+          data: [],
+          count: 0,
+          error: result.message || result.error || 'Failed to get popular locations'
+        };
       }
 
     } catch (error) {
-      console.error('Error getting popular locations:', error);
-      return [];
+      console.error('❌ Error in getPopularLocations:', error);
+      return {
+        success: false,
+        data: [],
+        count: 0,
+        error: error.message
+      };
     }
   };
 
@@ -463,7 +519,12 @@ export const debugAPI = async () => {
    */
   export const searchPropertiesByLocation = async (locationData, filters = {}) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/properties/search/by-location`, {
+      console.log('🔍 searchPropertiesByLocation called with:', { locationData, filters });
+      
+      const url = `${API_BASE_URL}/properties/search/by-location`;
+      console.log('📡 POST to:', url);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -477,20 +538,39 @@ export const debugAPI = async () => {
 
       // Parse response only ONCE
       const result = await parseResponse(response);
+      console.log('📡 Search by location response:', result);
 
       if (!response.ok) {
+        console.error('❌ Search by location HTTP Error:', response.status, result);
         throw new Error(`Search by location failed: ${response.status} - ${result.error || result.message || 'Unknown error'}`);
       }
 
-      if (result.success) {
-        return result.data || [];
+      if (result && result.success) {
+        console.log('✅ Search by location successful:', result);
+        return {
+          success: true,
+          data: result.data || [],
+          count: result.count || 0,
+          location: result.location || locationData
+        };
       } else {
-        throw new Error(result.error || 'Failed to search by location');
+        console.error('❌ Search by location API returned success: false:', result);
+        return {
+          success: false,
+          data: [],
+          count: 0,
+          error: result.message || result.error || 'Failed to search by location'
+        };
       }
 
     } catch (error) {
-      console.error('Error searching properties by location:', error);
-      return [];
+      console.error('❌ Error in searchPropertiesByLocation:', error);
+      return {
+        success: false,
+        data: [],
+        count: 0,
+        error: error.message
+      };
     }
   };
 
