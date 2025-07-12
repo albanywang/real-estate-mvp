@@ -333,9 +333,15 @@ const App = () => {
     
     // Apply all filters
     if (filters.propertyType) {
+      console.log('🔍 Filtering by propertyType:', filters.propertyType);
+      console.log('🔍 Available properties before filter:', propertiesToFilter.map(p => ({
+        id: p.id,
+        title: p.title,
+        propertyType: p.propertyType
+      })));      
       const normalizedFilterType = normalizePropertyType(filters.propertyType);
       filtered = filtered.filter(p => {
-        const normalizedPropertyType = normalizePropertyType(p.propertytype);
+        const normalizedPropertyType = normalizePropertyType(p.propertyType);
         const match = normalizedPropertyType === normalizedFilterType;
         console.log(`🔍 PropertyType check: ${normalizedPropertyType} === ${normalizedFilterType} -> ${match}`);
         return match;
