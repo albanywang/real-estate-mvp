@@ -552,14 +552,11 @@ class PropertyRoutes {
   }
 
   /**
-   * GET /properties - Get all properties with optional filtering
+   * GET /properties - Get all properties using Supabase only
    */
   async getAllProperties(req, res) {
     try {
-      // Debug logging
-      console.log('getAllProperties called');
-      console.log('PropertyService available:', !!this.propertyService);
-      console.log('PropertyRepo available:', !!this.propertyRepo);
+      console.log('getAllProperties called with Supabase');
 
       const {
         title,
@@ -573,8 +570,8 @@ class PropertyRoutes {
         petsAllowed,
         transportation,
         yearBuilt,
-        sortBy = 'id',
-        sortOrder = 'DESC',
+        sortBy = 'createdat',
+        sortOrder = 'desc',
         limit = 20,
         offset = 0
       } = req.query;
@@ -582,117 +579,64 @@ class PropertyRoutes {
       // Parse boolean values
       const parsedPetsAllowed = petsAllowed ? petsAllowed === 'true' : null;
 
-      // Create search parameters
-      const searchParams = {
-        title,
-        minPrice: minPrice ? Number(minPrice) : null,
-        maxPrice: maxPrice ? Number(maxPrice) : null,
-        address,
-        layout,
-        minArea: minArea ? Number(minArea) : null,
-        maxArea: maxArea ? Number(maxArea) : null,
-        propertyType,
-        petsAllowed: parsedPetsAllowed,
-        transportation,
-        yearBuilt,
-        sortBy,
-        sortOrder,
-        limit: Math.min(Number(limit) || 20, 100), // Cap at 100
-        offset: Number(offset) || 0
-      };
+      // Build Supabase query
+      let query = this.supabase
+        .from('properties')
+        .select('*', { count: 'exact' });
 
-      let result;
-
-      // Temporarily bypass service and use direct repository with simple search
-      console.log('Using direct repository with simpleSearch...');
-      
-      let repoResult;
-      
-      try {
-        // Try simpleSearch method first
-        repoResult = await this.propertyRepo.simpleSearch({
-          limit: searchParams.limit,
-          offset: searchParams.offset
-        });
-      } catch (simpleSearchError) {
-        console.log('simpleSearch failed, using direct query:', simpleSearchError.message);
-        
-        // Fallback to direct database query
-        const pool = this.propertyRepo.getPool();
-        const directQuery = `
-          SELECT 
-            id,
-            title,
-            price,
-            pricepersquaremeter as "pricePerSquareMeter",
-            address,
-            layout,
-            area,
-            floorinfo as "floorInfo",
-            structure,
-            managementfee as "managementFee",
-            areaofuse as "areaOfUse",
-            transportation,
-            ST_AsGeoJSON(location)::jsonb AS location,
-            propertytype as "propertyType",
-            yearbuilt as "yearBuilt",
-            balconyarea as "balconyArea",
-            totalunits as "totalUnits",
-            repairreservefund as "repairReserveFund",
-            landleasefee as "landLeaseFee",
-            rightfee as "rightFee",
-            depositguarantee as "depositGuarantee",
-            maintenancefees as "maintenanceFees",
-            otherfees as "otherFees",
-            bicycleparking as "bicycleParking",
-            bikestorage as "bikeStorage",
-            sitearea as "siteArea",
-            pets,
-            landrights as "landRights",
-            managementform as "managementForm",
-            landlawnotification as "landLawNotification",
-            currentsituation as "currentSituation",
-            extraditionpossibledate as "extraditionPossibleDate",
-            transactionmode as "transactionMode",
-            propertynumber as "propertyNumber",
-            informationreleasedate as "informationReleaseDate",
-            nextscheduledupdatedate as "nextScheduledUpdateDate",
-            remarks,
-            evaluationcertificate as "evaluationCertificate",
-            parking,
-            kitchen,
-            bathtoilet as "bathToilet",
-            facilitiesservices as "facilitiesServices",
-            others,
-            images,
-            createdat as "createdAt",
-            updatedat as "updatedAt"
-          FROM properties
-          ORDER BY createdat DESC
-          LIMIT $1 OFFSET $2
-        `;
-        
-        const countQuery = 'SELECT COUNT(*) as total FROM properties';
-        
-        const [directResult, countResult] = await Promise.all([
-          pool.query(directQuery, [searchParams.limit, searchParams.offset]),
-          pool.query(countQuery)
-        ]);
-        
-        const total = parseInt(countResult.rows[0].total);
-        
-        repoResult = {
-          properties: directResult.rows,
-          pagination: {
-            total,
-            count: directResult.rows.length,
-            hasMore: searchParams.offset + directResult.rows.length < total,
-            offset: searchParams.offset,
-            limit: searchParams.limit
-          }
-        };
+      // Apply filters
+      if (title) {
+        query = query.ilike('title', `%${title}%`);
       }
-      
+      if (minPrice) {
+        query = query.gte('price', Number(minPrice));
+      }
+      if (maxPrice) {
+        query = query.lte('price', Number(maxPrice));
+      }
+      if (address) {
+        query = query.ilike('address', `%${address}%`);
+      }
+      if (layout) {
+        query = query.eq('layout', layout);
+      }
+      if (minArea) {
+        query = query.gte('area', Number(minArea));
+      }
+      if (maxArea) {
+        query = query.lte('area', Number(maxArea));
+      }
+      if (propertyType) {
+        query = query.eq('propertytype', propertyType);
+      }
+      if (transportation) {
+        query = query.ilike('transportation', `%${transportation}%`);
+      }
+      if (yearBuilt) {
+        query = query.ilike('yearbuilt', `%${yearBuilt}%`);
+      }
+
+      // Apply sorting
+      const sortColumn = sortBy === 'id' ? 'createdat' : sortBy;
+      const ascending = sortOrder.toLowerCase() === 'asc';
+      query = query.order(sortColumn, { ascending });
+
+      // Apply pagination
+      const limitNum = Math.min(Number(limit) || 20, 100);
+      const offsetNum = Number(offset) || 0;
+      query = query.range(offsetNum, offsetNum + limitNum - 1);
+
+      // Execute query
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Supabase returned:', data.length, 'properties');
+      console.log('First property propertytype:', data[0]?.propertytype);
+
       // Helper function to handle fee fields that should be null for empty strings
       const processFeeField = (value) => {
         if (value === null || value === '' || value === undefined) {
@@ -701,90 +645,99 @@ class PropertyRoutes {
         const numValue = parseFloat(value);
         return isNaN(numValue) ? null : numValue;
       };
-      
-      // Process properties with complete field mapping for frontend
-      const properties = repoResult.properties.map(propData => ({
+
+      // Process properties with complete field mapping
+      const properties = data.map(propData => ({
         id: propData.id,
         title: propData.title || '',
         price: parseFloat(propData.price) || 0,
-        pricePerSquareMeter: parseFloat(propData.pricePerSquareMeter) || 0,
+        pricePerSquareMeter: parseFloat(propData.pricepersquaremeter) || 0,
         address: propData.address || '',
         layout: propData.layout || '',
         area: parseFloat(propData.area) || 0,
-        floorInfo: propData.floorInfo || '',
+        floorInfo: propData.floorinfo || '',
         structure: propData.structure || '',
-        managementFee: parseFloat(propData.managementFee) || 0,
-        areaOfUse: propData.areaOfUse || '',
+        managementFee: parseFloat(propData.managementfee) || 0,
+        areaOfUse: propData.areaofuse || '',
         transportation: propData.transportation || '',
         location: propData.location || null,
-        propertyType: propData.propertyType || '',
-        yearBuilt: propData.yearBuilt || '',
-        balconyArea: parseFloat(propData.balconyArea) || 0,
-        totalUnits: parseInt(propData.totalUnits) || 0,
-        repairReserveFund: parseFloat(propData.repairReserveFund) || 0,
         
-        // Fixed fee fields - these will now return null for empty strings
-        landLeaseFee: processFeeField(propData.landLeaseFee),
-        rightFee: processFeeField(propData.rightFee),
-        depositGuarantee: processFeeField(propData.depositGuarantee),
-        otherFees: processFeeField(propData.otherFees),
+        // FIXED: Use the actual database column names
+        propertyType: propData.propertytype || '',
+        yearBuilt: propData.yearbuilt || '',
+        transactionMode: propData.transactionmode || '',
+        propertyNumber: propData.propertynumber || '',
         
-        maintenanceFees: propData.maintenanceFees || '',
-        bicycleParking: propData.bicycleParking || '',
-        bikeStorage: propData.bikeStorage || '',
-        siteArea: propData.siteArea || '',
+        balconyArea: parseFloat(propData.balconyarea) || 0,
+        totalUnits: parseInt(propData.totalunits) || 0,
+        repairReserveFund: parseFloat(propData.repairreservefund) || 0,
+        
+        // Fee fields
+        landLeaseFee: processFeeField(propData.landleasefee),
+        rightFee: processFeeField(propData.rightfee),
+        depositGuarantee: processFeeField(propData.depositguarantee),
+        otherFees: processFeeField(propData.otherfees),
+        
+        maintenanceFees: propData.maintenancefees || '',
+        bicycleParking: propData.bicycleparking || '',
+        bikeStorage: propData.bikestorage || '',
+        siteArea: propData.sitearea || '',
         pets: propData.pets || '',
-        landRights: propData.landRights || '',
-        managementForm: propData.managementForm || '',
-        landLawNotification: propData.landLawNotification || '',
-        currentSituation: propData.currentSituation || '',
-        extraditionPossibleDate: propData.extraditionPossibleDate || '',
-        transactionMode: propData.transactionMode || '',
-        propertyNumber: propData.propertyNumber || '',
+        landRights: propData.landrights || '',
+        managementForm: propData.managementform || '',
+        landLawNotification: propData.landlawnotification || '',
+        currentSituation: propData.currentsituation || '',
+        extraditionPossibleDate: formatDateToString(propData.extraditionpossibledate),
+        
         // Format date fields to YYYY-MM-DD strings
-        informationReleaseDate: formatDateToString(propData.informationReleaseDate),
-        nextScheduledUpdateDate: formatDateToString(propData.nextScheduledUpdateDate),
+        informationReleaseDate: formatDateToString(propData.informationreleasedate),
+        nextScheduledUpdateDate: formatDateToString(propData.nextscheduledupdatedate),
+        
         remarks: propData.remarks || '',
-        extraditionPossibleDate: formatDateToString(propData.extraditionPossibleDate),
         parking: propData.parking || '',
         kitchen: propData.kitchen || '',
-        bathToilet: propData.bathToilet || '',
-        facilitiesServices: propData.facilitiesServices || '',
+        bathToilet: propData.bathtoilet || '',
+        facilitiesServices: propData.facilitiesservices || '',
         others: propData.others || '',
         images: propData.images || [],
-        createdAt: propData.createdAt,
-        updatedAt: propData.updatedAt
+        createdAt: propData.createdat,
+        updatedAt: propData.updatedat
       }));
 
-      result = {
-        properties,
-        pagination: repoResult.pagination || {},
-        summary: {
-          count: properties.length,
-          averagePrice: properties.length > 0 
-            ? Math.round(properties.reduce((sum, p) => sum + (p.price || 0), 0) / properties.length)
-            : 0,
-          averageArea: properties.length > 0
-            ? Math.round((properties.reduce((sum, p) => sum + (p.area || 0), 0) / properties.length) * 100) / 100
-            : 0,
-          priceRange: {
-            min: properties.length > 0 ? Math.min(...properties.map(p => p.price)) : 0,
-            max: properties.length > 0 ? Math.max(...properties.map(p => p.price)) : 0
-          },
-          areaRange: {
-            min: properties.length > 0 ? Math.min(...properties.map(p => p.area)) : 0,
-            max: properties.length > 0 ? Math.max(...properties.map(p => p.area)) : 0
-          }
+      const pagination = {
+        total: count,
+        count: data.length,
+        hasMore: offsetNum + data.length < count,
+        offset: offsetNum,
+        limit: limitNum
+      };
+
+      // Calculate summary
+      const summary = {
+        count: properties.length,
+        averagePrice: properties.length > 0 
+          ? Math.round(properties.reduce((sum, p) => sum + (p.price || 0), 0) / properties.length)
+          : 0,
+        averageArea: properties.length > 0
+          ? Math.round((properties.reduce((sum, p) => sum + (p.area || 0), 0) / properties.length) * 100) / 100
+          : 0,
+        priceRange: {
+          min: properties.length > 0 ? Math.min(...properties.map(p => p.price)) : 0,
+          max: properties.length > 0 ? Math.max(...properties.map(p => p.price)) : 0
+        },
+        areaRange: {
+          min: properties.length > 0 ? Math.min(...properties.map(p => p.area)) : 0,
+          max: properties.length > 0 ? Math.max(...properties.map(p => p.area)) : 0
         }
       };
 
-      // Ensure consistent response format
+      // Return response
       res.json({
         success: true,
-        data: Array.isArray(result.properties) ? result.properties : [],
-        pagination: result.pagination || {},
-        summary: result.summary || {},
-        count: result.properties ? result.properties.length : 0
+        data: properties,
+        pagination,
+        summary,
+        count: properties.length
       });
 
     } catch (error) {
@@ -793,7 +746,7 @@ class PropertyRoutes {
         success: false,
         error: 'Failed to fetch properties',
         message: error.message,
-        data: [],  // Always return empty array on error
+        data: [],
         count: 0
       });
     }

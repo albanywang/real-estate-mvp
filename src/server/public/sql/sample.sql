@@ -1,3 +1,4 @@
+SELECT * FROM properties;
 SELECT id, title, price FROM properties;
 DROP TABLE if exists properties cascade;
 

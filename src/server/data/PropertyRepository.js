@@ -29,7 +29,7 @@ class PropertyRepository {
   }
   
   // Add simple search method
-  async simpleSearch({ limit = 20, offset = 0 }) {
+  async simpleSearch({ limit = 50, offset = 0 }) {
     const { data, error, count } = await this.supabase
       .from(this.tableName)
       .select('*', { count: 'exact' })
