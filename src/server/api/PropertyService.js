@@ -5,6 +5,7 @@
  * It acts as an intermediary between routes (Controller) and the Model, 
  * encapsulating logic like validation or data processing.
  */
+import { response } from 'express';
 import {
   Property,
   PropertySearch,
@@ -115,7 +116,7 @@ class PropertyService {
       }
 
       // Use Supabase directly for simple property retrieval
-      const limit = Math.min(Number(filterParams.limit) || 20, 100);
+      const limit = Math.min(Number(filterParams.limit) || 50, 100);
       const offset = Number(filterParams.offset) || 0;
 
       const { data, error, count } = await this.supabase
@@ -125,12 +126,15 @@ class PropertyService {
         .range(offset, offset + limit - 1);
 
       if (error) throw error;
-
+      console.log('Raw Supabase data:', data); // Log raw data
+      
       // Process properties with business logic
       const properties = data.map(propData => {
         const property = new Property(propData);
         return this.enrichPropertyData(property);
       });
+
+      console.log('Enriched properties:', properties); // Log enriched data
 
       const pagination = {
         total: count,
@@ -143,12 +147,16 @@ class PropertyService {
       // Create collection with enhanced data
       const collection = new PropertyCollection(properties, pagination);
 
-      return {
+      const response = {
         properties: collection.properties.map(prop => prop.toJSON()),
         pagination: collection.pagination,
         summary: collection.getSummary(),
         searchCriteria: filterParams
       };
+
+      console.log('Final response:', response); // Log final response
+
+      return response;
 
     } catch (error) {
       console.error('Error in PropertyService.getAllProperties:', error);
