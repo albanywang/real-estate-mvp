@@ -157,8 +157,7 @@ class PropertyRoutes {
 
   /**
    * GET /properties/search/locations
-   * Search for location suggestions (city, postcode, address)
-   * SAFE VERSION - No .or() queries to avoid comma parsing issues
+   * Search for location suggestions with smart term splitting
    */
   async searchLocations(req, res) {
     try {
@@ -173,166 +172,183 @@ class PropertyRoutes {
       }
 
       console.log('🔍 Searching locations for:', query);
-      const searchTerm = query.trim();
+      const originalTerm = query.trim();
       
-      // Use individual queries instead of .or() to avoid parsing issues
+      // Smart term splitting - split by common delimiters
+      const searchTerms = [
+        originalTerm, // Original full term
+        ...originalTerm.split(/[,，、\s]+/).filter(term => term.trim().length > 0) // Split by comma, Japanese comma, space, etc.
+      ];
+      
+      console.log('🔍 Search terms:', searchTerms);
+      
       const suggestions = [];
       const seen = new Set();
 
-      try {
-        // Query 1: Search cities (area_level_4)
-        const { data: cityData, error: cityError } = await this.supabase
-          .from('properties')
-          .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
-          .eq('status', 'for sale')
-          .ilike('area_level_4', `%${searchTerm}%`)
-          .not('area_level_4', 'is', null)
-          .limit(parseInt(limit));
+      // Search with each term
+      for (const searchTerm of searchTerms) {
+        if (searchTerm.length < 2) continue;
+        
+        try {
+          // Query 1: Search cities (area_level_4)
+          const { data: cityData, error: cityError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
+            .eq('status', 'for sale')
+            .ilike('area_level_4', `%${searchTerm}%`)
+            .not('area_level_4', 'is', null)
+            .limit(5); // Reduced limit per term
 
-        if (cityError) {
-          console.warn('City search error:', cityError);
-        } else {
-          cityData.forEach(row => {
-            if (row.area_level_4) {
-              const key = `city-${row.area_level_4}-${row.area_level_2}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                suggestions.push({
-                  type: 'city',
-                  value: row.area_level_4,
-                  display_text: `${row.area_level_4}, ${row.area_level_2 || ''}`,
-                  area_level_1: row.area_level_1,
-                  area_level_2: row.area_level_2,
-                  area_level_3: row.area_level_3,
-                  area_level_4: row.area_level_4,
-                  property_count: 1
-                });
+          if (!cityError && cityData) {
+            cityData.forEach(row => {
+              if (row.area_level_4) {
+                const key = `city-${row.area_level_4}-${row.area_level_2}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  suggestions.push({
+                    type: 'city',
+                    value: row.area_level_4,
+                    display_text: `${row.area_level_4}, ${row.area_level_2 || ''}`,
+                    area_level_1: row.area_level_1,
+                    area_level_2: row.area_level_2,
+                    area_level_3: row.area_level_3,
+                    area_level_4: row.area_level_4,
+                    property_count: 1,
+                    matched_term: searchTerm
+                  });
+                }
               }
-            }
-          });
+            });
+          }
+        } catch (error) {
+          console.warn(`City search failed for "${searchTerm}":`, error.message);
         }
-      } catch (error) {
-        console.warn('City search failed:', error.message);
+
+        try {
+          // Query 2: Search areas (area_level_3)
+          const { data: areaData, error: areaError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
+            .eq('status', 'for sale')
+            .ilike('area_level_3', `%${searchTerm}%`)
+            .not('area_level_3', 'is', null)
+            .limit(5);
+
+          if (!areaError && areaData) {
+            areaData.forEach(row => {
+              if (row.area_level_3) {
+                const key = `area-${row.area_level_3}-${row.area_level_2}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  suggestions.push({
+                    type: 'area',
+                    value: row.area_level_3,
+                    display_text: `${row.area_level_3}, ${row.area_level_2 || ''}`,
+                    area_level_1: row.area_level_1,
+                    area_level_2: row.area_level_2,
+                    area_level_3: row.area_level_3,
+                    property_count: 1,
+                    matched_term: searchTerm
+                  });
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.warn(`Area search failed for "${searchTerm}":`, error.message);
+        }
+
+        try {
+          // Query 3: Search zipcodes
+          const { data: zipData, error: zipError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
+            .eq('status', 'for sale')
+            .ilike('zipcode', `%${searchTerm}%`)
+            .not('zipcode', 'is', null)
+            .limit(5);
+
+          if (!zipError && zipData) {
+            zipData.forEach(row => {
+              if (row.zipcode) {
+                const key = `zipcode-${row.zipcode}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  suggestions.push({
+                    type: 'zipcode',
+                    value: row.zipcode,
+                    display_text: `${row.zipcode} - ${row.area_level_4 || ''}, ${row.area_level_2 || ''}`,
+                    area_level_1: row.area_level_1,
+                    area_level_2: row.area_level_2,
+                    area_level_3: row.area_level_3,
+                    area_level_4: row.area_level_4,
+                    zipcode: row.zipcode,
+                    property_count: 1,
+                    matched_term: searchTerm
+                  });
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.warn(`Zipcode search failed for "${searchTerm}":`, error.message);
+        }
+
+        try {
+          // Query 4: Search addresses
+          const { data: addressData, error: addressError } = await this.supabase
+            .from('properties')
+            .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode, address')
+            .eq('status', 'for sale')
+            .ilike('address', `%${searchTerm}%`)
+            .not('address', 'is', null)
+            .limit(5);
+
+          if (!addressError && addressData) {
+            addressData.forEach(row => {
+              if (row.address) {
+                const key = `address-${row.address}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  suggestions.push({
+                    type: 'address',
+                    value: row.address,
+                    display_text: row.address,
+                    area_level_1: row.area_level_1,
+                    area_level_2: row.area_level_2,
+                    area_level_3: row.area_level_3,
+                    area_level_4: row.area_level_4,
+                    zipcode: row.zipcode,
+                    property_count: 1,
+                    matched_term: searchTerm
+                  });
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.warn(`Address search failed for "${searchTerm}":`, error.message);
+        }
       }
 
-      try {
-        // Query 2: Search areas (area_level_3)
-        const { data: areaData, error: areaError } = await this.supabase
-          .from('properties')
-          .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
-          .eq('status', 'for sale')
-          .ilike('area_level_3', `%${searchTerm}%`)
-          .not('area_level_3', 'is', null)
-          .limit(parseInt(limit));
-
-        if (areaError) {
-          console.warn('Area search error:', areaError);
-        } else {
-          areaData.forEach(row => {
-            if (row.area_level_3) {
-              const key = `area-${row.area_level_3}-${row.area_level_2}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                suggestions.push({
-                  type: 'area',
-                  value: row.area_level_3,
-                  display_text: `${row.area_level_3}, ${row.area_level_2 || ''}`,
-                  area_level_1: row.area_level_1,
-                  area_level_2: row.area_level_2,
-                  area_level_3: row.area_level_3,
-                  property_count: 1
-                });
-              }
-            }
-          });
-        }
-      } catch (error) {
-        console.warn('Area search failed:', error.message);
-      }
-
-      try {
-        // Query 3: Search zipcodes
-        const { data: zipData, error: zipError } = await this.supabase
-          .from('properties')
-          .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode')
-          .eq('status', 'for sale')
-          .ilike('zipcode', `%${searchTerm}%`)
-          .not('zipcode', 'is', null)
-          .limit(parseInt(limit));
-
-        if (zipError) {
-          console.warn('Zipcode search error:', zipError);
-        } else {
-          zipData.forEach(row => {
-            if (row.zipcode) {
-              const key = `zipcode-${row.zipcode}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                suggestions.push({
-                  type: 'zipcode',
-                  value: row.zipcode,
-                  display_text: `${row.zipcode} - ${row.area_level_4 || ''}, ${row.area_level_2 || ''}`,
-                  area_level_1: row.area_level_1,
-                  area_level_2: row.area_level_2,
-                  area_level_3: row.area_level_3,
-                  area_level_4: row.area_level_4,
-                  zipcode: row.zipcode,
-                  property_count: 1
-                });
-              }
-            }
-          });
-        }
-      } catch (error) {
-        console.warn('Zipcode search failed:', error.message);
-      }
-
-      try {
-        // Query 4: Search addresses
-        const { data: addressData, error: addressError } = await this.supabase
-          .from('properties')
-          .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode, address')
-          .eq('status', 'for sale')
-          .ilike('address', `%${searchTerm}%`)
-          .not('address', 'is', null)
-          .limit(parseInt(limit));
-
-        if (addressError) {
-          console.warn('Address search error:', addressError);
-        } else {
-          addressData.forEach(row => {
-            if (row.address) {
-              const key = `address-${row.address}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                suggestions.push({
-                  type: 'address',
-                  value: row.address,
-                  display_text: row.address,
-                  area_level_1: row.area_level_1,
-                  area_level_2: row.area_level_2,
-                  area_level_3: row.area_level_3,
-                  area_level_4: row.area_level_4,
-                  zipcode: row.zipcode,
-                  property_count: 1
-                });
-              }
-            }
-          });
-        }
-      } catch (error) {
-        console.warn('Address search failed:', error.message);
-      }
-
-      // Sort by type priority and limit results
+      // Sort by relevance: exact matches first, then by type priority
       const sortedSuggestions = suggestions
         .sort((a, b) => {
+          // Prioritize exact matches to the original query
+          const aExactMatch = a.value === originalTerm || a.display_text.includes(originalTerm);
+          const bExactMatch = b.value === originalTerm || b.display_text.includes(originalTerm);
+          
+          if (aExactMatch && !bExactMatch) return -1;
+          if (!aExactMatch && bExactMatch) return 1;
+          
+          // Then sort by type priority
           const typePriority = { zipcode: 1, city: 2, area: 3, address: 4 };
           return typePriority[a.type] - typePriority[b.type];
         })
         .slice(0, parseInt(limit));
 
       console.log(`✅ Found ${suggestions.length} total suggestions, returning ${sortedSuggestions.length}`);
+      console.log('🔍 Sample suggestions:', sortedSuggestions.slice(0, 3).map(s => s.display_text));
 
       res.json({
         success: true,
@@ -349,7 +365,6 @@ class PropertyRoutes {
       });
     }
   }
-
   /**
    * POST /properties/search/by-location
    * Get properties based on selected location
