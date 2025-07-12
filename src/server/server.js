@@ -42,6 +42,7 @@ const __dirname = path.dirname(__filename);
 class Server {
   constructor() {
     this.app = express();
+    app.set('trust proxy', true);
     
     // Set environment and port - THESE WERE MISSING!
     this.env = process.env.NODE_ENV || 'development';
