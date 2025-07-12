@@ -171,18 +171,29 @@ class PropertyRoutes {
         });
       }
 
-      // Use Supabase to search for location suggestions
-      const { data, error } = await this.supabase
+      console.log('🔍 Searching locations for:', query);
+      const searchTerm = query.trim();
+      // Build the query step by step to avoid comma parsing issues
+      let supabaseQuery = this.supabase
         .from('properties')
         .select('area_level_1, area_level_2, area_level_3, area_level_4, zipcode, address')
-        .or(`area_level_4.ilike.%${query.trim()}%,area_level_3.ilike.%${query.trim()}%,zipcode.ilike.%${query.trim()}%,address.ilike.%${query.trim()}%`)
         .eq('status', 'for sale')
         .limit(parseInt(limit) * 3); // Get more to deduplicate
 
+      // Apply OR conditions using individual filters
+      supabaseQuery = supabaseQuery.or([
+        `area_level_4.ilike.*${searchTerm}*`,
+        `area_level_3.ilike.*${searchTerm}*`, 
+        `zipcode.ilike.*${searchTerm}*`,
+        `address.ilike.*${searchTerm}*`
+      ].join(','));
+
+      const { data, error } = await supabaseQuery;
       if (error) {
         console.error('Supabase error in searchLocations:', error);
         throw error;
       }
+      console.log(`✅ Found ${data.length} location matches for "${searchTerm}"`);
 
       // Process results into location suggestions
       const suggestions = [];
