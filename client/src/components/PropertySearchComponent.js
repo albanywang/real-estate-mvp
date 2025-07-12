@@ -73,53 +73,6 @@ const PropertySearchComponent = ({
     }
   };
 
-  const searchLocations = async (query) => {
-    if (!query || query.trim().length < 2) {
-      setSuggestions([]);
-      setShowDropdown(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setFetchError(null);
-    try {
-      const response = await fetch(`/api/properties/search/locations?q=${encodeURIComponent(query)}&limit=10`);
-      
-      // DEBUG: Log what we're actually getting
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-      console.log('Content-Type:', response.headers.get('content-type'));
-      console.log('Status:', response.status);
-      
-      // Try to parse as JSON
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse failed:', parseError);
-        throw new Error(`Server returned non-JSON: ${responseText.substring(0, 200)}...`);
-      }
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}, Error: ${data.error || 'Unknown error'}`);
-      }
-
-      if (data.success) {
-        setSuggestions(data.data || []);
-        setShowDropdown(true);
-        console.log('✅ Location suggestions:', data.data);
-      } else {
-        throw new Error(data.message || 'API response indicates failure');
-      }
-    } catch (error) {
-      console.error('Error searching locations:', error.message);
-      setFetchError(error.message);
-      setSuggestions([]);
-      setShowDropdown(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSuggestionSelect = async (suggestion) => {
     setSearchQuery(suggestion.display_text);
@@ -146,7 +99,7 @@ const PropertySearchComponent = ({
     e.preventDefault();
     if (searchQuery.trim()) {
       console.log('🔍 Performing location search:', searchQuery.trim());
-      await searchLocations(searchQuery.trim());
+      await searchLocationsAPI(searchQuery.trim());
     } else {
       console.warn('⚠️ Search query is empty');
     }
@@ -212,7 +165,7 @@ const PropertySearchComponent = ({
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 if (debounceRef.current) clearTimeout(debounceRef.current);
-                debounceRef.current = setTimeout(() => searchLocations(e.target.value), 300);
+                debounceRef.current = setTimeout(() => searchLocationsAPI(e.target.value), 300);
               }}
               onFocus={handleInputFocus}
               onKeyPress={handleKeyPress}
