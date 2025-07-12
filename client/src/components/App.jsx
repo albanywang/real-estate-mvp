@@ -136,8 +136,8 @@ const App = () => {
 
   // Normalize API data propertyType values
   const propertyTypeMapping = {
-    '新築一戸建': '新築戸建',
-    '中古一戸建': '中古戸建',
+    '新築戸建': '新築戸建',
+    '新築戸建': '新築戸建',
     '新築マンション': '新築マンション',
     '中古マンション': '中古マンション'
   };
@@ -198,11 +198,11 @@ const App = () => {
         
         const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
           ...p,
-          propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+          propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
         })) : [];
         
         // Log unique propertyType values for debugging
-        const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertyType))];
+        const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
         console.log('🔍 Unique propertyType values in data:', uniquePropertyTypes);
         
         console.log(`📍 Setting ${propertiesArray.length} properties`);
@@ -260,7 +260,7 @@ const App = () => {
       
       const searchProperties = Array.isArray(result.properties) ? result.properties.map(p => ({
         ...p,
-        propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+        propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
       })) : [];
       
       // Update state with search results
@@ -300,11 +300,11 @@ const App = () => {
     // Normalize propertyType for location-based properties
     const normalizedLocationProperties = locationBasedProperties.map(p => ({
       ...p,
-      propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+      propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
     }));
     
     // Log unique propertyType values for location-based properties
-    const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertyType))];
+    const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertytype))];
     console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
     
     setSelectedLocation(location);
@@ -354,7 +354,7 @@ const App = () => {
     if (filters.propertyType) {
       const normalizedFilterType = normalizePropertyType(filters.propertyType);
       filtered = filtered.filter(p => {
-        const normalizedPropertyType = normalizePropertyType(p.propertyType);
+        const normalizedPropertyType = normalizePropertyType(p.propertytype);
         const match = normalizedPropertyType === normalizedFilterType;
         console.log(`🔍 PropertyType check: ${normalizedPropertyType} === ${normalizedFilterType} -> ${match}`);
         return match;
@@ -432,7 +432,7 @@ const App = () => {
     console.log(`🔍 Filtered ${propertiesToFilter.length} properties down to ${filtered.length}`);
     
     // Log the propertyType of filtered properties for debugging
-    console.log('🔍 Filtered properties propertyType values:', filtered.map(p => p.propertyType));
+    console.log('🔍 Filtered properties propertyType values:', filtered.map(p => p.propertytype));
     
     setFilteredProperties(filtered);
   };
@@ -476,11 +476,11 @@ const App = () => {
       
       const propertiesArray = Array.isArray(result.properties) ? result.properties.map(p => ({
         ...p,
-        propertyType: propertyTypeMapping[p.propertyType] || p.propertyType
+        propertyType: propertyTypeMapping[p.propertytype] || p.propertytype
       })) : [];
       
       // Log unique propertyType values for debugging
-      const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertyType))];
+      const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
       console.log('🔍 Unique propertyType values in retry data:', uniquePropertyTypes);
       
       setProperties(propertiesArray);

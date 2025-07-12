@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchLocations, getPopularLocations, searchPropertiesByLocation } from '../services/api';
 
+const API_BASE_URL = process.env.REACT_API_BASE_URL 
+  ? `${process.env.REACT_API_BASE_URL}/api`
+  : 'http://localhost:3001/api';
 
 const PropertySearchComponent = ({ 
   onLocationSelect, 
