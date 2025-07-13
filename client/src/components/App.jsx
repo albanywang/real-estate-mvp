@@ -755,15 +755,6 @@ const App = () => {
           )}
         </div>
 
-        <div style={{ padding: '1rem', background: '#f0f0f0', fontSize: '12px' }}>
-          <strong>Debug Info:</strong><br/>
-          Search Mode: {searchMode}<br/>
-          All Properties: {properties.length}<br/>
-          Location Properties: {locationProperties.length}<br/>
-          Filtered Properties: {filteredProperties.length}<br/>
-          Selected Location: {selectedLocation?.display_text || 'None'}<br/>
-        </div>
-
         {/* Property List Container - Takes up 40% of width */}
         <div style={{ 
           flex: '0 0 40%',
