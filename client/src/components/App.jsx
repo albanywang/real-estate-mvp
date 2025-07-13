@@ -303,7 +303,7 @@ const App = () => {
     console.log('🔍 First property after processing:', processedProperties[0]);
 
     // Log unique propertyType values for location-based properties
-    const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertytype))];
+    const uniquePropertyTypes = [...new Set(processedProperties.map(p => p.propertytype))];
     console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
     
     setSelectedLocation(location);
@@ -311,7 +311,7 @@ const App = () => {
     setSearchMode('location');
     
     // Apply existing filters to the location-based properties
-    applyFiltersToProperties(normalizedLocationProperties);
+    applyFiltersToProperties(processedProperties);
   };
 
   // Handle clearing location search
