@@ -283,18 +283,31 @@ const App = () => {
     console.log('📍 Location selected:', location);
     console.log('🏠 Properties for location:', locationBasedProperties);
     console.log('🏠 Properties count:', locationBasedProperties.length);
-    console.log('🏠 First property:', locationBasedProperties[0]);
     
-    // Log the property structure to see if it has the right fields
-    if (locationBasedProperties.length > 0) {
-      console.log('🏠 Property keys:', Object.keys(locationBasedProperties[0]));
+    // Check if we actually received properties
+    if (!locationBasedProperties || !Array.isArray(locationBasedProperties)) {
+      console.error('❌ Invalid properties data received:', locationBasedProperties);
+      setError('No properties found for this location');
+      return;
     }
+    // FIXED: Remove the propertyTypeMapping since your API already returns correct data
+    // Just use the properties as-is since your backend now returns proper field names
+    const processedProperties = locationBasedProperties.map(p => ({
+      ...p,
+      // Ensure we have the right field names (your API should already provide these)
+      propertyType: p.propertyType || p.propertytype || '',
+      yearBuilt: p.yearBuilt || p.yearbuilt || '',
+      transactionMode: p.transactionMode || p.transactionmode || ''
+    }));
+    console.log('🔄 Processed properties:', processedProperties);
+    console.log('🔍 First property after processing:', processedProperties[0]);
+
     // Log unique propertyType values for location-based properties
     const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertytype))];
     console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
     
     setSelectedLocation(location);
-    setLocationProperties(normalizedLocationProperties);
+    setLocationProperties(processedProperties);
     setSearchMode('location');
     
     // Apply existing filters to the location-based properties
