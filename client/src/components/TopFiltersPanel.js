@@ -68,7 +68,6 @@ const TopFiltersPanel = ({
     console.log('🧹 Clearing all filters');
     const clearedFilters = {
       propertyType: '',
-      propertyStatus: '',
       minPrice: '',
       maxPrice: '',
       minArea: '',
@@ -137,33 +136,6 @@ const TopFiltersPanel = ({
               }}
             >
               {propertyTypeOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div style={{ flex: '0 0 auto', minWidth: '140px' }}>
-            <select
-              value={filters.propertyStatus || ''}
-              onChange={(e) => handleFilterChange('propertyStatus', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.5rem',
-                fontSize: '0.875rem',
-                background: '#fff',
-                cursor: 'pointer',
-                appearance: 'none',
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              {propertyStatusOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -288,18 +260,6 @@ const TopFiltersPanel = ({
                 fontWeight: '500'
               }}>
                 Type: {propertyTypeOptions.find(opt => opt.value === filters.propertyType)?.label || 'Unknown Type'}
-              </span>
-            )}
-            {filters.propertyStatus && (
-              <span style={{
-                background: '#f3f4f6',
-                color: '#374151',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '1rem',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                Status: {propertyStatusOptions.find(opt => opt.value === filters.propertyStatus)?.label || 'Unknown Status'}
               </span>
             )}
             {filters.minPrice && (

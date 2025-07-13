@@ -565,42 +565,6 @@ const App = () => {
             justifyContent: 'space-between',
           }}
         >
-          {/* Left Navigation */}
-          <div
-            className="left-nav"
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              flexShrink: 0,
-              minWidth: '250px',
-              alignItems: 'center',
-            }}
-          >
-            <a
-              href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
-            >
-              {japanesePhrases.buy}
-            </a>
-            <a
-              href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
-            >
-              {japanesePhrases.rent}
-            </a>
-            <a
-              href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
-            >
-              {japanesePhrases.sell}
-            </a>
-            <a
-              href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
-            >
-              {japanesePhrases.agents}
-            </a>
-          </div>
 
           {/* Centered Logo */}
           <div
