@@ -282,8 +282,13 @@ const App = () => {
   const handleLocationSelect = (location, locationBasedProperties) => {
     console.log('📍 Location selected:', location);
     console.log('🏠 Properties for location:', locationBasedProperties);
+    console.log('🏠 Properties count:', locationBasedProperties.length);
+    console.log('🏠 First property:', locationBasedProperties[0]);
     
-    
+    // Log the property structure to see if it has the right fields
+    if (locationBasedProperties.length > 0) {
+      console.log('🏠 Property keys:', Object.keys(locationBasedProperties[0]));
+    }
     // Log unique propertyType values for location-based properties
     const uniquePropertyTypes = [...new Set(normalizedLocationProperties.map(p => p.propertytype))];
     console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
@@ -318,6 +323,7 @@ const App = () => {
   const applyFiltersToProperties = (sourceProperties = null) => {
     console.log('🔍 Applying filters:', filters);
     console.log('🔍 Search mode:', searchMode);
+    console.log('🔍 Source properties count:', sourceProperties?.length);
     
     // Determine which properties to filter
     let propertiesToFilter;
@@ -417,6 +423,7 @@ const App = () => {
     // Apply sorting
     filtered = sortProperties(filtered);
     console.log(`🔍 Filtered ${propertiesToFilter.length} properties down to ${filtered.length}`);
+    console.log('🔍 Setting filteredProperties to:', filtered);
     
     // Log the propertyType of filtered properties for debugging
     console.log('🔍 Filtered properties propertyType values:', filtered.map(p => p.propertytype));
@@ -733,6 +740,15 @@ const App = () => {
               visible={true}
             />
           )}
+        </div>
+
+        <div style={{ padding: '1rem', background: '#f0f0f0', fontSize: '12px' }}>
+          <strong>Debug Info:</strong><br/>
+          Search Mode: {searchMode}<br/>
+          All Properties: {properties.length}<br/>
+          Location Properties: {locationProperties.length}<br/>
+          Filtered Properties: {filteredProperties.length}<br/>
+          Selected Location: {selectedLocation?.display_text || 'None'}<br/>
         </div>
 
         {/* Property List Container - Takes up 40% of width */}
