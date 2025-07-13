@@ -12,7 +12,7 @@ const TopFiltersPanel = ({
   searchMode = 'all',
   priceOptions = [],
   areaOptions = [],
-  propertyStatusOptions = [],
+  walkDistanceOptions = [],
   propertyTypeOptions = [],
   isLoading = false,
   priceRange = { min: 0, max: 100000000 },
@@ -163,7 +163,7 @@ const TopFiltersPanel = ({
                 paddingRight: '2.5rem'
               }}
             >
-              {propertyStatusOptions.map(option => (
+              {walkDistanceOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -299,7 +299,7 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                distance: {propertyStatusOptions.find(opt => opt.value === filters.walkDistance)?.label || 'Unknown Distance'}
+                distance: {walkDistanceOptions.find(opt => opt.value === filters.walkDistance)?.label || 'Unknown Distance'}
               </span>
             )}
             {filters.minPrice && (
