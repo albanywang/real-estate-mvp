@@ -117,7 +117,7 @@ const App = () => {
   ];
 
   // Property status options
-  const walkDistanceOptiions = [
+  const walkDistanceOptions = [
     { value: '', label: '駅からの徒歩' },
     { value: '1', label: '1分以内' },
     { value: '3', label: '3分以内' },
@@ -644,7 +644,7 @@ const App = () => {
         searchMode={searchMode}
         priceOptions={priceOptions}
         areaOptions={areaOptions}
-        walkDistanceOptiions={walkDistanceOptiions}
+        walkDistanceOptions={walkDistanceOptions}
         propertyTypeOptions={propertyTypeOptions}
         isLoading={isLoading}
         priceRange={{ min: 0, max: 50000 }}
