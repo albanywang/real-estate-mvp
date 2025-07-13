@@ -92,23 +92,44 @@ const PropertySearchComponent = ({
 
 
   const handleSuggestionSelect = async (suggestion) => {
+    console.log('🎯 Suggestion selected:', suggestion);
     setSearchQuery(suggestion.display_text);
     setShowDropdown(false);
     setSuggestions([]);
+    console.log('🔄 About to fetch properties for location...');
     await fetchPropertiesByLocation(suggestion);
   };
 
   const fetchPropertiesByLocation = async (location, filters = {}) => {
+    console.log('🏠 fetchPropertiesByLocation called with:', { location, filters });
     setIsLoading(true);
     try {
+      console.log('📡 Calling searchPropertiesByLocation API...');
       const result = await searchPropertiesByLocation(location, filters);
+      console.log('📡 searchPropertiesByLocation result:', result);
+      console.log('📡 Result type:', typeof result);
+      console.log('📡 Result.success:', result?.success);
+      console.log('📡 Result.data:', result?.data);
+      console.log('📡 Result.data length:', result?.data?.length);
       if (result.success) {
+        console.log('✅ Properties fetched successfully, calling onLocationSelect...');
+        console.log('✅ Calling onLocationSelect with:', {
+          location,
+          properties: result.data,
+          count: result.data?.length
+        });        
         onLocationSelect(location, result.data);
-      }
+        console.log('✅ onLocationSelect called successfully');
+      } else {
+        console.error('❌ searchPropertiesByLocation failed:', result);
+        setFetchError(result.error || 'Failed to fetch properties for location');
+    }
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setFetchError(error.message);
     } finally {
       setIsLoading(false);
+      console.log('🏁 fetchPropertiesByLocation completed');
     }
   };
 
