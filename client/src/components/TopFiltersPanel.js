@@ -68,7 +68,7 @@ const TopFiltersPanel = ({
     console.log('🧹 Clearing all filters');
     const clearedFilters = {
       propertyType: '',
-      propertyStatus: '',
+      walkDistance: '',
       minPrice: '',
       maxPrice: '',
       minArea: '',
@@ -145,8 +145,8 @@ const TopFiltersPanel = ({
           </div>
           <div style={{ flex: '0 0 auto', minWidth: '140px' }}>
             <select
-              value={filters.propertyStatus || ''}
-              onChange={(e) => handleFilterChange('propertyStatus', e.target.value)}
+              value={filters.walkDistance || ''}
+              onChange={(e) => handleFilterChange('walkDistance', e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -290,7 +290,7 @@ const TopFiltersPanel = ({
                 Type: {propertyTypeOptions.find(opt => opt.value === filters.propertyType)?.label || 'Unknown Type'}
               </span>
             )}
-            {filters.propertyStatus && (
+            {filters.walkDistance && (
               <span style={{
                 background: '#f3f4f6',
                 color: '#374151',
@@ -299,7 +299,7 @@ const TopFiltersPanel = ({
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                Status: {propertyStatusOptions.find(opt => opt.value === filters.propertyStatus)?.label || 'Unknown Status'}
+                distance: {propertyStatusOptions.find(opt => opt.value === filters.walkDistance)?.label || 'Unknown Distance'}
               </span>
             )}
             {filters.minPrice && (

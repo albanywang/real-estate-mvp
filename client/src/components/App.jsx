@@ -77,7 +77,7 @@ const App = () => {
 
   const [filters, setFilters] = useState({
     propertyType: '',
-    propertyStatus: '',
+    walkDistance: '',
     minPrice: '',
     maxPrice: '',
     layout: '',
@@ -117,11 +117,15 @@ const App = () => {
   ];
 
   // Property status options
-  const propertyStatusOptions = [
-    { value: '', label: '購入' },
-    { value: 'for sale', label: '購入' },
-    { value: 'for rent', label: '賃貸' },
-    { value: 'sold', label: '売却' }
+  const walkDistanceOptiions = [
+    { value: '', label: '駅からの徒歩' },
+    { value: '1', label: '1分以内' },
+    { value: '3', label: '3分以内' },
+    { value: '5', label: '5分以内' },
+    { value: '7', label: '7分以内' },
+    { value: '10', label: '10分以内' },
+    { value: '15', label: '15分以内' },
+    { value: '20', label: '20分以内' }
   ];
 
   // Property type options
@@ -367,8 +371,8 @@ const App = () => {
       });
     }
     
-    if (filters.propertyStatus) {
-      filtered = filtered.filter(p => p.status === filters.propertyStatus);
+    if (filters.walkDistance) {
+      filtered = filtered.filter(p => p.status === filters.walkDistance);
     }
     
     if (filters.minPrice) {
@@ -640,7 +644,7 @@ const App = () => {
         searchMode={searchMode}
         priceOptions={priceOptions}
         areaOptions={areaOptions}
-        propertyStatusOptions={propertyStatusOptions}
+        walkDistanceOptiions={walkDistanceOptiions}
         propertyTypeOptions={propertyTypeOptions}
         isLoading={isLoading}
         priceRange={{ min: 0, max: 50000 }}
