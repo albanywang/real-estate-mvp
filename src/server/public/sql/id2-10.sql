@@ -1,7 +1,7 @@
 -- Sample property data
 INSERT INTO properties (
     title, price, pricePerSquareMeter, address, layout, area, floorInfo, 
-    structure, managementFee, areaOfUse, transportation, location, propertyType, 
+    structure, managementFee, areaOfUse, transportation, walkDistance, location, propertyType, 
     yearBuilt, balconyArea, totalUnits, repairReserveFund, landLeaseFee, 
     rightFee, depositGuarantee, maintenanceFees, otherFees, bicycleParking, 
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
@@ -23,6 +23,7 @@ VALUES (
     60700, 
     '準工業地域', 
     '東京メトロ有楽町線 / 月島駅 徒歩9分 東京メトロ有楽町線 / 月島駅 徒歩9分', 
+    9,
     ST_SetSRID(ST_MakePoint(139.7850, 35.6701), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '1999年1月', 
@@ -75,6 +76,7 @@ VALUES (
     36700, 
     '準工業地域', 
     '東京都大江戸線 「汐留」駅 まで 徒歩3分 山手線 「浜松町」駅 まで 徒歩7分', 
+    3,
     ST_SetSRID(ST_MakePoint(139.76024876736125, 35.66059974713901), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2002年9月', 
@@ -126,7 +128,8 @@ VALUES (
     'RC', 
     72650, 
     '準工業地域', 
-    '東京地下鉄日比谷線 「六本木」駅 まで 徒歩6分 東京都大江戸線 「麻布十番」駅 まで 徒歩10分', 
+    '東京地下鉄日比谷線 「六本木」駅 まで 徒歩6分 東京都大江戸線 「麻布十番」駅 まで 徒歩10分',
+    10, 
     ST_SetSRID(ST_MakePoint(139.72957203298222, 35.659029582092316), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2003年4月', 
@@ -178,6 +181,7 @@ VALUES (
     32440, 
     '準工業地域', 
     '東京地下鉄南北線 「麻布十番」駅 まで 徒歩3分 東京都大江戸線 「麻布十番」駅 まで 徒歩3分', 
+    3,
     ST_SetSRID(ST_MakePoint(139.73985472133614,35.65463430793352), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2010年5月', 
@@ -229,6 +233,7 @@ VALUES (
     43210, 
     '準工業地域', 
     '東京地下鉄日比谷線 「六本木」駅 まで 徒歩3分 東京地下鉄南北線 「六本木一丁目」駅 まで 徒歩6分', 
+    6,
     ST_SetSRID(ST_MakePoint(139.735074, 35.66447297370981), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2011年11月', 
@@ -280,6 +285,7 @@ VALUES (
     9100, 
     '準工業地域', 
     '東京都浅草線 「東銀座」駅 まで 徒歩3分 東京地下鉄銀座線 「銀座」駅 まで 徒歩6分', 
+    6,
     ST_SetSRID(ST_MakePoint(139.7716951057149, 35.67004812969985), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2004年10月', 
@@ -331,6 +337,7 @@ VALUES (
     26280, 
     '準工業地域', 
     '東京都大江戸線 「勝どき」駅 まで 徒歩17分', 
+    17,
     ST_SetSRID(ST_MakePoint(139.77309119865183,35.65011062484388), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2023年11月', 
@@ -382,6 +389,7 @@ VALUES (
     21592, 
     '準工業地域', 
     '東京地下鉄南北線 「白金高輪」駅 まで 徒歩3分 東京都三田線 「白金高輪」駅 まで 徒歩3分', 
+    3,
     ST_SetSRID(ST_MakePoint(139.73416295627342,35.64640510689863), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2023年2月', 
@@ -433,6 +441,7 @@ VALUES (
     20100, 
     '準工業地域', 
     '東京地下鉄南北線 「白金高輪」駅 まで 徒歩3分 東京都三田線 「白金高輪」駅 まで 徒歩3分', 
+    3,
     ST_SetSRID(ST_MakePoint(139.74096167715788,35.625384789934486), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2003年3月', 

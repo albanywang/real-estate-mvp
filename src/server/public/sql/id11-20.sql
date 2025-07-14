@@ -1,7 +1,7 @@
 -- Sample property data
 INSERT INTO properties (
     title, price, pricePerSquareMeter, address, layout, area, floorInfo, 
-    structure, managementFee, areaOfUse, transportation, location, propertyType, 
+    structure, managementFee, areaOfUse, transportation, walkDistance, location, propertyType, 
     yearBuilt, balconyArea, totalUnits, repairReserveFund, landLeaseFee, 
     rightFee, depositGuarantee, maintenanceFees, otherFees, bicycleParking, 
     bikeStorage, siteArea, pets, landRights, managementForm, landLawNotification, 
@@ -23,6 +23,7 @@ VALUES (
     32600, 
     '準工業地域', 
     'ゆりかもめ 「お台場海浜公園」駅 まで 徒歩2分 東京臨海高速鉄道 「東京テレポート」駅 まで 徒歩5分', 
+    5,
     ST_SetSRID(ST_MakePoint(139.7805784660709,35.63022943867125), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2006年5月', 
@@ -74,6 +75,7 @@ VALUES (
     31460, 
     '準工業地域', 
     '東京都大江戸線 「西新宿五丁目」駅 まで 徒歩4分 東京地下鉄丸ノ内線 「西新宿」駅 まで 徒歩10分', 
+    10,
     ST_SetSRID(ST_MakePoint(139.6875632790081,35.69080063336431), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '1981年2月', 
@@ -125,6 +127,7 @@ VALUES (
     9100, 
     '準工業地域', 
     '総武・中央緩行線 「大久保」駅 まで 徒歩5分 山手線 「新大久保」駅 まで 徒歩7分', 
+    7,
     ST_SetSRID(ST_MakePoint(139.6976880292879, 35.70427784217023), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '2000年11月', 
@@ -176,6 +179,7 @@ VALUES (
     12070, 
     '準工業地域', 
     '総武・中央緩行線 「大久保」駅 まで 徒歩5分 山手線 「新大久保」駅 まで 徒歩7分', 
+    7,
     ST_SetSRID(ST_MakePoint(139.73136807290675,35.72393586454848), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '1999年12月', 
@@ -227,6 +231,7 @@ VALUES (
     16100, 
     '準工業地域', 
     '東京地下鉄南北線 「本駒込」駅 まで 徒歩1分 東京都三田線 「白山」駅 まで 徒歩5分', 
+    5,
     ST_SetSRID(ST_MakePoint(139.75424162318618,35.72354043648502), 4326), -- Single Point: [lng, lat]
     '中古マンション', 
     '1999年10月', 
@@ -278,6 +283,7 @@ VALUES (
     45600,
     '準工業地域',
     '東京メトロ半蔵門線 / 錦糸町駅 徒歩4分',
+    4,
     ST_SetSRID(ST_MakePoint(139.8070975692615, 35.69448708237164), 4326),
     '中古マンション',
     '2006年2月',
@@ -329,6 +335,7 @@ VALUES (
     68200,
     '準工業地域',
     '東京メトロ有楽町線 / 月島駅 徒歩8分',
+    8,
     ST_SetSRID(ST_MakePoint(139.7850, 35.6701), 4326),
     '中古マンション',
     '1999年1月',
@@ -380,6 +387,7 @@ VALUES (
     22800,
     '商業地域',
     'JR山手線 / 目黒駅 徒歩3分',
+    3,
     ST_SetSRID(ST_MakePoint(139.7157, 35.6339), 4326),
     '中古マンション',
     '2015年9月',
@@ -431,6 +439,7 @@ VALUES (
     58900,
     '商業地域',
     '都営大江戸線 / 西新宿五丁目駅 徒歩4分',
+    4,
     ST_SetSRID(ST_MakePoint(139.6917, 35.6895), 4326),
     '中古マンション',
     '2020年7月',
