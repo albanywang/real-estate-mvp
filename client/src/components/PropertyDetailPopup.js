@@ -405,13 +405,107 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 <td>{property.managementForm || '－'}</td>
               </tr>  
               <tr>
-                <th>{phrases?.landLawNotification  || japanesePhrases.landLawNotification }</th>
-                <td colSpan="3">{property.landLawNotification  || '－'}</td>
+                <th>{phrases?.direction  || japanesePhrases.direction }</th>
+                <td>{property.direction || '－'}</td>                
+                <th>{phrases?.remarks  || japanesePhrases.remarks }</th>
+                <td>{property.remarks || '－'}</td>
               </tr>                                 
             </tbody>
           </table>
 
-          {/* Fourth table - Transaction info */}
+          {/* Fourth table - new Appartment info */}
+          <div className="property-detail-info-header">
+            <div className="property-detail-icon-container">
+              <i className="fas fa-calendar"></i>
+              <span>{japanesePhrases.newApartment}</span>
+            </div>
+          </div>
+          
+          <table className="property-detail-table property-detail-table-grid">
+            <tbody>
+              <tr>
+                <th>{phrases?.constructionCompany  || japanesePhrases.constructionCompany }</th>
+                <td>{property.constructionCompany  || '－'}</td>
+                <th>{phrases?.designCompany  || japanesePhrases.designCompany }</th>
+                <td>{property.designCompany  || '－'}</td>            
+              </tr>
+              <tr>
+                <th>{phrases?.managementCompany   || japanesePhrases.managementCompany  }</th>
+                <td>{property.managementCompany   || '－'}</td>
+                <th>{phrases?.condominiumSalesCompany   || japanesePhrases.condominiumSalesCompany  }</th>
+                <td>{property.condominiumSalesCompany   || '－'}</td>            
+              </tr>                                                           
+            </tbody>
+          </table>
+
+          {/* Fifth table - for house only */}
+          <div className="property-detail-info-header">
+            <div className="property-detail-icon-container">
+              <i className="fas fa-calendar"></i>
+              <span>{japanesePhrases.house}</span>
+            </div>
+          </div>
+          <table className="property-detail-table property-detail-table-grid">
+            <tbody>
+              <tr>
+                <th>{phrases?.landArea || japanesePhrases.landArea}</th>
+                <td>{property.landArea || '－'}</td>
+                <th>{phrases?.buildingArea || japanesePhrases.buildingArea}</th>
+                <td>{property.buildingArea || '－'}</td>           
+              </tr>
+              <tr>
+                <th>{phrases?.buildingCoverageRatio || japanesePhrases.buildingCoverageRatio}</th>
+                <td>{property.buildingCoverageRatio || '－'}</td>
+                <th>{phrases?.floorAreaRatio || japanesePhrases.floorAreaRatio}</th>
+                <td>{property.floorAreaRatio || '－'}</td>           
+              </tr>
+              <tr>
+                <th>{phrases?.accessSituation || japanesePhrases.accessSituation}</th>
+                <td>{property.accessSituation || '－'}</td>
+                <th>{phrases?.areaOfUse || japanesePhrases.areaOfUse}</th>
+                <td>{property.areaOfUse || '－'}</td>           
+              </tr>   
+              <tr>
+                <th>{phrases?.urbanPlanning || japanesePhrases.urbanPlanning}</th>
+                <td>{property.urbanPlanning || '－'}</td>         
+              </tr>                             
+            </tbody>
+          </table>
+
+          {/* Sixth table - for 一棟アパート only */}
+          <div className="property-detail-info-header">
+            <div className="property-detail-icon-container">
+              <i className="fas fa-calendar"></i>
+              <span>{japanesePhrases.oneBuildingApartment}</span>
+            </div>
+          </div>      
+          <table className="property-detail-table property-detail-table-grid">
+            <tbody>
+              <tr>
+                <th>{phrases?.estimatedRent || japanesePhrases.estimatedRent}</th>
+                <td>{property.estimatedRent || '－'}</td>
+                <th>{phrases?.assumedYield || japanesePhrases.assumedYield}</th>
+                <td>{property.assumedYield || '－'}</td>           
+              </tr>
+              <tr>
+                <th>{phrases?.currentRent || japanesePhrases.currentRent}</th>
+                <td>{property.currentRent || '－'}</td>
+                <th>{phrases?.currentyield || japanesePhrases.currentyield}</th>
+                <td>{property.currentyield || '－'}</td>           
+              </tr>
+              <tr>
+                <th>{phrases?.rentalStatus || japanesePhrases.rentalStatus}</th>
+                <td>{property.rentalStatus || '－'}</td>
+                <th>{phrases?.numberOfUnitsInTheBuilding || japanesePhrases.numberOfUnitsInTheBuilding}</th>
+                <td>{property.numberOfUnitsInTheBuilding || '－'}</td>           
+              </tr>   
+              <tr>
+                <th>{phrases?.exclusiveAreaOfEachResidence || japanesePhrases.exclusiveAreaOfEachResidence}</th>
+                <td>{property.exclusiveAreaOfEachResidence || '－'}</td>          
+              </tr>   
+            </tbody>
+          </table> 
+          {/* Seventh table - Transaction info */}
           <div className="property-detail-info-header">
             <div className="property-detail-icon-container">
               <i className="fas fa-calendar"></i>
@@ -440,7 +534,7 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 <td>{formatDate(property.nextScheduledUpdateDate) || '－'}</td>            
               </tr>                                                            
             </tbody>
-          </table>
+          </table>          
 
           {/* Action buttons */}
           <div className="property-detail-buttons">

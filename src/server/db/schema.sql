@@ -1,3 +1,4 @@
+--- drop table properties CASCADE
 -- Enable PostGIS extension (run this once in your database if not already enabled)
 CREATE EXTENSION IF NOT EXISTS postgis;
 
