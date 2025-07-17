@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,     
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence      
 )
 VALUES (
     'アトラスシティ千歳烏山グランスイート杜ノ棟',
@@ -60,7 +66,26 @@ VALUES (
     '東京都',
     '23区',
     '世田谷区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'プラウド二子玉川',
@@ -112,7 +137,26 @@ VALUES (
     '東京都',
     '23区',
     '世田谷区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'プレミスト南平台',
@@ -164,7 +208,26 @@ VALUES (
     '東京都',
     '23区',
     '渋谷区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'プラウドタワー渋谷',
@@ -216,7 +279,26 @@ VALUES (
     '東京都',
     '23区',
     '渋谷区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'パークシティ中野 ザ タワー ブリーズ',
@@ -268,7 +350,26 @@ VALUES (
     '東京都',
     '23区',
     '中野区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'パークホームズ南池袋',
@@ -320,7 +421,26 @@ VALUES (
     '東京都',
     '23区',
     '豊島区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ザ・タワー十条',
@@ -372,7 +492,26 @@ VALUES (
     '東京都',
     '23区',
     '北区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'シティテラス多摩川 C棟',
@@ -424,5 +563,24 @@ VALUES (
     '東京都',
     'その他市部',
     '調布市',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 );

@@ -413,98 +413,133 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
             </tbody>
           </table>
 
-          {/* Fourth table - new Appartment info */}
-          <div className="property-detail-info-header">
-            <div className="property-detail-icon-container">
-              <i className="fas fa-calendar"></i>
-              <span>{japanesePhrases.newApartment}</span>
-            </div>
-          </div>
+          {/* NEW: Condominium Details (for condominiums) */}
+          {(property.propertyType === '新築マンション' || property.propertyType === '中古マンション') && 
+          (property.condominiumSalesCompany || property.managementCompany) && (
+            <>
+              <div className="property-detail-info-header">
+                <div className="property-detail-icon-container">
+                  <i className="fas fa-building"></i>
+                  <span>マンション詳細</span>
+                </div>
+              </div>
+              
+              <table className="property-detail-table property-detail-table-grid">
+                <tbody>
+                  {property.condominiumSalesCompany && (
+                    <tr>
+                      <th>分譲会社</th>
+                      <td>{property.condominiumSalesCompany}</td>
+                      <th>管理会社</th>
+                      <td>{property.managementCompany || '－'}</td>
+                    </tr>
+                  )}
+                  {property.constructionCompany && (
+                    <tr>
+                      <th>施工会社</th>
+                      <td>{property.constructionCompany}</td>
+                      <th>設計会社</th>
+                      <td>{property.designCompany || '－'}</td>
+                    </tr>
+                  )}
+                  {property.direction && (
+                    <tr>
+                      <th>向き</th>
+                      <td>{property.direction}</td>
+                      <th>都市計画</th>
+                      <td>{property.urbanPlanning || '－'}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {/* NEW: Building & Land Details (for houses) */}
+          {(property.propertyType === '新築戸建' || property.propertyType === '中古戸建') && (
+            <>
+              <div className="property-detail-info-header">
+                <div className="property-detail-icon-container">
+                  <i className="fas fa-home"></i>
+                  <span>建物・土地詳細</span>
+                </div>
+              </div>
+              
+              <table className="property-detail-table property-detail-table-grid">
+                <tbody>
+                  <tr>
+                    <th>建物面積</th>
+                    <td>{property.buildingArea ? `${property.buildingArea}㎡` : '－'}</td>
+                    <th>土地面積</th>
+                    <td>{property.landArea ? `${property.landArea}㎡` : '－'}</td>
+                  </tr>
+                  <tr>
+                    <th>建ぺい率</th>
+                    <td>{property.buildingCoverageRatio ? `${property.buildingCoverageRatio}%` : '－'}</td>
+                    <th>容積率</th>
+                    <td>{property.floorAreaRatio ? `${property.floorAreaRatio}%` : '－'}</td>
+                  </tr>
+                  <tr>
+                    <th>接道状況</th>
+                    <td colSpan="3">{property.accessSituation || '－'}</td>
+                  </tr>
+                  {property.constructionCompany && (
+                    <tr>
+                      <th>施工会社</th>
+                      <td>{property.constructionCompany}</td>
+                      <th>設計会社</th>
+                      <td>{property.designCompany || '－'}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
+          )}
+
+
+          {/* NEW: Investment Analysis (if rental data exists) */}
+          {(property.estimatedRent || property.currentRent || property.assumedYield) && (
+            <>
+              <div className="property-detail-info-header">
+                <div className="property-detail-icon-container">
+                  <i className="fas fa-chart-line"></i>
+                  <span>投資収益分析</span>
+                </div>
+              </div>
+              
+              <table className="property-detail-table property-detail-table-grid">
+                <tbody>
+                  {(property.estimatedRent || property.currentRent) && (
+                    <tr>
+                      <th>想定賃料(年間)</th>
+                      <td>{property.estimatedRent ? `${property.estimatedRent.toLocaleString()}円` : '－'}</td>
+                      <th>現行賃料(年間)</th>
+                      <td>{property.currentRent ? `${property.currentRent.toLocaleString()}円` : '－'}</td>
+                    </tr>
+                  )}
+                  {(property.assumedYield || property.currentYield) && (
+                    <tr>
+                      <th>想定利回り</th>
+                      <td>{property.assumedYield ? `${(property.assumedYield * 100).toFixed(2)}%` : '－'}</td>
+                      <th>現行利回り</th>
+                      <td>{property.currentYield ? `${(property.currentYield * 100).toFixed(2)}%` : '－'}</td>
+                    </tr>
+                  )}
+                  {property.rentalStatus && (
+                    <tr>
+                      <th>賃貸状況</th>
+                      <td>{property.rentalStatus === 'vacant' ? '空室' : 
+                          property.rentalStatus === 'occupied' ? '賃貸中' : 
+                          property.rentalStatus === 'available' ? '賃貸可能' : property.rentalStatus}</td>
+                      <th>建物内住戸数</th>
+                      <td>{property.numberOfUnitsInTheBuilding || '－'}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </>
+          )}
           
-          <table className="property-detail-table property-detail-table-grid">
-            <tbody>
-              <tr>
-                <th>{phrases?.constructionCompany  || japanesePhrases.constructionCompany }</th>
-                <td>{property.constructionCompany  || '－'}</td>
-                <th>{phrases?.designCompany  || japanesePhrases.designCompany }</th>
-                <td>{property.designCompany  || '－'}</td>            
-              </tr>
-              <tr>
-                <th>{phrases?.managementCompany   || japanesePhrases.managementCompany  }</th>
-                <td>{property.managementCompany   || '－'}</td>
-                <th>{phrases?.condominiumSalesCompany   || japanesePhrases.condominiumSalesCompany  }</th>
-                <td>{property.condominiumSalesCompany   || '－'}</td>            
-              </tr>                                                           
-            </tbody>
-          </table>
-
-          {/* Fifth table - for house only */}
-          <div className="property-detail-info-header">
-            <div className="property-detail-icon-container">
-              <i className="fas fa-calendar"></i>
-              <span>{japanesePhrases.house}</span>
-            </div>
-          </div>
-          <table className="property-detail-table property-detail-table-grid">
-            <tbody>
-              <tr>
-                <th>{phrases?.landArea || japanesePhrases.landArea}</th>
-                <td>{property.landArea || '－'}</td>
-                <th>{phrases?.buildingArea || japanesePhrases.buildingArea}</th>
-                <td>{property.buildingArea || '－'}</td>           
-              </tr>
-              <tr>
-                <th>{phrases?.buildingCoverageRatio || japanesePhrases.buildingCoverageRatio}</th>
-                <td>{property.buildingCoverageRatio || '－'}</td>
-                <th>{phrases?.floorAreaRatio || japanesePhrases.floorAreaRatio}</th>
-                <td>{property.floorAreaRatio || '－'}</td>           
-              </tr>
-              <tr>
-                <th>{phrases?.accessSituation || japanesePhrases.accessSituation}</th>
-                <td>{property.accessSituation || '－'}</td>
-                <th>{phrases?.areaOfUse || japanesePhrases.areaOfUse}</th>
-                <td>{property.areaOfUse || '－'}</td>           
-              </tr>   
-              <tr>
-                <th>{phrases?.urbanPlanning || japanesePhrases.urbanPlanning}</th>
-                <td>{property.urbanPlanning || '－'}</td>         
-              </tr>                             
-            </tbody>
-          </table>
-
-          {/* Sixth table - for 一棟アパート only */}
-          <div className="property-detail-info-header">
-            <div className="property-detail-icon-container">
-              <i className="fas fa-calendar"></i>
-              <span>{japanesePhrases.oneBuildingApartment}</span>
-            </div>
-          </div>      
-          <table className="property-detail-table property-detail-table-grid">
-            <tbody>
-              <tr>
-                <th>{phrases?.estimatedRent || japanesePhrases.estimatedRent}</th>
-                <td>{property.estimatedRent || '－'}</td>
-                <th>{phrases?.assumedYield || japanesePhrases.assumedYield}</th>
-                <td>{property.assumedYield || '－'}</td>           
-              </tr>
-              <tr>
-                <th>{phrases?.currentRent || japanesePhrases.currentRent}</th>
-                <td>{property.currentRent || '－'}</td>
-                <th>{phrases?.currentyield || japanesePhrases.currentyield}</th>
-                <td>{property.currentyield || '－'}</td>           
-              </tr>
-              <tr>
-                <th>{phrases?.rentalStatus || japanesePhrases.rentalStatus}</th>
-                <td>{property.rentalStatus || '－'}</td>
-                <th>{phrases?.numberOfUnitsInTheBuilding || japanesePhrases.numberOfUnitsInTheBuilding}</th>
-                <td>{property.numberOfUnitsInTheBuilding || '－'}</td>           
-              </tr>   
-              <tr>
-                <th>{phrases?.exclusiveAreaOfEachResidence || japanesePhrases.exclusiveAreaOfEachResidence}</th>
-                <td>{property.exclusiveAreaOfEachResidence || '－'}</td>          
-              </tr>   
-            </tbody>
-          </table> 
           {/* Seventh table - Transaction info */}
           <div className="property-detail-info-header">
             <div className="property-detail-icon-container">

@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence          
 )
 VALUES (
     'プレシス馬込ザ・テラス',
@@ -60,7 +66,26 @@ VALUES (
     '東京都',
     '23区',
     '大田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'エンゼルハイム南六郷第5',
@@ -112,7 +137,26 @@ VALUES (
     '東京都',
     '23区',
     '大田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ダイナシティ新中野',
@@ -164,7 +208,26 @@ VALUES (
     '東京都',
     '23区',
     '中野区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '西荻ニュースカイマンション',
@@ -216,7 +279,26 @@ VALUES (
     '東京都',
     '23区',
     '杉並区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '藤和南大塚コープ',
@@ -268,7 +350,26 @@ VALUES (
     '東京都',
     '23区',
     '豊島区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ブレシア東十条レジデンス',
@@ -320,7 +421,26 @@ VALUES (
     '東京都',
     '23区',
     '北区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'デュオシティ西日暮里ステーシア',
@@ -372,7 +492,26 @@ VALUES (
     '東京都',
     '23区',
     '荒川区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ダイアパレス成増Ⅲ',
@@ -424,7 +563,26 @@ VALUES (
     '東京都',
     '23区',
     '練馬区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'リビオ北千住',
@@ -476,7 +634,26 @@ VALUES (
     '東京都',
     '23区',
     '足立区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ダイアパレス立石',
@@ -528,5 +705,24 @@ VALUES (
     '東京都',
     '23区',
     '葛飾区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 );

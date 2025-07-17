@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,    
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence      
 )
 VALUES (
     'THE TOYOMI TOWER MARINE&SKY 東ウイング',
@@ -60,7 +66,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'THE TOYOMI TOWER MARINE&SKY 西ウイング',
@@ -112,7 +137,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'WORLD TOWER RESIDENCE',
@@ -164,7 +208,26 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '三田ガーデンヒルズ パークマンション棟',
@@ -216,7 +279,26 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'パークシティ高田馬場',
@@ -268,7 +350,26 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'パークタワー西新宿',
@@ -320,7 +421,26 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ルジェンテ小石川播磨坂',
@@ -372,7 +492,26 @@ VALUES (
     '東京都',
     '23区',
     '文京区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '住友不動産株式会社', -- condominiumSalesCompany
+    '住友不動産株式会社', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '住友不動産建物サービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'Brillia目黒大橋',
@@ -424,5 +563,24 @@ VALUES (
     '東京都',
     '23区',
     '目黒区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 );

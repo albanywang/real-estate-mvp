@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence         
 )
 VALUES (
     'シティタワーズ豊洲ザ・ツイン サウスタワー',
@@ -60,7 +66,26 @@ VALUES (
     '東京都',
     '23区',
     '江東区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'ライオンズミレス蔵前',
@@ -112,7 +137,26 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'      
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'クレアホームズフラン東京三ノ輪Ⅱ',
@@ -164,7 +208,26 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'     
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'リビオレゾン上野入谷ザ・テラス',
@@ -216,7 +279,26 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'      
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'ルフォン根岸三丁目',
@@ -268,7 +350,26 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     'ライオンズマンション曳舟 5階',
@@ -320,7 +421,26 @@ VALUES (
     '東京都',
     '23区',
     '墨田区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     'パークホームズ錦糸町コンフォートプレミア',
@@ -372,7 +492,26 @@ VALUES (
     '東京都',
     '23区',
     '墨田区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     'ソプラタワー',
@@ -424,7 +563,26 @@ VALUES (
     '東京都',
     '23区',
     '目黒区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     '秀和都立大レジデンス',
@@ -476,7 +634,26 @@ VALUES (
     '東京都',
     '23区',
     '目黒区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     'The目黒四季レジデンス',
@@ -528,5 +705,24 @@ VALUES (
     '東京都',
     '23区',
     '目黒区',
-    'for sale'       
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 );

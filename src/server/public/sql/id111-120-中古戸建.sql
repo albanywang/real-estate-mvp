@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence          
 )
 VALUES (
     '港区南青山4丁目 戸建',
@@ -60,7 +66,27 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    125.30, -- buildingArea (建物面積)
+    185.50, -- landArea (土地面積)
+    '南側幅員6m公道', -- accessSituation (接道状況)
+    60.00, -- buildingCoverageRatio (建ぺい率 60%)
+    150.00, -- floorAreaRatio (容積率 150%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '西麻布四丁目戸建',
@@ -112,7 +138,27 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    118.75, -- buildingArea (建物面積)
+    187.42, -- landArea (土地面積)
+    '東側幅員6m公道、南側幅員4m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '港区高輪1丁目',
@@ -164,7 +210,27 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    105.50, -- buildingArea (建物面積)
+    146.28, -- landArea (土地面積)
+    '北側幅員5m公道', -- accessSituation (接道状況)
+    60.00, -- buildingCoverageRatio (建ぺい率 60%)
+    200.00, -- floorAreaRatio (容積率 200%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '新宿区西落合4丁目 戸建',
@@ -216,7 +282,27 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    158.47, -- buildingArea (建物面積)
+    72.37, -- landArea (土地面積)
+    '西側幅員6m公道', -- accessSituation (接道状況)
+    80.00, -- buildingCoverageRatio (建ぺい率 80%)
+    400.00, -- floorAreaRatio (容積率 400%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '新宿6丁目 戸建',
@@ -268,7 +354,27 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    148.12, -- buildingArea (建物面積)
+    98.52, -- landArea (土地面積)
+    '南側幅員8m公道', -- accessSituation (接道状況)
+    80.00, -- buildingCoverageRatio (建ぺい率 80%)
+    500.00, -- floorAreaRatio (容積率 500%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '新宿区中落合2丁目 戸建',
@@ -320,7 +426,27 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    229.68, -- buildingArea (建物面積)
+    250.18, -- landArea (土地面積)
+    '東側幅員8m公道、南側幅員6m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '新宿区西新宿四丁目 借地権付き戸建',
@@ -372,7 +498,27 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    229.68, -- buildingArea (建物面積)
+    250.18, -- landArea (土地面積)
+    '東側幅員8m公道、南側幅員6m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '北新宿1丁目 戸建',
@@ -424,7 +570,27 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    229.68, -- buildingArea (建物面積)
+    250.18, -- landArea (土地面積)
+    '東側幅員8m公道、南側幅員6m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '本駒込5丁目 戸建',
@@ -476,7 +642,27 @@ VALUES (
     '東京都',
     '23区',
     '文京区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    229.68, -- buildingArea (建物面積)
+    250.18, -- landArea (土地面積)
+    '東側幅員8m公道、南側幅員6m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     '千駄木5丁目 戸建',
@@ -528,5 +714,25 @@ VALUES (
     '東京都',
     '23区',
     '文京区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    -- House-specific data
+    229.68, -- buildingArea (建物面積)
+    250.18, -- landArea (土地面積)
+    '東側幅員8m公道、南側幅員6m公道', -- accessSituation (接道状況)
+    50.00, -- buildingCoverageRatio (建ぺい率 50%)
+    100.00, -- floorAreaRatio (容積率 100%)
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 );

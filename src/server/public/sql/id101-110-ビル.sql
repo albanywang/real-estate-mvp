@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence          
 )
 VALUES (
     '千代田区外神田二丁目ビル',
@@ -60,7 +66,27 @@ VALUES (
     '東京都',
     '23区',
     '千代田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    4800000, -- estimatedRent (想定賃料年間: 40万/月)
+    0.0304, -- assumedYield (想定利回り: 3.04%)
+    NULL, -- currentRent (現行賃料年間: 空家のため無し)
+    NULL, -- currentYield (現行利回り: 空家のため無し)
+    'vacant', -- rentalStatus (賃貸状況: 空家)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    185.50 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)   
 ),
 (
     '千代田区鍛冶町一丁目ビル',
@@ -112,7 +138,27 @@ VALUES (
     '東京都',
     '23区',
     '千代田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    4200000, -- estimatedRent (想定賃料年間: 35万/月)
+    0.0311, -- assumedYield (想定利回り: 3.11%)
+    NULL, -- currentRent (現行賃料年間: 空家のため無し)
+    NULL, -- currentYield (現行利回り: 空家のため無し)
+    'vacant', -- rentalStatus (賃貸状況: 空家)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    187.42 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)    
 ),
 (
     'ウィンド小伝馬町ビル',
@@ -164,7 +210,27 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    3000000, -- estimatedRent (想定賃料年間: 25万/月)
+    0.0316, -- assumedYield (想定利回り: 3.16%)
+    NULL, -- currentRent (現行賃料年間: 空家のため無し)
+    NULL, -- currentYield (現行利回り: 空家のため無し)
+    'available', -- rentalStatus (賃貸状況: 賃貸可能)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    146.28 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)    
 ),
 (
     '東日本橋1丁目ビル',
@@ -216,7 +282,27 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7200000, -- estimatedRent (想定賃料年間: 60万/月)
+    0.0242, -- assumedYield (想定利回り: 2.42%)
+    NULL, -- currentRent (現行賃料年間: 空家のため無し)
+    NULL, -- currentYield (現行利回り: 空家のため無し)
+    'vacant', -- rentalStatus (賃貸状況: 空家)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    158.47 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)   
 ),
 (
     '港区麻布十番2丁目ビル',
@@ -268,7 +354,27 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    5400000, -- estimatedRent (想定賃料年間: 45万/月)
+    0.0292, -- assumedYield (想定利回り: 2.92%)
+    NULL, -- currentRent (現行賃料年間: 空家のため無し)
+    NULL, -- currentYield (現行利回り: 空家のため無し)
+    'vacant', -- rentalStatus (賃貸状況: 空家)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    148.12 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)    
 ),
 (
     'H・T南青山ビルディングⅢ',
@@ -320,7 +426,27 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7800000, -- estimatedRent (想定賃料年間: 65万/月)
+    0.0347, -- assumedYield (想定利回り: 3.47%)
+    7800000, -- currentRent (現行賃料年間: 65万/月 - 居住中なので自己使用評価)
+    0.0347, -- currentYield (現行利回り: 3.47%)
+    'occupied', -- rentalStatus (賃貸状況: 居住中)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    229.68 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)  
 ),
 (
     '台東区浅草橋2丁目ビル',
@@ -372,7 +498,27 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7800000, -- estimatedRent (想定賃料年間: 65万/月)
+    0.0347, -- assumedYield (想定利回り: 3.47%)
+    7800000, -- currentRent (現行賃料年間: 65万/月 - 居住中なので自己使用評価)
+    0.0347, -- currentYield (現行利回り: 3.47%)
+    'occupied', -- rentalStatus (賃貸状況: 居住中)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    229.68 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積) 
 ),
 (
     '台東区東上野5丁目 ビル',
@@ -424,7 +570,27 @@ VALUES (
     '東京都',
     '23区',
     '台東区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7800000, -- estimatedRent (想定賃料年間: 65万/月)
+    0.0347, -- assumedYield (想定利回り: 3.47%)
+    7800000, -- currentRent (現行賃料年間: 65万/月 - 居住中なので自己使用評価)
+    0.0347, -- currentYield (現行利回り: 3.47%)
+    'occupied', -- rentalStatus (賃貸状況: 居住中)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    229.68 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)  
 ),
 (
     '墨田区緑三丁目ビル',
@@ -476,7 +642,27 @@ VALUES (
     '東京都',
     '23区',
     '墨田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7800000, -- estimatedRent (想定賃料年間: 65万/月)
+    0.0347, -- assumedYield (想定利回り: 3.47%)
+    7800000, -- currentRent (現行賃料年間: 65万/月 - 居住中なので自己使用評価)
+    0.0347, -- currentYield (現行利回り: 3.47%)
+    'occupied', -- rentalStatus (賃貸状況: 居住中)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    229.68 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積)  
 ),
 (
     'AZ渋谷本町',
@@ -528,5 +714,25 @@ VALUES (
     '東京都',
     '23区',
     '墨田区',
-    'for sale'    
+    'for sale',    
+-- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    -- Rental/Investment data
+    7800000, -- estimatedRent (想定賃料年間: 65万/月)
+    0.0347, -- assumedYield (想定利回り: 3.47%)
+    7800000, -- currentRent (現行賃料年間: 65万/月 - 居住中なので自己使用評価)
+    0.0347, -- currentYield (現行利回り: 3.47%)
+    'occupied', -- rentalStatus (賃貸状況: 居住中)
+    1, -- numberOfUnitsInTheBuilding (建物内の住戸数: 戸建なので1)
+    229.68 -- exclusiveAreaOfEachResidence (各住戸の専有面積: 戸建なので全体面積) 
 );  

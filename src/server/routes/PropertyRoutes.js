@@ -780,7 +780,31 @@ class PropertyRoutes {
         others: propData.others || '',
         images: propData.images || [],
         createdAt: propData.createdat,
-        updatedAt: propData.updatedat
+        updatedAt: propData.updatedat,
+        // ADD THESE NEW FIELD MAPPINGS:
+        // Company fields
+        direction: propData.direction || '',
+        urbanPlanning: propData.urbanplanning || '',
+        condominiumSalesCompany: propData.condominiumsalescompany || '',
+        constructionCompany: propData.constructioncompany || '',
+        designCompany: propData.designcompany || '',
+        managementCompany: propData.managementcompany || '',
+        
+        // Building/Land fields
+        buildingArea: parseFloat(propData.buildingarea) || null,
+        landArea: parseFloat(propData.landarea) || null,
+        accessSituation: propData.accesssituation || '',
+        buildingCoverageRatio: parseFloat(propData.buildingcoverageratio) || null,
+        floorAreaRatio: parseFloat(propData.floorarearatio) || null,
+        
+        // Investment/Rental fields
+        estimatedRent: parseFloat(propData.estimatedrent) || null,
+        assumedYield: parseFloat(propData.assumedyield) || null,
+        currentRent: parseFloat(propData.currentrent) || null,
+        currentYield: parseFloat(propData.currentyield) || null,
+        rentalStatus: propData.rentalstatus || '',
+        numberOfUnitsInTheBuilding: parseInt(propData.numberofunitsinthebuilding) || null,
+        exclusiveAreaOfEachResidence: parseFloat(propData.exclusiveareaofeachresidence) || null
       }));
 
       const pagination = {

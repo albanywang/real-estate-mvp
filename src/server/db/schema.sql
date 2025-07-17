@@ -1,11 +1,10 @@
---- drop table properties CASCADE
 -- Enable PostGIS extension (run this once in your database if not already enabled)
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- Drop existing table and all dependencies
 DROP TABLE IF EXISTS properties CASCADE;
 
--- Create the enhanced properties table with walkDistance field
+-- Create the enhanced properties table with all new fields
 CREATE TABLE properties (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -52,6 +51,27 @@ CREATE TABLE properties (
     facilitiesServices TEXT, -- Available facilities and services
     others TEXT, -- Other features
     images TEXT[], -- Array of image URLs or paths
+    
+    -- NEW FIELDS ADDED:
+    direction VARCHAR(100), -- Property direction/orientation (e.g., "South-facing", "北向き")
+    urbanPlanning VARCHAR(200), -- Urban planning designation
+    condominiumSalesCompany VARCHAR(200), -- Condominium sales company
+    constructionCompany VARCHAR(200), -- Construction company
+    designCompany VARCHAR(200), -- Design company  
+    managementCompany VARCHAR(200), -- Management company
+    buildingArea DECIMAL(10, 2), -- Building area in square meters
+    landArea DECIMAL(10, 2), -- Land area in square meters
+    accessSituation TEXT, -- Access situation details
+    buildingCoverageRatio DECIMAL(5, 2), -- Building coverage ratio as percentage
+    floorAreaRatio DECIMAL(5, 2), -- Floor area ratio as percentage
+    estimatedRent DECIMAL(10, 2), -- Estimated monthly rent
+    assumedYield DECIMAL(5, 4), -- Assumed yield as decimal (e.g., 0.0350 for 3.5%)
+    currentRent DECIMAL(10, 2), -- Current monthly rent
+    currentYield DECIMAL(5, 4), -- Current yield as decimal (e.g., 0.0420 for 4.2%)
+    rentalStatus VARCHAR(50), -- Rental status (e.g., "vacant", "occupied", "available")
+    numberOfUnitsInTheBuilding INTEGER, -- Number of units in the building
+    exclusiveAreaOfEachResidence DECIMAL(10, 2), -- Exclusive area of each residence
+    
     -- Hierarchical area columns and zipcode
     zipcode VARCHAR(8), -- Format: NNN-NNNN
     area_level_1 VARCHAR(50), -- 首都圏 (Metropolitan area)
@@ -79,10 +99,17 @@ CREATE INDEX IF NOT EXISTS idx_properties_area_level_3 ON properties(area_level_
 CREATE INDEX IF NOT EXISTS idx_properties_area_level_4 ON properties(area_level_4);
 CREATE INDEX IF NOT EXISTS idx_properties_status ON properties(status);
 
+-- Create indices for new financial/rental fields
+CREATE INDEX IF NOT EXISTS idx_properties_estimatedRent ON properties(estimatedRent);
+CREATE INDEX IF NOT EXISTS idx_properties_currentRent ON properties(currentRent);
+CREATE INDEX IF NOT EXISTS idx_properties_assumedYield ON properties(assumedYield);
+CREATE INDEX IF NOT EXISTS idx_properties_currentYield ON properties(currentYield);
+CREATE INDEX IF NOT EXISTS idx_properties_rentalStatus ON properties(rentalStatus);
+
 -- Create composite index for hierarchical area searches
 CREATE INDEX IF NOT EXISTS idx_properties_area_hierarchy ON properties(area_level_1, area_level_2, area_level_3, area_level_4);
 
--- Enhanced search function with walkDistance parameter
+-- Enhanced search function with new fields
 CREATE OR REPLACE FUNCTION search_properties(
     searchTitle VARCHAR DEFAULT NULL,
     minPrice DECIMAL DEFAULT NULL,
@@ -96,14 +123,22 @@ CREATE OR REPLACE FUNCTION search_properties(
     searchTransportation VARCHAR DEFAULT NULL,
     searchYearBuilt VARCHAR DEFAULT NULL,
     -- Area hierarchy parameters
-    searchAreaLevel1 VARCHAR DEFAULT NULL, -- 首都圏
-    searchAreaLevel2 VARCHAR DEFAULT NULL, -- 東京都
-    searchAreaLevel3 VARCHAR DEFAULT NULL, -- 23区
-    searchAreaLevel4 VARCHAR DEFAULT NULL, -- 千代田区
+    searchAreaLevel1 VARCHAR DEFAULT NULL,
+    searchAreaLevel2 VARCHAR DEFAULT NULL,
+    searchAreaLevel3 VARCHAR DEFAULT NULL,
+    searchAreaLevel4 VARCHAR DEFAULT NULL,
     searchZipcode VARCHAR DEFAULT NULL,
     searchStatus VARCHAR DEFAULT NULL,
     -- Walk distance parameter
-    maxWalkDistance INTEGER DEFAULT NULL
+    maxWalkDistance INTEGER DEFAULT NULL,
+    -- New search parameters
+    searchDirection VARCHAR DEFAULT NULL,
+    searchUrbanPlanning VARCHAR DEFAULT NULL,
+    minEstimatedRent DECIMAL DEFAULT NULL,
+    maxEstimatedRent DECIMAL DEFAULT NULL,
+    minAssumedYield DECIMAL DEFAULT NULL,
+    maxAssumedYield DECIMAL DEFAULT NULL,
+    searchRentalStatus VARCHAR DEFAULT NULL
 )
 RETURNS SETOF properties AS $$
 BEGIN
@@ -131,6 +166,14 @@ BEGIN
         AND (searchStatus IS NULL OR p.status = searchStatus)
         -- Walk distance filter
         AND (maxWalkDistance IS NULL OR p.walkDistance <= maxWalkDistance)
+        -- New filters
+        AND (searchDirection IS NULL OR p.direction ILIKE '%' || searchDirection || '%')
+        AND (searchUrbanPlanning IS NULL OR p.urbanPlanning ILIKE '%' || searchUrbanPlanning || '%')
+        AND (minEstimatedRent IS NULL OR p.estimatedRent >= minEstimatedRent)
+        AND (maxEstimatedRent IS NULL OR p.estimatedRent <= maxEstimatedRent)
+        AND (minAssumedYield IS NULL OR p.assumedYield >= minAssumedYield)
+        AND (maxAssumedYield IS NULL OR p.assumedYield <= maxAssumedYield)
+        AND (searchRentalStatus IS NULL OR p.rentalStatus = searchRentalStatus)
     ORDER BY p.createdAt DESC;
 END;
 $$ LANGUAGE plpgsql;
@@ -189,7 +232,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Sample property data with walkDistance field
+-- Sample property data with all new fields
 INSERT INTO properties (
     title, price, pricePerSquareMeter, address, layout, area, floorInfo,
     structure, managementFee, areaOfUse, transportation, walkDistance, location, propertyType,
@@ -199,6 +242,12 @@ INSERT INTO properties (
     currentSituation, extraditionPossibleDate, transactionMode, propertyNumber,
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
+    -- New fields
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence,
     -- Area hierarchy and zipcode
     zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status
 )
@@ -247,6 +296,25 @@ VALUES (
     '全居室収納、ウォークインクローゼット、収納スペース、室内洗濯機置場、シューズインクローゼット、都市ガス',
     'ペット用施設、キッズルーム、フィットネス施設、共用パーティルーム、エレベーター',
     ARRAY['/images/id1-1.jpg', '/images/id1-2.jpg', '/images/id1-3.jpg', '/images/id1-4.jpg', '/images/id1-5.jpg'],
+    -- New field values
+    '北向き', -- direction
+    '準工業地域', -- urbanPlanning
+    '三井不動産レジデンシャル株式会社', -- condominiumSalesCompany
+    '株式会社大林組', -- constructionCompany
+    '株式会社日建設計', -- designCompany
+    '三井不動産レジデンシャルサービス株式会社', -- managementCompany
+    73.58, -- buildingArea
+    NULL, -- landArea (for condominiums)
+    '東京都大江戸線勝どき駅より徒歩12分。晴海通り沿いの好立地', -- accessSituation
+    NULL, -- buildingCoverageRatio (for condominiums)
+    NULL, -- floorAreaRatio (for condominiums)
+    280000, -- estimatedRent
+    0.0240, -- assumedYield (2.4%)
+    NULL, -- currentRent
+    NULL, -- currentYield
+    'vacant', -- rentalStatus
+    883, -- numberOfUnitsInTheBuilding
+    73.58, -- exclusiveAreaOfEachResidence
     -- Area hierarchy and zipcode data
     '104-0053',
     '首都圏',
@@ -256,40 +324,31 @@ VALUES (
     'for sale'
 );
 
+-- Example queries to test new fields:
 
--- Example queries to test walkDistance functionality:
-
--- Query 1: Find properties within 5 minutes walk
--- SELECT id, title, walkDistance, transportation, address 
+-- Query 1: Find properties with high yield potential
+-- SELECT title, price, estimatedRent, assumedYield, direction
 -- FROM properties 
--- WHERE walkDistance <= 5;
+-- WHERE assumedYield > 0.02
+-- ORDER BY assumedYield DESC;
 
--- Query 2: Use the search function with walkDistance
+-- Query 2: Search properties by direction
+-- SELECT * FROM search_properties(searchDirection := '南向き');
+
+-- Query 3: Find properties by rental status
+-- SELECT * FROM search_properties(searchRentalStatus := 'vacant');
+
+-- Query 4: Search by yield range
 -- SELECT * FROM search_properties(
---     maxWalkDistance := 10,
---     searchAreaLevel4 := '港区'
+--     minAssumedYield := 0.015,
+--     maxAssumedYield := 0.030
 -- );
 
--- Query 3: Get statistics on walk distances
+-- Query 5: Get yield statistics
 -- SELECT 
---     MIN(walkDistance) as min_walk,
---     MAX(walkDistance) as max_walk,
---     AVG(walkDistance)::INTEGER as avg_walk,
+--     AVG(assumedYield) as avg_yield,
+--     MIN(assumedYield) as min_yield,
+--     MAX(assumedYield) as max_yield,
 --     COUNT(*) as total_properties
 -- FROM properties 
--- WHERE walkDistance IS NOT NULL;
-
--- Query 4: Group properties by walk distance ranges
--- SELECT 
---     CASE 
---         WHEN walkDistance <= 5 THEN '1-5 minutes'
---         WHEN walkDistance <= 10 THEN '6-10 minutes'
---         WHEN walkDistance <= 15 THEN '11-15 minutes'
---         WHEN walkDistance <= 20 THEN '16-20 minutes'
---         ELSE '20+ minutes'
---     END as walk_range,
---     COUNT(*) as property_count
--- FROM properties 
--- WHERE walkDistance IS NOT NULL
--- GROUP BY walk_range
--- ORDER BY MIN(walkDistance);
+-- WHERE assumedYield IS NOT NULL;

@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence           
 )
 VALUES (
     'プラウドタワー渋谷 18階 3LDK',
@@ -60,7 +66,26 @@ VALUES (
     '東京都',
     '23区',
     '渋谷区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'パークシティ中央湊 12階 2LDK',
@@ -112,7 +137,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale' -- Property status       
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 ),
 (
     'ザ・千代田麹町 25階 1SLDK',
@@ -164,7 +208,26 @@ VALUES (
     '東京都',
     '23区',
     '千代田区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'グランドメゾン白金台 6階 4LDK',
@@ -216,7 +279,26 @@ VALUES (
     '東京都',
     '23区',
     '千代田区',
-    'for sale' -- Property status      
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'ブリリア辰巳キャナルテラス 14階 3LDK',
@@ -268,7 +350,26 @@ VALUES (
     '東京都',
     '23区',
     '江東区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'ブリリア門前仲町 20階 2LDK',
@@ -320,7 +421,26 @@ VALUES (
     '東京都',
     '23区',
     '江東区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'ザ・パークハウス西新宿タワー60 45階 1LDK',
@@ -372,7 +492,26 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale' -- Property status      
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'ブリリア大井町ラヴィアンタワー 28階 3LDK',
@@ -424,7 +563,26 @@ VALUES (
     '東京都',
     '23区',
     '品川区',
-    'for sale' -- Property status      
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'パークタワー晴海 32階 2SLDK',
@@ -476,7 +634,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 ('ブリリア銀座タワー 38階 2LDK', 425000000, 4946581, '東京都中央区銀座8丁目15番2号', '2LDK', 85.9, '38階 / 地上45階建', 'SRC', 65200, '商業地域', '東京メトロ銀座線 / 銀座駅 徒歩4分', 4, ST_SetSRID(ST_MakePoint(139.76143895569635,35.65438372664328), 4326), '中古マンション', '2020年12月', 10.5, 312, 68900, 58200, NULL, NULL, '管理費込み、修繕積立金別途', NULL, '有', '有', NULL, '不可', '所有権', '全部委託／日勤', '届出不要', '空家', '相談', '専任媒介', 1015229210, '2025-05-29', '2025-06-29', '銀座中心地、プレミアム立地、夜景眺望', NULL, '有', 'アイランドキッチン', 'バス・トイレ別', 'コンシェルジュ、スカイラウンジ、ゲストルーム、宅配ボックス', '24時間セキュリティ、ルームサービス、クリーニング取次', ARRAY['/images/id30-1.jpg', '/images/id30-2.jpg', '/images/id30-3.jpg', '/images/id30-4.jpg', '/images/id30-5.jpg'],     
     '104-0061',
@@ -484,7 +661,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale' -- Property status 
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence  
     );
 
 
