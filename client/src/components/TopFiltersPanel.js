@@ -20,7 +20,6 @@ const TopFiltersPanel = ({
   onAddressSearch
 }) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  // Add state for selected area option
   const [selectedAreaOption, setSelectedAreaOption] = useState('');
   const [selectedPriceOption, setSelectedPriceOption] = useState('');
 
@@ -28,13 +27,42 @@ const TopFiltersPanel = ({
     console.log('TopFiltersPanel props:', { onAddressSearch, type: typeof onAddressSearch });
   }, [onAddressSearch]);
 
+  // Add useEffect to sync selected options with filters
+  useEffect(() => {
+    // Sync area option
+    if (filters.maxArea === '30') {
+      setSelectedAreaOption('under30');
+    } else if (filters.minArea === '30') {
+      setSelectedAreaOption('30plus');
+    } else if (filters.minArea) {
+      setSelectedAreaOption(filters.minArea);
+    } else {
+      setSelectedAreaOption('');
+    }
+
+    // Sync price option
+    if (filters.maxPrice === '1000') {
+      setSelectedPriceOption('under1000');
+    } else if (filters.minPrice === '1000') {
+      setSelectedPriceOption('1000plus');
+    } else if (filters.minPrice) {
+      setSelectedPriceOption(filters.minPrice);
+    } else {
+      setSelectedPriceOption('');
+    }
+  }, [filters.minArea, filters.maxArea, filters.minPrice, filters.maxPrice]);
+
   const handleFilterChange = useCallback((name, value) => {
     console.log(`🔍 Filter changed: ${name} = ${value}`);
     const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
-  }, [filters, setFilters]);
+    
+    // Call applyFilters if it exists to trigger search
+    if (applyFilters && typeof applyFilters === 'function') {
+      applyFilters(newFilters);
+    }
+  }, [filters, setFilters, applyFilters]);
 
-  // Add new handleAreaChange function
   const handleAreaChange = useCallback((value) => {
     console.log(`🔍 Area filter changed: ${value}`);
     const newFilters = { ...filters, minArea: '', maxArea: '' };
@@ -46,10 +74,14 @@ const TopFiltersPanel = ({
       newFilters.minArea = value;
     }
     setFilters(newFilters);
-    setSelectedAreaOption(value); // Track selected option
-  }, [filters, setFilters]);
+    setSelectedAreaOption(value);
+    
+    // Call applyFilters if it exists
+    if (applyFilters && typeof applyFilters === 'function') {
+      applyFilters(newFilters);
+    }
+  }, [filters, setFilters, applyFilters]);
   
-  // Add handlePriceChange function
   const handlePriceChange = useCallback((value) => {
     console.log(`🔍 Price filter changed: ${value}`);
     const newFilters = { ...filters, minPrice: '', maxPrice: '' };
@@ -62,7 +94,24 @@ const TopFiltersPanel = ({
     }
     setFilters(newFilters);
     setSelectedPriceOption(value);
-  }, [filters, setFilters]);
+    
+    // Call applyFilters if it exists
+    if (applyFilters && typeof applyFilters === 'function') {
+      applyFilters(newFilters);
+    }
+  }, [filters, setFilters, applyFilters]);
+
+  // Add specific handler for walkDistance
+  const handleWalkDistanceChange = useCallback((value) => {
+    console.log(`🔍 Walk distance filter changed: ${value}`);
+    const newFilters = { ...filters, walkDistance: value };
+    setFilters(newFilters);
+    
+    // Call applyFilters if it exists
+    if (applyFilters && typeof applyFilters === 'function') {
+      applyFilters(newFilters);
+    }
+  }, [filters, setFilters, applyFilters]);
 
   const clearAllFilters = useCallback(() => {
     console.log('🧹 Clearing all filters');
@@ -86,7 +135,12 @@ const TopFiltersPanel = ({
     setFilters(clearedFilters);
     setSelectedAreaOption(''); 
     setSelectedPriceOption('');
-  }, [setFilters]);
+    
+    // Call applyFilters with cleared filters
+    if (applyFilters && typeof applyFilters === 'function') {
+      applyFilters(clearedFilters);
+    }
+  }, [setFilters, applyFilters]);
 
   const hasActiveFilters = Object.values(filters).some(value => 
     value !== '' && value !== false
@@ -95,13 +149,6 @@ const TopFiltersPanel = ({
   const formatPrice = (price) => {
     if (!price) return '';
     return `${parseInt(price).toLocaleString()}万`;
-  };
-
-  const handleClearLocationSearch = () => {
-    console.log('🧹 Clearing selected location');
-    // This should clear the selectedLocation state in the parent
-    // Assuming selectedLocation is managed with useState in a higher component
-    // If not, you need to pass a setter or manage it here with useState
   };
 
   return (
@@ -146,7 +193,7 @@ const TopFiltersPanel = ({
           <div style={{ flex: '0 0 auto', minWidth: '140px' }}>
             <select
               value={filters.walkDistance || ''}
-              onChange={(e) => handleFilterChange('walkDistance', e.target.value)}
+              onChange={(e) => handleWalkDistanceChange(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -292,14 +339,14 @@ const TopFiltersPanel = ({
             )}
             {filters.walkDistance && (
               <span style={{
-                background: '#f3f4f6',
-                color: '#374151',
+                background: '#f0f9ff',
+                color: '#0c4a6e',
                 padding: '0.25rem 0.75rem',
                 borderRadius: '1rem',
                 fontSize: '0.75rem',
                 fontWeight: '500'
               }}>
-                distance: {walkDistanceOptions.find(opt => opt.value === filters.walkDistance)?.label || 'Unknown Distance'}
+                🚶 {walkDistanceOptions.find(opt => opt.value === filters.walkDistance)?.label || 'Unknown Distance'}
               </span>
             )}
             {filters.minPrice && (
