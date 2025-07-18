@@ -372,7 +372,13 @@ const App = () => {
     }
     
     if (filters.walkDistance) {
-      filtered = filtered.filter(p => p.status === filters.walkDistance);
+      console.log('🔍 Filtering by walkDistance:', filters.walkDistance);
+      const maxWalkDistance = parseInt(filters.walkDistance, 10);
+      
+      filtered = filtered.filter(p => {
+        const walkDistance = p.walkdistance; // Use the correct field name
+        return walkDistance !== null && walkDistance !== undefined && walkDistance <= maxWalkDistance;
+      });
     }
     
     if (filters.minPrice) {
