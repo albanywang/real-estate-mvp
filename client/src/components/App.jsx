@@ -374,11 +374,15 @@ const App = () => {
     if (filters.walkDistance) {
       console.log('🔍 Filtering by walkDistance:', filters.walkDistance);
       const maxWalkDistance = parseInt(filters.walkDistance, 10);
+      console.log('🔍 Max walk distance (minutes):', maxWalkDistance);
       
       filtered = filtered.filter(p => {
-        const walkDistance = p.walkdistance; // Use the correct field name
-        return walkDistance !== null && walkDistance !== undefined && walkDistance <= maxWalkDistance;
+        const walkDistance = p.walkdistance;
+        const isValid = walkDistance !== null && walkDistance !== undefined && walkDistance <= maxWalkDistance;
+        return isValid;
       });
+      
+      console.log(`🔍 After walkDistance filter: ${filtered.length} properties remaining`);
     }
     
     if (filters.minPrice) {
