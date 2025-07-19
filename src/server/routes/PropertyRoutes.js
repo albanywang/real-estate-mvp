@@ -740,6 +740,7 @@ class PropertyRoutes {
         areaOfUse: propData.areaofuse || '',
         transportation: propData.transportation || '',
         location: propData.location || null,
+        walkDistance: parseInt(propData.walkdistance) || null,
         
         // FIXED: Use the actual database column names
         propertyType: propData.propertytype || '',
