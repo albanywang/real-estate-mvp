@@ -376,9 +376,30 @@ const App = () => {
       const maxWalkDistance = parseInt(filters.walkDistance, 10);
       console.log('🔍 Max walk distance (minutes):', maxWalkDistance);
       
+      // DEBUG: Check all walkdistance values in your properties
+      console.log('🔍 ALL walkdistance values:', propertiesToFilter.map(p => ({
+        id: p.id,
+        title: p.title,
+        walkdistance: p.walkdistance,
+        walkdistanceType: typeof p.walkdistance,
+        transportation: p.transportation
+      })));
+      
+      // DEBUG: Check unique walkdistance values
+      const uniqueWalkDistances = [...new Set(propertiesToFilter.map(p => p.walkdistance))];
+      console.log('🔍 Unique walkdistance values:', uniqueWalkDistances);
+      
+      // DEBUG: Count null/undefined values
+      const nullCount = propertiesToFilter.filter(p => p.walkdistance === null || p.walkdistance === undefined).length;
+      console.log('🔍 Properties with null/undefined walkdistance:', nullCount, 'out of', propertiesToFilter.length);
+      
       filtered = filtered.filter(p => {
         const walkDistance = p.walkdistance;
         const isValid = walkDistance !== null && walkDistance !== undefined && walkDistance <= maxWalkDistance;
+        
+        // DEBUG: Log each property's filter result
+        console.log(`🔍 Property ${p.id}: walkdistance=${walkDistance} (${typeof walkDistance}), max=${maxWalkDistance}, valid=${isValid}`);
+        
         return isValid;
       });
       
