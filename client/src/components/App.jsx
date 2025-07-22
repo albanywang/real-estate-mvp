@@ -23,6 +23,17 @@ const App = () => {
   const [apiStats, setApiStats] = useState({ total: 0, count: 0 });
   const [fullscreenViewerReady, setFullscreenViewerReady] = useState(false);
   
+  // Function to open the login popup
+  const handleOpenLogin = (e) => {
+    e.preventDefault(); // Prevent default anchor behavior
+    setIsLoginPopupOpen(true);
+  };
+
+  // Function to close the login popup
+  const handleCloseLogin = () => {
+    setIsLoginPopupOpen(false);
+  };
+
   // Location-based search state
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationProperties, setLocationProperties] = useState([]);
@@ -666,7 +677,14 @@ const App = () => {
             </a>
             <a
               href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
+              onClick={handleOpenLogin}
+              style={{ 
+                textDecoration: 'none', 
+                color: '#6b7280', 
+                fontWeight: '500', 
+                whiteSpace: 'nowrap',
+                cursor: 'pointer' // Add cursor pointer for better UX
+              }}
             >
               {japanesePhrases.signIn}
             </a>
@@ -674,6 +692,12 @@ const App = () => {
         </div>
       </header>
 
+      {/* LoginPopup component */}
+      <LoginPopup 
+        isOpen={isLoginPopupOpen} 
+        onClose={handleCloseLogin} 
+      />
+      
       {/* Top Filters Panel */}
       <TopFiltersPanel
         filters={filters}
