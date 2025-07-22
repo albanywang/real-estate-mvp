@@ -692,12 +692,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* LoginPopup component */}
-      <LoginPopup 
-        isOpen={isLoginPopupOpen} 
-        onClose={handleCloseLogin} 
-      />
-      
       {/* Top Filters Panel */}
       <TopFiltersPanel
         filters={filters}
