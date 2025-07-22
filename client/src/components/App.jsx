@@ -489,9 +489,6 @@ const App = () => {
     }
   }, [locationProperties, searchMode]);
 
-  const closeLoginPopup = () => {
-    setIsLoginPopupOpen(false);
-  };
 
   // Retry function for error state
   const retryLoading = async () => {
@@ -953,7 +950,7 @@ const App = () => {
 
       <LoginPopup
         isOpen={isLoginPopupOpen}
-        onClose={closeLoginPopup}
+        onClose={handleCloseLogin}
       />
       
       <PropertyDetailPopup
