@@ -8,6 +8,7 @@ import LoginPopup from './LoginPopup';
 import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
+import UnderConstructionPopup from './UnderConstructionPopup';
 
 // Main App Component
 const App = () => {
@@ -27,6 +28,12 @@ const App = () => {
   const [locationProperties, setLocationProperties] = useState([]);
   const [searchMode, setSearchMode] = useState('all'); // 'all' or 'location'
   const [sortOption, setSortOption] = useState('createdAt-desc');
+  const [popup, setPopup] = useState({
+    isOpen: false,
+    type: 'construction',
+    title: '',
+    message: ''
+  });
 
   const sortOptions = [
     { value: 'createdAt-desc', label: '登録: 新しい順' },
@@ -617,13 +624,43 @@ const App = () => {
           >
             <a
               href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
+              onClick={(e) => {
+                e.preventDefault();
+                setPopup({
+                  isOpen: true,
+                  type: 'construction',
+                  title: japanesePhrases.advertisement,
+                  message: 'この機能は現在開発中です。'
+                });
+              }}
+              style={{ 
+                textDecoration: 'none', 
+                color: '#6b7280', 
+                fontWeight: '500', 
+                whiteSpace: 'nowrap',
+                cursor: 'pointer'
+              }}
             >
               {japanesePhrases.advertisement}
             </a>
             <a
               href="#"
-              style={{ textDecoration: 'none', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap' }}
+              onClick={(e) => {
+                e.preventDefault();
+                setPopup({
+                  isOpen: true,
+                  type: 'coming-soon',
+                  title: japanesePhrases.help,
+                  message: 'ヘルプセンターをまもなく開設予定です！'
+                });
+              }}
+              style={{ 
+                textDecoration: 'none', 
+                color: '#6b7280', 
+                fontWeight: '500', 
+                whiteSpace: 'nowrap',
+                cursor: 'pointer'
+              }}
             >
               {japanesePhrases.help}
             </a>
@@ -909,6 +946,13 @@ const App = () => {
         fullscreenViewerReady={fullscreenViewerReady}
       />
 
+      <UnderConstructionPopup
+        isOpen={popup.isOpen}
+        onClose={() => setPopup({...popup, isOpen: false})}
+        type={popup.type}
+        title={popup.title}
+        message={popup.message}
+      />
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
