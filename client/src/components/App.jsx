@@ -10,6 +10,7 @@ import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
 
+window.japanesePhrases = japanesePhrases;
 
 // Main App Component
 const App = () => {
