@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../assets/styles/login_popup.css'; // Add this line
 
 // Login Popup Component - FIXED Hook Order Issue
 const LoginPopup = ({ isOpen, onClose }) => {
