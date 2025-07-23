@@ -89,189 +89,36 @@ const LoginPopup = ({ isOpen, onClose }) => {
     }
   };
   
-  // Inline styles
-  const styles = {
-    overlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 9999
-    },
-    content: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      padding: '2rem',
-      width: '90%',
-      maxWidth: '420px',
-      maxHeight: '90vh',
-      overflow: 'auto',
-      position: 'relative',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-    },
-    closeButton: {
-      position: 'absolute',
-      top: '1rem',
-      right: '1rem',
-      background: 'none',
-      border: 'none',
-      fontSize: '1.5rem',
-      cursor: 'pointer',
-      color: '#6b7280',
-      padding: '0.25rem',
-      borderRadius: '50%',
-      width: '32px',
-      height: '32px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    header: {
-      textAlign: 'center',
-      marginBottom: '2rem'
-    },
-    title: {
-      fontSize: '1.5rem',
-      fontWeight: 'bold',
-      color: '#1f2937',
-      margin: 0
-    },
-    tabsContainer: {
-      display: 'flex',
-      marginBottom: '2rem',
-      backgroundColor: '#f3f4f6',
-      borderRadius: '8px',
-      padding: '4px'
-    },
-    tab: {
-      flex: 1,
-      padding: '0.75rem',
-      border: 'none',
-      backgroundColor: 'transparent',
-      cursor: 'pointer',
-      borderRadius: '6px',
-      fontWeight: '500',
-      transition: 'all 0.2s',
-      color: '#6b7280'
-    },
-    activeTab: {
-      flex: 1,
-      padding: '0.75rem',
-      border: 'none',
-      backgroundColor: 'white',
-      cursor: 'pointer',
-      borderRadius: '6px',
-      fontWeight: '500',
-      transition: 'all 0.2s',
-      color: '#3b82f6',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-    },
-    formGroup: {
-      marginBottom: '1rem'
-    },
-    label: {
-      display: 'block',
-      marginBottom: '0.5rem',
-      color: '#374151',
-      fontWeight: '500',
-      fontSize: '0.875rem'
-    },
-    input: {
-      width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      fontSize: '1rem',
-      transition: 'border-color 0.2s',
-      boxSizing: 'border-box'
-    },
-    forgotLink: {
-      display: 'block',
-      textAlign: 'right',
-      color: '#3b82f6',
-      textDecoration: 'none',
-      fontSize: '0.875rem',
-      marginBottom: '1rem'
-    },
-    submitButton: {
-      width: '100%',
-      padding: '0.75rem',
-      backgroundColor: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '1rem',
-      fontWeight: '600',
-      marginBottom: '1rem',
-      transition: 'background-color 0.2s'
-    },
-    divider: {
-      textAlign: 'center',
-      margin: '1.5rem 0',
-      color: '#6b7280',
-      fontSize: '0.875rem',
-      position: 'relative'
-    },
-    socialContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem'
-    },
-    socialButton: {
-      width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '0.875rem',
-      backgroundColor: 'white',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.5rem',
-      transition: 'border-color 0.2s'
-    },
-    socialIcon: {
-      width: '16px',
-      height: '16px',
-      display: 'inline-block'
-    }
-  };
+  // CSS classes will be used instead of inline styles
   
   return (
-    <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={styles.content}>
-        <button style={styles.closeButton} onClick={onClose}>×</button>
+    <div className="login-popup-overlay" onClick={handleOverlayClick}>
+      <div className="login-popup-content">
+        <button className="login-popup-close" onClick={onClose}>×</button>
         
-        <div style={styles.header}>
-          <h2 style={styles.title}>{japanesePhrases.welcome}</h2>
+        <div className="login-popup-header">
+          <h2>{japanesePhrases.welcome}</h2>
         </div>
         
-        <div style={styles.tabsContainer}>
+        <div className="login-popup-tabs">
           <div 
-            style={activeTab === 'signin' ? styles.activeTab : styles.tab}
+            className={`login-popup-tab ${activeTab === 'signin' ? 'active' : ''}`}
             onClick={() => setActiveTab('signin')}
           >
             {japanesePhrases.signIn}
           </div>
           <div 
-            style={activeTab === 'register' ? styles.activeTab : styles.tab}
+            className={`login-popup-tab ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => setActiveTab('register')}
           >
             {japanesePhrases.newAccount}
           </div>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form className="login-popup-form" onSubmit={handleSubmit}>
           {activeTab === 'register' && (
-            <div style={styles.formGroup}>
-              <label htmlFor="name" style={styles.label}>{japanesePhrases.fullName}</label>
+            <div className="login-popup-form-group">
+              <label htmlFor="name">{japanesePhrases.fullName}</label>
               <input 
                 type="text" 
                 id="name" 
@@ -280,13 +127,12 @@ const LoginPopup = ({ isOpen, onClose }) => {
                 onChange={handleChange}
                 placeholder={japanesePhrases.fullNamePlaceholder}
                 required={activeTab === 'register'}
-                style={styles.input}
               />
             </div>
           )}
           
-          <div style={styles.formGroup}>
-            <label htmlFor="email" style={styles.label}>{japanesePhrases.email}</label>
+          <div className="login-popup-form-group">
+            <label htmlFor="email">{japanesePhrases.email}</label>
             <input 
               type="email" 
               id="email" 
@@ -295,12 +141,11 @@ const LoginPopup = ({ isOpen, onClose }) => {
               onChange={handleChange}
               placeholder={japanesePhrases.emailPlaceholder}
               required
-              style={styles.input}
             />
           </div>
           
-          <div style={styles.formGroup}>
-            <label htmlFor="password" style={styles.label}>{japanesePhrases.password}</label>
+          <div className="login-popup-form-group">
+            <label htmlFor="password">{japanesePhrases.password}</label>
             <input 
               type="password" 
               id="password" 
@@ -309,13 +154,12 @@ const LoginPopup = ({ isOpen, onClose }) => {
               onChange={handleChange}
               placeholder={activeTab === 'signin' ? japanesePhrases.passwordPlaceholder : japanesePhrases.createPasswordPlaceholder}
               required
-              style={styles.input}
             />
           </div>
           
           {activeTab === 'register' && (
-            <div style={styles.formGroup}>
-              <label htmlFor="confirmPassword" style={styles.label}>{japanesePhrases.confirmPassword}</label>
+            <div className="login-popup-form-group">
+              <label htmlFor="confirmPassword">{japanesePhrases.confirmPassword}</label>
               <input 
                 type="password" 
                 id="confirmPassword" 
@@ -324,32 +168,31 @@ const LoginPopup = ({ isOpen, onClose }) => {
                 onChange={handleChange}
                 placeholder={japanesePhrases.confirmPasswordPlaceholder}
                 required={activeTab === 'register'}
-                style={styles.input}
               />
             </div>
           )}
           
           {activeTab === 'signin' && (
-            <div>
-              <a href="#" style={styles.forgotLink}>{japanesePhrases.forgotPassword}</a>
+            <div className="login-popup-forgot">
+              <a href="#">{japanesePhrases.forgotPassword}</a>
             </div>
           )}
           
-          <button type="submit" style={styles.submitButton}>
+          <button type="submit" className="login-popup-submit">
             {activeTab === 'signin' ? japanesePhrases.signIn : japanesePhrases.createAccount}
           </button>
           
-          <div style={styles.divider}>{japanesePhrases.orConnectWith}</div>
+          <div className="login-popup-divider">{japanesePhrases.orConnectWith}</div>
           
-          <div style={styles.socialContainer}>
-            <button type="button" style={styles.socialButton}>
-              <span style={styles.socialIcon}>G</span> {japanesePhrases.continueWithGoogle}
+          <div className="login-popup-social">
+            <button type="button" className="login-popup-social-btn google">
+              <i className="fab fa-google"></i> {japanesePhrases.continueWithGoogle}
             </button>
-            <button type="button" style={styles.socialButton}>
-              <span style={styles.socialIcon}>L</span> {japanesePhrases.continueWithLine}
+            <button type="button" className="login-popup-social-btn line">
+              <i className="fab fa-line"></i> {japanesePhrases.continueWithLine}
             </button>
-            <button type="button" style={styles.socialButton}>
-              <span style={styles.socialIcon}>Y</span> {japanesePhrases.continueWithYahoo}
+            <button type="button" className="login-popup-social-btn yahoo">
+              <i className="fab fa-yahoo"></i> {japanesePhrases.continueWithYahoo}
             </button>
           </div>
         </form>
