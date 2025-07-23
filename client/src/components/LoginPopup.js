@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Login Popup Component - Fixed version of your original
+// Login Popup Component - FIXED Hook Order Issue
 const LoginPopup = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('signin');
   const [formData, setFormData] = useState({
@@ -10,10 +10,24 @@ const LoginPopup = ({ isOpen, onClose }) => {
     confirmPassword: ''
   });
   
+  // CRITICAL FIX: Move useEffect BEFORE the early return
+  // Hooks must ALWAYS be called in the same order on every render
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    // Only add/remove listener based on isOpen state
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey);
+      return () => document.removeEventListener('keydown', handleEscKey);
+    }
+  }, [isOpen, onClose]); // Dependencies array
+  
   // Safe fallback for japanesePhrases
   const defaultPhrases = {
     welcome: 'ようこそ',
-    signIn: 'サインイン',
+    signIn: 'サインイン', 
     newAccount: '新規アカウント',
     fullName: '氏名',
     fullNamePlaceholder: '氏名を入力してください',
@@ -32,10 +46,9 @@ const LoginPopup = ({ isOpen, onClose }) => {
     continueWithYahoo: 'Yahooで続行'
   };
   
-  // Try to get japanesePhrases safely
+  // Get phrases safely
   let japanesePhrases = defaultPhrases;
   try {
-    // This will use your actual japanesePhrases if available
     if (window.japanesePhrases) {
       japanesePhrases = window.japanesePhrases;
     }
@@ -43,7 +56,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     console.log('Using default Japanese phrases');
   }
   
-  // If popup is not open, return null
+  // NOW it's safe to return early - all hooks have been called
   if (!isOpen) return null;
   
   const handleChange = (e) => {
@@ -58,20 +71,15 @@ const LoginPopup = ({ isOpen, onClose }) => {
     e.preventDefault();
     
     if (activeTab === 'signin') {
-      // Handle sign in
       console.log('Sign in with:', formData.email, formData.password);
-      // You would add authentication logic here
     } else {
-      // Handle registration
       if (formData.password !== formData.confirmPassword) {
         alert('パスワードが一致しません！');
         return;
       }
       console.log('Register with:', formData.name, formData.email, formData.password);
-      // You would add registration logic here
     }
     
-    // For demo, just close the popup
     onClose();
   };
   
@@ -81,19 +89,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     }
   };
   
-  // Effect for event listener
-  useEffect(() => {
-    const handleEscKey = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscKey);
-      return () => document.removeEventListener('keydown', handleEscKey);
-    }
-  }, [isOpen, onClose]);
-  
-  // CSS styles as JavaScript objects (to avoid missing CSS file issues)
+  // Inline styles
   const styles = {
     overlay: {
       position: 'fixed',
