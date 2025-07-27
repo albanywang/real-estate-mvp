@@ -9,6 +9,7 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
+import  AuthProvider  from '../services/authContext';
 
 window.japanesePhrases = japanesePhrases;
 
@@ -569,7 +570,7 @@ const App = () => {
   }, [isDetailPopupOpen]);
 
   return (
-    <>
+    <AuthProvider>
       <header
         style={{
           background: '#fff',
@@ -978,7 +979,7 @@ const App = () => {
           100% { transform: rotate(360deg); }
         }
       `}</style>
-    </>
+    </AuthProvider>
   );
 };
 
