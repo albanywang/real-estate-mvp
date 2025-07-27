@@ -2,7 +2,7 @@ const path = require('path');
 const Dotenv = require('dotenv-webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
-  entry: './src/index.js',
+  entry: './client/src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -37,7 +37,7 @@ module.exports = {
     extensions: ['.js', '.jsx'],
     // You can also add aliases if needed
     alias: {
-      '@': path.resolve(__dirname, 'src/'),
+      '@': path.resolve(__dirname, 'client/src/'),
     }
   },
   plugins: [
