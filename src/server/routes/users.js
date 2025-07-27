@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { authenticateToken, generateToken } from '../middleware/auth.js';
-import { userDbService } from '../services/userDbService.js';
+import userDbService from '../services/userDbService.js';
 
 const router = express.Router();
 

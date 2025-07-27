@@ -1,6 +1,6 @@
 // server/services/userDbService.js - PostgreSQL Version
-const { query, transaction } = require('../config/database');
-const { User, UserSession, UserFavorite, SearchHistory, initializeUserTables } = require('../models/User');
+import { query, transaction } from '../config/database.js';
+import { User, UserSession, UserFavorite, SearchHistory, initializeUserTables } from '../models/User.js';
 
 class userDbService {
   
