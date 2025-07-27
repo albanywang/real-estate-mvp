@@ -3,7 +3,7 @@
 // =======================
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import userService from './UserService';
+import userService from './UserService.js';
 
 // Create Auth Context
 const AuthContext = createContext();
