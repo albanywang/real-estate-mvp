@@ -1,15 +1,10 @@
 // =======================
-// 2. USER API SERVICE
+// CLIENT-SIDE USER SERVICE
 // =======================
-
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 
 class UserService {
   constructor() {
-    this.baseURL = process.env.API_BASE_URL || 'http://localhost:3000/api';
-    this.jwtSecret = process.env.JWT_SECRET || 'your-super-secret-key';
+    this.baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
   }
 
   // ===== AUTHENTICATION =====
@@ -18,13 +13,6 @@ class UserService {
     try {
       const { email, password, fullName, phone, dateOfBirth, gender } = userData;
       
-      // Hash password
-      const saltRounds = 12;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
-      
-      // Generate email verification token
-      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-      
       const response = await fetch(`${this.baseURL}/users/register`, {
         method: 'POST',
         headers: {
@@ -32,12 +20,11 @@ class UserService {
         },
         body: JSON.stringify({
           email,
-          passwordHash,
+          password, // Send plain password - server will hash it
           fullName,
           phone,
           dateOfBirth,
           gender,
-          emailVerificationToken,
           preferredLanguage: 'ja'
         }),
       });
@@ -48,9 +35,6 @@ class UserService {
         throw new Error(result.error || 'Registration failed');
       }
 
-      // Send verification email (you'd implement this)
-      await this.sendVerificationEmail(email, emailVerificationToken);
-      
       return {
         success: true,
         message: 'Registration successful. Please check your email to verify your account.',
@@ -167,13 +151,71 @@ class UserService {
   }
 
   async lineLogin(lineToken) {
-    // Similar implementation for LINE login
-    // You'd integrate with LINE's OAuth API
+    try {
+      const response = await fetch(`${this.baseURL}/users/auth/line`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: lineToken }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'LINE login failed');
+      }
+
+      localStorage.setItem('authToken', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      return {
+        success: true,
+        user: result.user,
+        token: result.token
+      };
+      
+    } catch (error) {
+      console.error('LINE login error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 
   async yahooLogin(yahooToken) {
-    // Similar implementation for Yahoo login
-    // You'd integrate with Yahoo's OAuth API
+    try {
+      const response = await fetch(`${this.baseURL}/users/auth/yahoo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: yahooToken }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Yahoo login failed');
+      }
+
+      localStorage.setItem('authToken', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      return {
+        success: true,
+        user: result.user,
+        token: result.token
+      };
+      
+    } catch (error) {
+      console.error('Yahoo login error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 
   // ===== USER MANAGEMENT =====
@@ -522,12 +564,6 @@ class UserService {
 
   getAuthToken() {
     return localStorage.getItem('authToken');
-  }
-
-  async sendVerificationEmail(email, token) {
-    // Implementation would depend on your email service
-    // Could use SendGrid, AWS SES, etc.
-    console.log(`Sending verification email to ${email} with token ${token}`);
   }
 
   // Debug method
