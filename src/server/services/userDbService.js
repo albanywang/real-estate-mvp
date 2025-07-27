@@ -817,4 +817,4 @@ class userDbService {
   }
 }
 
-module.exports = new userDbService();
+export default userDbService;
