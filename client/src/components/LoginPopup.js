@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../services/AuthContext.js';
+import { useAuth } from '../services/authContext.js';
 
 // Login Popup Component - Integrated with User Database
 const LoginPopup = ({ isOpen, onClose }) => {
