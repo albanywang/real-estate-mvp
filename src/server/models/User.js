@@ -1,5 +1,5 @@
 // server/models/User.js - PostgreSQL Version
-const { query } = require('../config/database');
+import { query } from '../config/database.js';
 
 class User {
   constructor(data) {
@@ -367,7 +367,8 @@ const initializeUserTables = async () => {
   }
 };
 
-module.exports = {
+// ES6 Exports
+export {
   User,
   UserSession,
   UserFavorite,
