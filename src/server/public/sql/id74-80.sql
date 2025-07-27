@@ -8,7 +8,13 @@ INSERT INTO properties (
     informationReleaseDate, nextScheduledUpdateDate, remarks, evaluationCertificate,
     parking, kitchen, bathToilet, facilitiesServices, others, images,
     -- New hierarchical area fields and zipcode
-    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status     
+    zipcode, area_level_1, area_level_2, area_level_3, area_level_4, status,
+    -- NEW FIELDS ADDED:
+    direction, urbanPlanning, condominiumSalesCompany, constructionCompany,
+    designCompany, managementCompany, buildingArea, landArea, accessSituation,
+    buildingCoverageRatio, floorAreaRatio, estimatedRent, assumedYield,
+    currentRent, currentYield, rentalStatus, numberOfUnitsInTheBuilding,
+    exclusiveAreaOfEachResidence           
 )
 VALUES (
     'メゾン岸谷',

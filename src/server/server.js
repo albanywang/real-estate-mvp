@@ -9,6 +9,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createClient } from '@supabase/supabase-js';
+const userRoutes = require('./routes/users');
+const { corsMiddleware, securityHeaders, requestLogger, errorHandler } = require('./middleware/auth');
 
 // Import your custom modules
 import PropertyRepository from './data/PropertyRepository.js';
@@ -59,6 +61,18 @@ class Server {
     this.propertyService = null;
     this.PropertyRoutes = null;
     this.server = null;
+
+    // Middleware
+    this.app.use(corsMiddleware);
+    this.app.use(securityHeaders);
+    this.app.use(requestLogger);
+    this.app.use(express.json());
+
+    // Routes
+    this.app.use('/api/users', userRoutes);
+
+    // Error handling
+    this.app.use(errorHandler);
 
     // Bind methods
     this.gracefulShutdown = this.gracefulShutdown.bind(this);

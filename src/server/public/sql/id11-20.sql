@@ -67,7 +67,26 @@ VALUES (
     '東京都',
     '23区',
     '港区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     '東建ニューハイツ西新宿', 
@@ -119,7 +138,26 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale' -- Property status    
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence     
 ),
 (
     'シエン・コンドミニオ', 
@@ -171,7 +209,26 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'アールヴェール文京大塚公園', 
@@ -223,7 +280,26 @@ VALUES (
     '東京都',
     '23区',
     '文京区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'アールヴェール文京白山', 
@@ -275,7 +351,26 @@ VALUES (
     '東京都',
     '23区',
     '文京区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'ランドステージ錦糸町２',
@@ -327,7 +422,26 @@ VALUES (
     '東京都',
     '23区',
     '墨田区',
-    'for sale' -- Property status     
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence      
 ),
 (
     'センチュリーパークタワー 15階 3LDK',
@@ -379,7 +493,26 @@ VALUES (
     '東京都',
     '23区',
     '中央区',
-    'for sale' -- Property status      
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'グランドタワー品川 8階 1LDK',
@@ -431,7 +564,26 @@ VALUES (
     '東京都',
     '23区',
     '品川区',
-    'for sale' -- Property status      
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence       
 ),
 (
     'ザ・パークハウス新宿 35階 2SLDK',
@@ -483,5 +635,24 @@ VALUES (
     '東京都',
     '23区',
     '新宿区',
-    'for sale' -- Property status       
+    'for sale' ,
+    -- NEW FIELD VALUES (NULL for 中古マンション):
+    NULL, -- direction
+    NULL, -- urbanPlanning
+    NULL, -- condominiumSalesCompany
+    NULL, -- constructionCompany
+    NULL, -- designCompany
+    NULL, -- managementCompany
+    NULL, -- buildingArea
+    NULL, -- landArea
+    NULL, -- accessSituation
+    NULL, -- buildingCoverageRatio
+    NULL, -- floorAreaRatio
+    NULL, -- estimatedRent
+    NULL, -- assumedYield
+    NULL, -- currentRent
+    NULL, -- currentYield
+    NULL, -- rentalStatus
+    NULL, -- numberOfUnitsInTheBuilding
+    NULL  -- exclusiveAreaOfEachResidence        
 );

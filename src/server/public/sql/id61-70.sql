@@ -66,8 +66,7 @@ VALUES (
     '東京都',
     '23区',
     '板橋区',
-    ,
-'for sale',    
+    'for sale',    
 -- NEW FIELD VALUES (NULL for 中古マンション):
     NULL, -- direction
     NULL, -- urbanPlanning
@@ -138,7 +137,7 @@ VALUES (
     '東京都',
     '23区',
     '江戸川区',
-    ,
+    'for sale', 
     -- NEW FIELD VALUES (NULL for 中古マンション):
     NULL, -- direction
     NULL, -- urbanPlanning
