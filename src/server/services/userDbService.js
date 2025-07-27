@@ -2,7 +2,7 @@
 const { query, transaction } = require('../config/database');
 const { User, UserSession, UserFavorite, SearchHistory, initializeUserTables } = require('../models/User');
 
-class UserDbService {
+class userDbService {
   
   // =======================
   // USER CRUD OPERATIONS
@@ -817,4 +817,4 @@ class UserDbService {
   }
 }
 
-module.exports = new UserDbService();
+module.exports = new userDbService();
