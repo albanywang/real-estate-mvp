@@ -18,7 +18,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
   const [success, setSuccess] = useState('');
 
   // Get auth methods from context
-  const { login, logout, user, isLoggedIn } = useAuth();
+  const { login, logout, user, isLoggedIn, isLoading } = useAuth();
   
   // Hook must be called before early return
   useEffect(() => {
