@@ -294,6 +294,33 @@ router.post('/change-password', authenticateToken, async (req, res) => {
   }
 });
 
+// Add this to routes/users.js temporarily
+router.post('/reset-test-password', async (req, res) => {
+  try {
+    const newPassword = 'test123';
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    
+    // Update the test user's password
+    await dbService.updateUserPassword(1, hashedPassword); // User ID 1
+    
+    res.json({
+      success: true,
+      message: 'Test user password reset!',
+      credentials: {
+        email: 'test@example.com',
+        password: 'test123'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // =======================
 // FAVORITES
 // =======================
