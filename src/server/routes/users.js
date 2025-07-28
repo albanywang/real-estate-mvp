@@ -6,6 +6,8 @@ import { authenticateToken, generateToken } from '../middleware/auth.js';
 import userDbService from '../services/userDbService.js';
 
 const router = express.Router();
+// Create an instance of the service
+const userDbService = new userDbService();
 
 // =======================
 // REGISTRATION
