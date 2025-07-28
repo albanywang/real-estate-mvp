@@ -9,7 +9,7 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
-import { AuthProvider } from '../services/AuthContext';  
+import { AuthProvider } from '../services/authContext';  
 window.japanesePhrases = japanesePhrases;
 
 // Main App Component
