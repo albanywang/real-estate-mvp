@@ -67,9 +67,6 @@ class Server {
     this.app.use(requestLogger);
     this.app.use(express.json());
 
-    // Routes
-    this.app.use('/api/users', userRoutes);
-
     // Error handling
     this.app.use(errorHandler);
 
@@ -155,7 +152,7 @@ class Server {
    */
   setupMiddleware() {
     console.log('🔧 Setting up middleware...');
-    
+
     // CORS configuration
     const corsOptions = {
       origin: [
@@ -334,7 +331,9 @@ class Server {
    */
   setupRoutes() {
     console.log('🔧 Setting up API routes...');
-
+    // Routes
+    this.app.use('/api/users', userRoutes);
+    
     if (!this.propertyService) {
       throw new Error('PropertyService must be initialized before routes');
     }
