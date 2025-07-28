@@ -63,7 +63,6 @@ class Server {
     this.server = null;
 
     // Middleware
-    this.app.use(corsMiddleware);
     this.app.use(securityHeaders);
     this.app.use(requestLogger);
     this.app.use(express.json());
@@ -156,6 +155,19 @@ class Server {
    */
   setupMiddleware() {
     console.log('🔧 Setting up middleware...');
+    
+    // CORS configuration
+    const corsOptions = {
+      origin: [
+        'https://real-estate-client-i3v9.onrender.com', // Your client URL
+        'http://localhost:3000', // For local development
+        'http://localhost:3001'  // For local development
+      ],
+      credentials: true,
+      optionsSuccessStatus: 200,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+    };
 
     // Fix CORP issues for all static assets - ADD THIS FIRST
     this.app.use((req, res, next) => {
@@ -199,19 +211,6 @@ class Server {
       legacyHeaders: false,
     });
     this.app.use('/api/', limiter);
-
-    // CORS configuration
-    const corsOptions = {
-      origin: [
-        'https://real-estate-client-i3v9.onrender.com', // Your client URL
-        'http://localhost:3000', // For local development
-        'http://localhost:3001'  // For local development
-      ],
-      credentials: true,
-      optionsSuccessStatus: 200,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
-    };
 
     this.app.use(cors(corsOptions));
 
