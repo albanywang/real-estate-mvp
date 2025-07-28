@@ -1,13 +1,22 @@
 // server/services/userDbService.js - PostgreSQL Version
-import { query, transaction } from '../config/database.js';
+
 import { User, UserSession, UserFavorite, SearchHistory, initializeUserTables } from '../models/User.js';
+// Use Supabase client like your main server:
+import { createClient } from '@supabase/supabase-js';
 
 class userDbService {
   
   // =======================
   // USER CRUD OPERATIONS
   // =======================
-  
+  constructor() {
+    // Initialize Supabase client
+    this.supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
+    );
+  }
+
   async createUser(userData) {
     try {
       const {
@@ -63,11 +72,23 @@ class userDbService {
 
   async findUserByEmail(email) {
     try {
-      const queryText = 'SELECT * FROM users WHERE email = $1 AND account_status != $2';
-      const result = await query(queryText, [email, 'deleted']);
+      const { data, error } = await this.supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .neq('account_status', 'deleted')
+        .single();
       
-      return result.rows.length > 0 ? User.fromRow(result.rows[0]) : null;
-
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found
+          return null;
+        }
+        throw error;
+      }
+      
+      return data ? User.fromRow(data) : null;
+      
     } catch (error) {
       console.error('Find user by email error:', error);
       throw error;

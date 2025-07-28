@@ -331,9 +331,14 @@ class Server {
    */
   setupRoutes() {
     console.log('🔧 Setting up API routes...');
-    // Routes
-    this.app.use('/api/users', userRoutes);
-    
+    // Create userDbService with Supabase client
+    const userDbServiceInstance = new UserDbService(this.supabase);
+    // Pass the service instance to routes
+    this.app.use('/api/users', (req, res, next) => {
+      req.userDbService = userDbServiceInstance;
+      next();
+    }, userRoutes);
+
     if (!this.propertyService) {
       throw new Error('PropertyService must be initialized before routes');
     }

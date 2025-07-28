@@ -90,7 +90,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Find user
-    const user = await userDbService.findUserByEmail(email);
+    const user = await req.userDbService.findUserByEmail(email);
     if (!user) {
       return res.status(401).json({
         error: 'メールアドレスまたはパスワードが正しくありません。'
