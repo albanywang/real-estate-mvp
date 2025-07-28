@@ -7,7 +7,7 @@ import userDbService from '../services/userDbService.js';
 
 const router = express.Router();
 // Create an instance of the service
-const userDbService = new userDbService();
+const userDbService = new UserDbService();
 
 // =======================
 // REGISTRATION
