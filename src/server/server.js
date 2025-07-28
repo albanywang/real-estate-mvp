@@ -16,6 +16,10 @@ import { corsMiddleware, securityHeaders, requestLogger, errorHandler } from './
 import PropertyRepository from './data/PropertyRepository.js';
 import PropertyService from './api/PropertyService.js';
 import PropertyRoutes from './routes/PropertyRoutes.js';
+import UserDbService from './services/userDbService.js';
+
+// Create an instance of the service
+const userDbService = new UserDbService();
 
 // Initialize environment variables first
 dotenv.config();
