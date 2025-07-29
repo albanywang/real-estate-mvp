@@ -360,6 +360,49 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+router.get('/reset-password', async (req, res) => {
+  try {
+    const newPassword = 'test123';
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    
+    console.log('🔄 Resetting password for test@example.com');
+    console.log('🔒 New password will be:', newPassword);
+    console.log('🔒 New hash will be:', hashedPassword);
+    
+    // Update password using Supabase directly
+    const supabase = req.userDbService.supabase;
+    const { data, error } = await supabase
+      .from('users')
+      .update({ password_hash: hashedPassword })
+      .eq('email', 'test@example.com')
+      .select();
+    
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw error;
+    }
+    
+    console.log('✅ Password updated successfully');
+    
+    res.json({
+      success: true,
+      message: 'Password reset successfully!',
+      newCredentials: {
+        email: 'test@example.com',
+        password: 'test123'
+      },
+      updatedUser: data[0]
+    });
+    
+  } catch (error) {
+    console.error('❌ Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // =======================
 // FAVORITES
 // =======================
