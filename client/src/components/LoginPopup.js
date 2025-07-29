@@ -8,10 +8,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     email: '',
     password: '',
     name: '',
-    confirmPassword: '',
-    phone: '',
-    dateOfBirth: '',
-    gender: ''
+    confirmPassword: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -46,13 +43,6 @@ const LoginPopup = ({ isOpen, onClose }) => {
     createPasswordPlaceholder: 'パスワードを作成してください',
     confirmPassword: 'パスワード確認',
     confirmPasswordPlaceholder: 'パスワードを再入力してください',
-    phone: '電話番号',
-    phonePlaceholder: '電話番号を入力してください（任意）',
-    dateOfBirth: '生年月日',
-    gender: '性別',
-    genderMale: '男性',
-    genderFemale: '女性',
-    genderOther: 'その他',
     forgotPassword: 'パスワードを忘れた方',
     createAccount: 'アカウント作成',
     orConnectWith: 'または次のサービスでログイン',
@@ -80,10 +70,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
       email: '',
       password: '',
       name: '',
-      confirmPassword: '',
-      phone: '',
-      dateOfBirth: '',
-      gender: ''
+      confirmPassword: ''
     });
     setError('');
     setSuccess('');
@@ -96,10 +83,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
         email: '',
         password: '',
         name: '',
-        confirmPassword: '',
-        phone: '',
-        dateOfBirth: '',
-        gender: ''
+        confirmPassword: ''
       });
       setError('');
       setSuccess('');
@@ -179,10 +163,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
         const userData = {
           email: formData.email,
           password: formData.password,
-          fullName: formData.name,
-          phone: formData.phone || null,
-          dateOfBirth: formData.dateOfBirth || null,
-          gender: formData.gender || null
+          fullName: formData.name
         };
         
         const result = await register(userData);
@@ -364,46 +345,6 @@ const LoginPopup = ({ isOpen, onClose }) => {
                 />
               </div>
               
-              <div className="login-popup-form-group">
-                <label htmlFor="phone">{japanesePhrases.phone}</label>
-                <input 
-                  type="tel" 
-                  id="phone" 
-                  name="phone" 
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder={japanesePhrases.phonePlaceholder}
-                  disabled={isSubmitting}
-                />
-              </div>
-              
-              <div className="login-popup-form-group">
-                <label htmlFor="dateOfBirth">{japanesePhrases.dateOfBirth}</label>
-                <input 
-                  type="date" 
-                  id="dateOfBirth" 
-                  name="dateOfBirth" 
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                />
-              </div>
-              
-              <div className="login-popup-form-group">
-                <label htmlFor="gender">{japanesePhrases.gender}</label>
-                <select 
-                  id="gender" 
-                  name="gender" 
-                  value={formData.gender}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                >
-                  <option value="">選択してください</option>
-                  <option value="male">{japanesePhrases.genderMale}</option>
-                  <option value="female">{japanesePhrases.genderFemale}</option>
-                  <option value="other">{japanesePhrases.genderOther}</option>
-                </select>
-              </div>
             </>
           )}
           
