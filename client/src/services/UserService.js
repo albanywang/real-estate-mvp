@@ -11,7 +11,7 @@ class UserService {
   
   async register(userData) {
     try {
-      const { email, password, fullName, phone, dateOfBirth, gender } = userData;
+      const { email, password, fullName } = userData;
       
       const response = await fetch(`${this.baseURL}/users/register`, {
         method: 'POST',
@@ -22,9 +22,6 @@ class UserService {
           email,
           password, // Send plain password - server will hash it
           fullName,
-          phone,
-          dateOfBirth,
-          gender,
           preferredLanguage: 'ja'
         }),
       });
