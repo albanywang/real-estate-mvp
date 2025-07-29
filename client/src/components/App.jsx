@@ -535,42 +535,187 @@ const App = () => {
   };
 
 // Add this component inside your App.jsx file:
+// UserAuthSection component with dropdown
 const UserAuthSection = ({ onOpenLogin, phrases }) => {
   const { user, isLoggedIn, logout } = useAuth();
+  const [showDropdown, setShowDropdown] = useState(false);
   
   if (isLoggedIn && user) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '1rem' 
-      }}>
-        <span style={{ 
-          color: '#374151', 
-          fontWeight: '500',
-          whiteSpace: 'nowrap'
-        }}>
-          {user.fullName || user.email}
-        </span>
+      <div style={{ position: 'relative' }}>
+        {/* User name - clickable to toggle dropdown */}
         <button
-          onClick={logout}
+          onClick={() => setShowDropdown(!showDropdown)}
           style={{ 
             background: 'transparent',
-            border: '1px solid #d1d5db',
-            borderRadius: '0.375rem',
-            padding: '0.5rem 1rem',
-            color: '#6b7280', 
-            fontWeight: '500', 
+            border: 'none',
+            color: '#374151', 
+            fontWeight: '500',
             whiteSpace: 'nowrap',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem',
+            borderRadius: '0.375rem'
           }}
+          onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+          onMouseLeave={(e) => e.target.style.background = 'transparent'}
         >
-          ログアウト
+          {user.fullName || user.email}
+          <span style={{ 
+            fontSize: '0.8rem',
+            transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s'
+          }}>
+            ▼
+          </span>
         </button>
+
+        {/* Dropdown menu */}
+        {showDropdown && (
+          <>
+            {/* Backdrop to close dropdown when clicking outside */}
+            <div 
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 998
+              }}
+              onClick={() => setShowDropdown(false)}
+            />
+            
+            {/* Dropdown content */}
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '0.5rem',
+              background: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.5rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              minWidth: '180px',
+              zIndex: 999
+            }}>
+              {/* User info section */}
+              <div style={{
+                padding: '0.75rem 1rem',
+                borderBottom: '1px solid #f3f4f6'
+              }}>
+                <div style={{ 
+                  fontWeight: '600', 
+                  color: '#111827',
+                  fontSize: '0.875rem'
+                }}>
+                  {user.fullName}
+                </div>
+                <div style={{ 
+                  color: '#6b7280',
+                  fontSize: '0.75rem'
+                }}>
+                  {user.email}
+                </div>
+              </div>
+
+              {/* Menu items */}
+              <div style={{ padding: '0.5rem 0' }}>
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    // Add profile functionality later
+                    console.log('Profile clicked');
+                  }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#374151',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                  <span>👤</span>
+                  プロフィール
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    // Add settings functionality later
+                    console.log('Settings clicked');
+                  }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#374151',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                  <span>⚙️</span>
+                  設定
+                </button>
+
+                {/* Divider */}
+                <div style={{
+                  height: '1px',
+                  background: '#f3f4f6',
+                  margin: '0.5rem 0'
+                }} />
+
+                {/* Logout button */}
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                    logout();
+                  }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '0.75rem 1rem',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#dc2626',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#fef2f2'}
+                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                  <span>🚪</span>
+                  ログアウト
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
   
+  // When not logged in, show login link
   return (
     <a
       href="#"
