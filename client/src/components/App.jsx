@@ -532,6 +532,60 @@ const App = () => {
     }
   };
 
+// Add this component inside your App.jsx file:
+const UserAuthSection = ({ onOpenLogin, phrases }) => {
+  const { user, isLoggedIn, logout } = useAuth();
+  
+  if (isLoggedIn && user) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '1rem' 
+      }}>
+        <span style={{ 
+          color: '#374151', 
+          fontWeight: '500',
+          whiteSpace: 'nowrap'
+        }}>
+          {user.fullName || user.email}
+        </span>
+        <button
+          onClick={logout}
+          style={{ 
+            background: 'transparent',
+            border: '1px solid #d1d5db',
+            borderRadius: '0.375rem',
+            padding: '0.5rem 1rem',
+            color: '#6b7280', 
+            fontWeight: '500', 
+            whiteSpace: 'nowrap',
+            cursor: 'pointer'
+          }}
+        >
+          ログアウト
+        </button>
+      </div>
+    );
+  }
+  
+  return (
+    <a
+      href="#"
+      onClick={onOpenLogin}
+      style={{ 
+        textDecoration: 'none', 
+        color: '#6b7280', 
+        fontWeight: '500', 
+        whiteSpace: 'nowrap',
+        cursor: 'pointer'
+      }}
+    >
+      {phrases.signIn}
+    </a>
+  );
+};
+
   // Enhanced debug function
   React.useEffect(() => {
     window.debugRealEstate = {
@@ -676,19 +730,10 @@ const App = () => {
             >
               {japanesePhrases.help}
             </a>
-            <a
-              href="#"
-              onClick={handleOpenLogin}
-              style={{ 
-                textDecoration: 'none', 
-                color: '#6b7280', 
-                fontWeight: '500', 
-                whiteSpace: 'nowrap',
-                cursor: 'pointer' // Add cursor pointer for better UX
-              }}
-            >
-              {japanesePhrases.signIn}
-            </a>
+            <UserAuthSection 
+              onOpenLogin={handleOpenLogin}
+              phrases={japanesePhrases}
+            />
           </div>
         </div>
       </header>
