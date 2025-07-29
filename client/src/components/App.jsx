@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from '../services/authContext';
 import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
 import PropertyDetailPopup from './PropertyDetailPopup';
 import MapComponent from './MapComponent';
@@ -9,7 +11,7 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
-import { AuthProvider } from '../services/authContext';  
+
 window.japanesePhrases = japanesePhrases;
 
 // Main App Component
