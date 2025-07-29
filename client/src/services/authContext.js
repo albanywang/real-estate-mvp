@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     
     // Authentication methods
     login,
+    register,
     logout,
     
     // Utility methods
@@ -118,4 +119,22 @@ export const useAuth = () => {
   
   console.log('useAuth: Returning context:', context);
   return context;
+};
+
+const register = async (userData) => {
+  try {
+    setIsLoading(true);
+    const result = await userService.register(userData);
+    
+    if (result.success) {
+      return { success: true, message: result.message };
+    } else {
+      return { success: false, error: result.error };
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    return { success: false, error: error.message };
+  } finally {
+    setIsLoading(false);
+  }
 };
