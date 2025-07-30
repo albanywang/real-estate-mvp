@@ -14,10 +14,27 @@ const userDbService = new UserDbService();
 // =======================
 router.post('/register', async (req, res) => {
   try {
+    console.log('📝 Server: Registration request received');
+    console.log('📧 Server: req.body:', req.body);
+    console.log('📧 Server: req.body keys:', Object.keys(req.body));
+    console.log('📧 Server: Individual fields:', {
+      email: req.body.email,
+      password: req.body.password,
+      fullName: req.body.fullName,  // Check if this exists
+      full_name: req.body.full_name  // Check if this exists instead
+    });
+
     const { email, password, full_name } = req.body;
+    console.log('🔍 Server: Extracted values:', { email, password, fullName });
+    console.log('🔍 Server: Validation check:', {
+      emailExists: !!email,
+      passwordExists: !!password,
+      fullNameExists: !!fullName
+    });
 
     // Validation
     if (!email || !password || !full_name) {
+      console.log('❌ Server: Validation failed!');
       return res.status(400).json({
         error: 'メールアドレス、パスワード、氏名は必須です。'
       });
