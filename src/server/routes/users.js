@@ -182,6 +182,41 @@ router.post('/logout', authenticateToken, async (req, res) => {
   }
 });
 
+// Add this temporary route to test the password hash
+router.post('/verify-password', async (req, res) => {
+  try {
+    const { email, testPassword } = req.body;
+    
+    // Get user from database
+    const userResult = await req.userDbService.findUserByEmail(email);
+    
+    if (!userResult.success || !userResult.user) {
+      return res.json({ success: false, error: 'User not found' });
+    }
+    
+    const user = userResult.user;
+    console.log('🔍 Testing password for user:', email);
+    console.log('🔍 Stored hash:', user.password_hash);
+    console.log('🔍 Testing password:', testPassword);
+    
+    // Test the password
+    const isValid = await bcrypt.compare(testPassword, user.password_hash);
+    console.log('🔍 Password match result:', isValid);
+    
+    return res.json({
+      success: true,
+      email: email,
+      testPassword: testPassword,
+      hashMatch: isValid,
+      storedHash: user.password_hash
+    });
+    
+  } catch (error) {
+    console.error('Verify password error:', error);
+    return res.json({ success: false, error: error.message });
+  }
+});
+
 // =======================
 // GET PROFILE
 // =======================
