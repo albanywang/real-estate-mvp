@@ -90,6 +90,8 @@ class userDbService {
 
   async findUserByEmail(email) {
     try {
+      console.log('🔍 Finding user by email:', email);
+      
       const { data, error } = await this.supabase
         .from('users')
         .select('*')
@@ -97,19 +99,39 @@ class userDbService {
         .neq('account_status', 'deleted')
         .single();
       
+      console.log('🔍 Supabase query result:', { data: !!data, error });
+      
       if (error) {
+        console.log('🔍 Supabase error code:', error.code);
         if (error.code === 'PGRST116') {
           // No rows found
-          return null;
+          return {
+            success: false,
+            error: 'ユーザーが見つかりません'
+          };
         }
         throw error;
       }
       
-      return data ? User.fromRow(data) : null;
+      if (!data) {
+        return {
+          success: false,
+          error: 'ユーザーが見つかりません'
+        };
+      }
+      
+      console.log('🔍 User found with email:', data.email);
+      return {
+        success: true,
+        user: data  // Return the raw data, no User.fromRow needed
+      };
       
     } catch (error) {
       console.error('Find user by email error:', error);
-      throw error;
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 
