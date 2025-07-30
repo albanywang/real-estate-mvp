@@ -23,18 +23,14 @@ class userDbService {
         email,
         passwordHash,
         fullName,
-        phone,
-        dateOfBirth,
-        gender,
         emailVerificationToken,
         preferredLanguage = 'ja'
       } = userData;
 
       const queryText = `
         INSERT INTO users (
-          email, password_hash, full_name, phone, date_of_birth, 
-          gender, email_verification_token, preferred_language
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          email, password_hash, full_name, email_verification_token, preferred_language
+        ) VALUES ($1, $2, $3, $4, $5)
         RETURNING id
       `;
 
@@ -42,9 +38,6 @@ class userDbService {
         email,
         passwordHash,
         fullName,
-        phone,
-        dateOfBirth,
-        gender,
         emailVerificationToken,
         preferredLanguage
       ]);
@@ -139,27 +132,20 @@ class userDbService {
       const {
         fullName,
         email,
-        phone,
-        dateOfBirth,
-        gender,
         preferredLanguage,
         profileImageUrl
       } = updateData;
 
       const queryText = `
         UPDATE users 
-        SET full_name = $1, email = $2, phone = $3, date_of_birth = $4, 
-            gender = $5, preferred_language = $6, profile_image_url = $7
-        WHERE id = $8
+        SET full_name = $1, email = $2, preferred_language = $3, profile_image_url = $4
+        WHERE id = $5
         RETURNING *
       `;
 
       const result = await query(queryText, [
         fullName,
         email,
-        phone,
-        dateOfBirth,
-        gender,
         preferredLanguage,
         profileImageUrl,
         userId
@@ -509,7 +495,7 @@ class userDbService {
       }
 
       const queryText = `
-        SELECT id, email, full_name, phone, date_of_birth, gender,
+        SELECT id, email, full_name, 
                email_verified, preferred_language, account_status,
                last_login, login_count, created_at, updated_at
         FROM users 
@@ -671,13 +657,12 @@ class userDbService {
       const { limit = 20, offset = 0 } = options;
       
       const queryText = `
-        SELECT id, email, full_name, phone, account_status, created_at
+        SELECT id, email, full_name, account_status, created_at
         FROM users 
         WHERE account_status != 'deleted'
           AND (
             full_name ILIKE $1 
             OR email ILIKE $1 
-            OR phone ILIKE $1
           )
         ORDER BY created_at DESC
         LIMIT $2 OFFSET $3
