@@ -14,10 +14,10 @@ const userDbService = new UserDbService();
 // =======================
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, fullName } = req.body;
+    const { email, password, full_name } = req.body;
 
     // Validation
-    if (!email || !password || !fullName) {
+    if (!email || !password || !full_name) {
       return res.status(400).json({
         error: 'メールアドレス、パスワード、氏名は必須です。'
       });
@@ -39,24 +39,24 @@ router.post('/register', async (req, res) => {
 
     // Hash password
     const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Generate email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const email_verification_token = crypto.randomBytes(32).toString('hex');
 
     // Create user
     const userData = {
       email,
-      passwordHash,
-      fullName,
-      emailVerificationToken,
-      preferredLanguage: 'ja'
+      password_hash,
+      full_name,
+      email_verification_token,
+      preferred_language: 'ja'
     };
 
     const userId = await userDbService.createUser(userData);
 
     // TODO: Send verification email
-    // await emailService.sendVerificationEmail(email, emailVerificationToken);
+    // await emailService.sendVerificationEmail(email, email_verification_token);
 
     res.status(201).json({
       success: true,
@@ -103,9 +103,9 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    console.log('🔒 User password hash:', user.passwordHash);
+    console.log('🔒 User password hash:', user.password_hash);
     console.log('🔒 Input password:', password);
-    console.log('🔒 Hash length:', user.passwordHash?.length);
+    console.log('🔒 Hash length:', user.password_hash?.length);
     console.log('🔒 Password length:', password?.length);
     
     // Check account status
@@ -119,7 +119,7 @@ router.post('/login', async (req, res) => {
     
     // Verify password with detailed logging
     console.log('🔍 About to compare passwords...');
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
     console.log('🔒 bcrypt.compare result:', isValidPassword);
     
     if (!isValidPassword) {
@@ -128,7 +128,7 @@ router.post('/login', async (req, res) => {
       // Test with common passwords for debugging
       const testPasswords = ['password', 'password123', 'test123', '123456'];
       for (const testPwd of testPasswords) {
-        const testResult = await bcrypt.compare(testPwd, user.passwordHash);
+        const testResult = await bcrypt.compare(testPwd, user.password_hash);
         console.log(`🧪 Testing "${testPwd}":`, testResult);
         if (testResult) {
           console.log(`✅ CORRECT PASSWORD IS: "${testPwd}"`);
@@ -149,8 +149,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
-        preferredLanguage: user.preferredLanguage
+        full_name: user.full_name,
+        preferred_language: user.preferred_language
       },
       token: 'temp-token-' + user.id
     });
@@ -216,10 +216,10 @@ router.get('/profile', authenticateToken, async (req, res) => {
 // =======================
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { fullName, email, preferredLanguage } = req.body;
+    const { full_name, email, preferred_language } = req.body;
 
     // Validation
-    if (!fullName || !email) {
+    if (!full_name || !email) {
       return res.status(400).json({
         error: '氏名とメールアドレスは必須です。'
       });
@@ -236,9 +236,9 @@ router.put('/profile', authenticateToken, async (req, res) => {
     }
 
     const updateData = {
-      fullName,
+      full_name,
       email,
-      preferredLanguage: preferredLanguage || 'ja'
+      preferred_language: preferred_language || 'ja'
     };
 
     const updatedUser = await userDbService.updateUser(req.user.id, updateData);
@@ -285,7 +285,7 @@ router.post('/change-password', authenticateToken, async (req, res) => {
     }
 
     // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash);
     if (!isValidPassword) {
       return res.status(401).json({
         error: '現在のパスワードが正しくありません。'
@@ -294,10 +294,10 @@ router.post('/change-password', authenticateToken, async (req, res) => {
 
     // Hash new password
     const saltRounds = 12;
-    const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+    const newpassword_hash = await bcrypt.hash(newPassword, saltRounds);
 
     // Update password
-    await userDbService.updateUserPassword(req.user.id, newPasswordHash);
+    await userDbService.updateUserPassword(req.user.id, newpassword_hash);
 
     res.json({
       success: true,
