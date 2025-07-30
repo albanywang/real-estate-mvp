@@ -3,6 +3,9 @@ import { useAuth } from '../services/authContext';
 
 // Login Popup Component - Integrated with User Database
 const LoginPopup = ({ isOpen, onClose }) => {
+    // Get auth methods from context
+  const { login, register, isLoading } = useAuth();
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [activeTab, setActiveTab] = useState('signin');
   const [formData, setFormData] = useState({
     email: '',
@@ -13,9 +16,6 @@ const LoginPopup = ({ isOpen, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Get auth methods from context
-  const { login, logout, user, isLoggedIn, isLoading } = useAuth();
   
   // Hook must be called before early return
   useEffect(() => {
@@ -140,6 +140,34 @@ const LoginPopup = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    try {
+      if (isLoginMode) {
+        // Login
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          onClose();
+        } else {
+          console.error('Login failed:', result.error);
+        }
+      } else {
+        // Register - now using register from useAuth
+        const result = await register({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName
+        });
+        
+        if (result.success) {
+          alert('Registration successful! Please check your email.');
+          setIsLoginMode(true); // Switch to login mode
+        } else {
+          console.error('Registration failed:', result.error);
+        }
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+    }
+  };    
     if (!validateForm()) return;
     
     setIsSubmitting(true);
