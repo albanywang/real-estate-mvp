@@ -95,11 +95,11 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    // Find user
-    const user = await req.userDbService.findUserByEmail(email);
-    console.log('👤 User found:', !!user);
+    // Find user - FIXED: Handle the result object
+    const userResult = await req.userDbService.findUserByEmail(email);
+    console.log('👤 User lookup result:', userResult.success);
     
-    if (!user) {
+    if (!userResult.success || !userResult.user) {
       console.log('❌ No user found');
       return res.status(401).json({
         success: false,
@@ -107,38 +107,29 @@ router.post('/login', async (req, res) => {
       });
     }
     
+    const user = userResult.user; // Extract the actual user object
+    
     console.log('🔒 User password hash:', user.password_hash);
     console.log('🔒 Input password:', password);
     console.log('🔒 Hash length:', user.password_hash?.length);
     console.log('🔒 Password length:', password?.length);
     
-    // Check account status
-    if (user.accountStatus !== 'active') {
-      console.log('❌ Account not active:', user.accountStatus);
+    // Check account status - FIXED: Use snake_case field name
+    if (user.account_status !== 'active') {
+      console.log('❌ Account not active:', user.account_status);
       return res.status(401).json({
         success: false,
         error: 'このアカウントは無効になっています。'
       });
     }
     
-    // Verify password with detailed logging
+    // Verify password
     console.log('🔍 About to compare passwords...');
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     console.log('🔒 bcrypt.compare result:', isValidPassword);
     
     if (!isValidPassword) {
       console.log('❌ Password mismatch');
-      
-      // Test with common passwords for debugging
-      const testPasswords = ['password', 'password123', 'test123', '123456'];
-      for (const testPwd of testPasswords) {
-        const testResult = await bcrypt.compare(testPwd, user.password_hash);
-        console.log(`🧪 Testing "${testPwd}":`, testResult);
-        if (testResult) {
-          console.log(`✅ CORRECT PASSWORD IS: "${testPwd}"`);
-        }
-      }
-      
       return res.status(401).json({
         success: false,
         error: 'メールアドレスまたはパスワードが正しくありません。'
@@ -147,14 +138,17 @@ router.post('/login', async (req, res) => {
     
     console.log('✅ Password verified successfully!');
     
-    // For now, skip JWT and sessions - just return success
+    // Update last login
+    await req.userDbService.updateLastLogin(user.id);
+    
     res.json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
-        preferred_language: user.preferred_language
+        preferred_language: user.preferred_language,
+        email_verified: user.email_verified
       },
       token: 'temp-token-' + user.id
     });
@@ -167,7 +161,6 @@ router.post('/login', async (req, res) => {
     });
   }
 });
-
 // =======================
 // LOGOUT
 // =======================
