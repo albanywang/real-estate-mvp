@@ -67,6 +67,17 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
+      console.log('📝 Client: Attempting registration with:', userData);
+      
+      // Check required fields on client side
+      if (!userData.email || !userData.password || !userData.fullName) {
+        console.error('❌ Client: Missing required fields:', {
+          email: !!userData.email,
+          password: !!userData.password,
+          fullName: !!userData.fullName
+        });
+        throw new Error('メールアドレス、パスワード、氏名は必須です。');
+      }      
       setIsLoading(true);
       const result = await userService.register(userData);
       
@@ -82,7 +93,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-  
+
   // Logout function
   const logout = async () => {
     try {
