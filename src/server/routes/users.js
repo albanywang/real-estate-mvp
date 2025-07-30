@@ -49,9 +49,6 @@ router.post('/register', async (req, res) => {
       email,
       passwordHash,
       fullName,
-      phone,
-      dateOfBirth,
-      gender,
       emailVerificationToken,
       preferredLanguage: 'ja'
     };
@@ -219,7 +216,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 // =======================
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { fullName, email, phone, dateOfBirth, gender, preferredLanguage } = req.body;
+    const { fullName, email, preferredLanguage } = req.body;
 
     // Validation
     if (!fullName || !email) {
@@ -241,9 +238,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
     const updateData = {
       fullName,
       email,
-      phone,
-      dateOfBirth,
-      gender,
       preferredLanguage: preferredLanguage || 'ja'
     };
 
