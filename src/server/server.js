@@ -361,7 +361,8 @@ class Server {
         uptime: process.uptime(),
         database: this.propertyRepo ? 'connected' : 'disconnected',
         services: {
-          propertyService: this.propertyService ? 'available' : 'unavailable'
+          propertyService: this.propertyService ? 'available' : 'unavailable',
+          userService: userDbService ? 'available' : 'unavailable' // Added user service status
         }
       });
     });
@@ -374,11 +375,13 @@ class Server {
         version: '1.0.0',
         environment: this.env,
         endpoints: {
+          users: '/api/users', 
           properties: '/api/properties',
           health: '/health',
           documentation: '/api/docs'
         },
         features: [
+          'User authentication and management',
           'Property CRUD operations',
           'Advanced search and filtering',
           'Image upload support',
@@ -393,6 +396,17 @@ class Server {
       res.json({
         success: true,
         documentation: {
+          // User endpoints
+          'POST /api/users/register': 'Register new user account',
+          'POST /api/users/login': 'User login',
+          'POST /api/users/logout': 'User logout',
+          'GET /api/users/profile': 'Get user profile',
+          'PUT /api/users/profile': 'Update user profile',
+          'GET /api/users/favorites': 'Get user favorites',
+          'POST /api/users/favorites': 'Add property to favorites',
+          'DELETE /api/users/favorites/:propertyId': 'Remove from favorites',
+
+          // Property endpoints
           'GET /api/properties': 'List all properties with filtering',
           'GET /api/properties/search': 'Advanced property search',
           'GET /api/properties/:id': 'Get single property by ID',
