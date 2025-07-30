@@ -54,6 +54,10 @@ class UserService {
 
   async login(email, password) {
     try {
+
+      console.log('🌐 UserService: Starting login for:', email);
+      console.log('🔗 Login URL:', `${BASE_URL}/users/login`);
+
       const response = await fetch(`${this.baseURL}/users/login`, {
         method: 'POST',
         headers: {
@@ -62,9 +66,12 @@ class UserService {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('🌐 UserService: Login response status:', response.status);
       const result = await response.json();
-      
+      console.log('🌐 UserService: Login response data:', result);
+
       if (!response.ok) {
+        console.error('❌ Login failed with status:', response.status);
         throw new Error(result.error || 'Login failed');
       }
 
