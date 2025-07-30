@@ -11,39 +11,44 @@ class UserService {
   
   async register(userData) {
     try {
-      const { email, password, fullName } = userData;
-      
-      const response = await fetch(`${this.baseURL}/users/register`, {
+      console.log('🌐 UserService: Starting registration with:', userData);
+      console.log('🔍 UserService: Field validation:', {
+        email: !!userData.email,
+        password: !!userData.password,
+        fullName: !!userData.fullName
+      });
+
+      // Check if you have validation here that's failing
+      if (!userData.email || !userData.password || !userData.fullName) {
+        console.error('❌ UserService: Validation failed');
+        throw new Error('メールアドレス、パスワード、氏名は必須です。');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
-          password, // Send plain password - server will hash it
-          fullName,
-          preferredLanguage: 'ja'
-        }),
+          email: userData.email,
+          password: userData.password,
+          fullName: userData.fullName  // Make sure this matches what server expects
+        })
       });
 
+      console.log('🌐 UserService: Server response status:', response.status);
       const result = await response.json();
-      
+      console.log('🌐 UserService: Server response:', result);
+
       if (!response.ok) {
         throw new Error(result.error || 'Registration failed');
       }
 
-      return {
-        success: true,
-        message: 'Registration successful. Please check your email to verify your account.',
-        userId: result.userId
-      };
-      
+      return result;
+
     } catch (error) {
-      console.error('Registration error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
+      console.error('❌ UserService registration error:', error);
+      throw error;
     }
   }
 
