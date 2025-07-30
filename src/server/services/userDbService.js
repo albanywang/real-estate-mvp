@@ -217,6 +217,31 @@ class userDbService {
     }
   }
 
+  async updateLastLogin(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('users')
+        .update({
+          last_login: new Date().toISOString(),
+          login_count: this.supabase.sql`login_count + 1`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Update last login error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Update last login error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async updateLoginStats(userId) {
     try {
       const queryText = `
