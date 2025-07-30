@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
     const userData = {
       email,
       password_hash,
-      fullName,
+      full_name: fullName,  // Map fullName to full_name,
       email_verification_token,
       preferred_language: 'ja'
     };
