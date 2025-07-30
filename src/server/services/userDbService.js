@@ -19,35 +19,60 @@ class userDbService {
 
   async createUser(userData) {
     try {
+      console.log('Creating user with data:', userData);
       const {
         email,
-        passwordHash,
-        fullName,
-        emailVerificationToken,
-        preferredLanguage = 'ja'
+        password_hash,      // ✅ Changed from passwordHash
+        full_name,          // ✅ Changed from fullName  
+        email_verification_token, // ✅ Changed from emailVerificationToken
+        preferred_language = 'ja'
       } = userData;
 
-      const queryText = `
-        INSERT INTO users (
-          email, password_hash, full_name, email_verification_token, preferred_language
-        ) VALUES ($1, $2, $3, $4, $5)
-        RETURNING id
-      `;
-
-      const result = await query(queryText, [
+    // ✅ Use Supabase instead of undefined 'query' function
+    const { data, error } = await this.supabase
+      .from('users')
+      .insert({
         email,
-        passwordHash,
-        fullName,
-        emailVerificationToken,
-        preferredLanguage
-      ]);
+        password_hash,
+        full_name,
+        email_verification_token,
+        preferred_language
+      })
+      .select()
+      .single();
 
-      return result.rows[0].id;
+      if (error) {
+        console.error('Supabase create user error:', error);
+        
+        // Handle specific errors
+        if (error.code === '23505') { // Unique violation
+          return {
+            success: false,
+            error: 'このメールアドレスは既に使用されています'
+          };
+        }
+        
+        return {
+          success: false,
+          error: 'アカウント作成中にエラーが発生しました'
+        };
+      }
+
+      console.log('User created successfully:', data);
+      return {
+        success: true,
+        user: data,
+        message: 'ユーザーが正常に作成されました'
+      };
 
     } catch (error) {
       console.error('Create user error:', error);
-      throw error;
+      return {
+        success: false,
+        error: 'アカウント作成中にエラーが発生しました'
+      };
     }
+
   }
 
   async findUserById(userId) {
