@@ -130,6 +130,42 @@ CREATE TRIGGER update_users_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+CREATE OR REPLACE FUNCTION increment_login_count(user_id BIGINT)
+RETURNS INTEGER AS $$
+DECLARE
+  current_count INTEGER;
+BEGIN
+  SELECT COALESCE(login_count, 0) + 1 INTO current_count
+  FROM users 
+  WHERE id = user_id;
+  
+  RETURN current_count;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_user_stats()
+RETURNS TABLE(
+  total_users BIGINT,
+  active_users BIGINT,
+  suspended_users BIGINT,
+  verified_users BIGINT,
+  active_last_30_days BIGINT,
+  new_last_30_days BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(*) as total_users,
+    COUNT(CASE WHEN account_status = 'active' THEN 1 END) as active_users,
+    COUNT(CASE WHEN account_status = 'suspended' THEN 1 END) as suspended_users,
+    COUNT(CASE WHEN email_verified = TRUE THEN 1 END) as verified_users,
+    COUNT(CASE WHEN last_login >= NOW() - INTERVAL '30 days' THEN 1 END) as active_last_30_days,
+    COUNT(CASE WHEN created_at >= NOW() - INTERVAL '30 days' THEN 1 END) as new_last_30_days
+  FROM users 
+  WHERE account_status != 'deleted';
+END;
+$$ LANGUAGE plpgsql;
+
 -- ================================
 -- ROW LEVEL SECURITY (RLS) - Optional
 -- ================================

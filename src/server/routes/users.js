@@ -1,72 +1,89 @@
-// server/routes/users.js - ES Modules Version
+// server/routes/users.js - Fixed Supabase Version
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { authenticateToken, generateToken } from '../middleware/auth.js';
-import UserDbService from '../services/userDbService.js';
+import userDbService from '../services/userDbService.js'; // Import the singleton instance
 
 const router = express.Router();
-// Create an instance of the service
-const userDbService = new UserDbService();
 
 // =======================
 // REGISTRATION
 // =======================
 router.post('/register', async (req, res) => {
   try {
+    console.log('📝 Registration attempt:', req.body.email);
+    
     const { email, password, fullName } = req.body;
 
     // Validation
     if (!email || !password || !fullName) {
       return res.status(400).json({
+        success: false,
         error: 'メールアドレス、パスワード、氏名は必須です。'
       });
     }
 
     if (password.length < 8) {
       return res.status(400).json({
+        success: false,
         error: 'パスワードは8文字以上で入力してください。'
       });
     }
 
     // Check if user already exists
-    const existingUser = await userDbService.findUserByEmail(email);
-    if (existingUser) {
+    const existingUserResult = await userDbService.findUserByEmail(email);
+    if (existingUserResult.success) {
       return res.status(400).json({
+        success: false,
         error: 'このメールアドレスは既に登録されています。'
       });
     }
 
     // Hash password
     const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Generate email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const email_verification_token = crypto.randomBytes(32).toString('hex');
 
-    // Create user
+    // Create user data object
     const userData = {
       email,
-      passwordHash,
-      fullName,
-      emailVerificationToken,
-      preferredLanguage: 'ja'
+      password_hash,
+      full_name: fullName,
+      email_verification_token,
+      preferred_language: 'ja'
     };
 
-    const userId = await userDbService.createUser(userData);
+    console.log('🔧 Creating user with data:', { ...userData, password_hash: '[HIDDEN]' });
 
-    // TODO: Send verification email
-    // await emailService.sendVerificationEmail(email, emailVerificationToken);
+    // Create user using the fixed service
+    const result = await userDbService.createUser(userData);
 
-    res.status(201).json({
-      success: true,
-      userId,
-      message: 'アカウントが作成されました。確認メールをご確認ください。'
-    });
+    if (result.success) {
+      console.log('✅ User created successfully:', result.user.id);
+      
+      // TODO: Send verification email
+      // await emailService.sendVerificationEmail(email, email_verification_token);
+
+      res.status(201).json({
+        success: true,
+        user: result.user,
+        message: result.message
+      });
+    } else {
+      console.log('❌ User creation failed:', result.error);
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('❌ Registration error:', error);
     res.status(500).json({
+      success: false,
       error: 'アカウント作成中にエラーが発生しました。'
     });
   }
@@ -79,7 +96,6 @@ router.post('/login', async (req, res) => {
   try {
     console.log('🔐 Login attempt received');
     console.log('📧 Email:', req.body.email);
-    console.log('🔒 Password provided:', req.body.password);
     
     const { email, password } = req.body;
     
@@ -92,10 +108,10 @@ router.post('/login', async (req, res) => {
     }
     
     // Find user
-    const user = await req.userDbService.findUserByEmail(email);
-    console.log('👤 User found:', !!user);
+    const userResult = await userDbService.findUserByEmail(email);
+    console.log('👤 User lookup result:', userResult.success);
     
-    if (!user) {
+    if (!userResult.success || !userResult.user) {
       console.log('❌ No user found');
       return res.status(401).json({
         success: false,
@@ -103,38 +119,25 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    console.log('🔒 User password hash:', user.passwordHash);
-    console.log('🔒 Input password:', password);
-    console.log('🔒 Hash length:', user.passwordHash?.length);
-    console.log('🔒 Password length:', password?.length);
+    const user = userResult.user;
+    console.log('🔒 User found with ID:', user.id);
     
     // Check account status
-    if (user.accountStatus !== 'active') {
-      console.log('❌ Account not active:', user.accountStatus);
+    if (user.account_status !== 'active') {
+      console.log('❌ Account not active:', user.account_status);
       return res.status(401).json({
         success: false,
         error: 'このアカウントは無効になっています。'
       });
     }
     
-    // Verify password with detailed logging
-    console.log('🔍 About to compare passwords...');
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-    console.log('🔒 bcrypt.compare result:', isValidPassword);
+    // Verify password
+    console.log('🔍 Verifying password...');
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    console.log('🔒 Password verification result:', isValidPassword);
     
     if (!isValidPassword) {
       console.log('❌ Password mismatch');
-      
-      // Test with common passwords for debugging
-      const testPasswords = ['password', 'password123', 'test123', '123456'];
-      for (const testPwd of testPasswords) {
-        const testResult = await bcrypt.compare(testPwd, user.passwordHash);
-        console.log(`🧪 Testing "${testPwd}":`, testResult);
-        if (testResult) {
-          console.log(`✅ CORRECT PASSWORD IS: "${testPwd}"`);
-        }
-      }
-      
       return res.status(401).json({
         success: false,
         error: 'メールアドレスまたはパスワードが正しくありません。'
@@ -143,16 +146,22 @@ router.post('/login', async (req, res) => {
     
     console.log('✅ Password verified successfully!');
     
-    // For now, skip JWT and sessions - just return success
+    // Update last login
+    await userDbService.updateLastLogin(user.id);
+    
+    // Generate JWT token (you can implement this properly later)
+    const token = generateToken ? generateToken(user) : `temp-token-${user.id}`;
+    
     res.json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
-        preferredLanguage: user.preferredLanguage
+        full_name: user.full_name,
+        preferred_language: user.preferred_language,
+        email_verified: user.email_verified
       },
-      token: 'temp-token-' + user.id
+      token: token
     });
     
   } catch (error) {
@@ -180,6 +189,7 @@ router.post('/logout', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({
+      success: false,
       error: 'ログアウト中にエラーが発生しました。'
     });
   }
@@ -190,22 +200,32 @@ router.post('/logout', authenticateToken, async (req, res) => {
 // =======================
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
-    const user = await userDbService.findUserById(req.user.id);
+    const result = await userDbService.findUserById(req.user.id);
     
-    if (!user) {
+    if (!result.success || !result.user) {
       return res.status(404).json({
+        success: false,
         error: 'ユーザーが見つかりません。'
       });
     }
 
     res.json({
       success: true,
-      user: user.toSafeFormat()
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        full_name: result.user.full_name,
+        preferred_language: result.user.preferred_language,
+        email_verified: result.user.email_verified,
+        account_status: result.user.account_status,
+        created_at: result.user.created_at
+      }
     });
 
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({
+      success: false,
       error: 'プロフィール取得中にエラーが発生しました。'
     });
   }
@@ -216,116 +236,72 @@ router.get('/profile', authenticateToken, async (req, res) => {
 // =======================
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { fullName, email, preferredLanguage } = req.body;
+    const { full_name, email, preferred_language } = req.body;
 
     // Validation
-    if (!fullName || !email) {
+    if (!full_name || !email) {
       return res.status(400).json({
+        success: false,
         error: '氏名とメールアドレスは必須です。'
       });
     }
 
     // Check if email is already taken by another user
     if (email !== req.user.email) {
-      const existingUser = await userDbService.findUserByEmail(email);
-      if (existingUser && existingUser.id !== req.user.id) {
+      const existingUserResult = await userDbService.findUserByEmail(email);
+      if (existingUserResult.success && existingUserResult.user.id !== req.user.id) {
         return res.status(400).json({
+          success: false,
           error: 'このメールアドレスは既に使用されています。'
         });
       }
     }
 
     const updateData = {
-      fullName,
+      full_name,
       email,
-      preferredLanguage: preferredLanguage || 'ja'
+      preferred_language: preferred_language || 'ja'
     };
 
-    const updatedUser = await userDbService.updateUser(req.user.id, updateData);
+    const result = await userDbService.updateUser(req.user.id, updateData);
 
-    res.json({
-      success: true,
-      user: updatedUser.toSafeFormat()
-    });
+    if (result.success) {
+      res.json({
+        success: true,
+        user: result.user
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({
+      success: false,
       error: 'プロフィール更新中にエラーが発生しました。'
     });
   }
 });
 
 // =======================
-// CHANGE PASSWORD
+// DEBUGGING ROUTES (REMOVE IN PRODUCTION)
 // =======================
-router.post('/change-password', authenticateToken, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    // Validation
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        error: '現在のパスワードと新しいパスワードを入力してください。'
-      });
-    }
-
-    if (newPassword.length < 8) {
-      return res.status(400).json({
-        error: '新しいパスワードは8文字以上で入力してください。'
-      });
-    }
-
-    // Get user with password
-    const user = await userDbService.findUserById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        error: 'ユーザーが見つかりません。'
-      });
-    }
-
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
-    if (!isValidPassword) {
-      return res.status(401).json({
-        error: '現在のパスワードが正しくありません。'
-      });
-    }
-
-    // Hash new password
-    const saltRounds = 12;
-    const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
-
-    // Update password
-    await userDbService.updateUserPassword(req.user.id, newPasswordHash);
-
-    res.json({
-      success: true,
-      message: 'パスワードが変更されました。'
-    });
-
-  } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({
-      error: 'パスワード変更中にエラーが発生しました。'
-    });
-  }
-});
-
 router.post('/reset-password', async (req, res) => {
   try {
-    const newPassword = 'test123';
+    const { email = 'test@example.com', newPassword = 'test123' } = req.body;
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     
-    console.log('🔄 Resetting password for test@example.com');
+    console.log('🔄 Resetting password for:', email);
     console.log('🔒 New password will be:', newPassword);
-    console.log('🔒 New hash will be:', hashedPassword);
     
     // Update password using Supabase
-    const { data, error } = await req.userDbService.supabase
+    const { data, error } = await userDbService.supabase
       .from('users')
       .update({ password_hash: hashedPassword })
-      .eq('email', 'test@example.com')
+      .eq('email', email)
       .select();
     
     if (error) {
@@ -339,8 +315,8 @@ router.post('/reset-password', async (req, res) => {
       success: true,
       message: 'Password reset successfully!',
       newCredentials: {
-        email: 'test@example.com',
-        password: 'test123'
+        email: email,
+        password: newPassword
       },
       updatedUser: data[0]
     });
@@ -354,42 +330,35 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-router.get('/reset-password', async (req, res) => {
+router.get('/debug-user/:email', async (req, res) => {
   try {
-    const newPassword = 'test123';
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const email = req.params.email;
+    console.log('🔍 Debug lookup for email:', email);
     
-    console.log('🔄 Resetting password for test@example.com');
-    console.log('🔒 New password will be:', newPassword);
-    console.log('🔒 New hash will be:', hashedPassword);
-    
-    // Update password using Supabase directly
-    const supabase = req.userDbService.supabase;
-    const { data, error } = await supabase
+    const { data, error } = await userDbService.supabase
       .from('users')
-      .update({ password_hash: hashedPassword })
-      .eq('email', 'test@example.com')
-      .select();
+      .select('id, email, full_name, account_status, email_verified, created_at')
+      .eq('email', email)
+      .single();
     
     if (error) {
-      console.error('Supabase update error:', error);
-      throw error;
+      console.log('❌ Debug error:', error);
+      return res.json({
+        success: false,
+        error: error.message,
+        code: error.code
+      });
     }
     
-    console.log('✅ Password updated successfully');
-    
+    console.log('✅ Debug found user:', data);
     res.json({
       success: true,
-      message: 'Password reset successfully!',
-      newCredentials: {
-        email: 'test@example.com',
-        password: 'test123'
-      },
-      updatedUser: data[0]
+      user: data,
+      message: 'User found successfully'
     });
     
   } catch (error) {
-    console.error('❌ Reset password error:', error);
+    console.error('❌ Debug error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -402,16 +371,24 @@ router.get('/reset-password', async (req, res) => {
 // =======================
 router.get('/favorites', authenticateToken, async (req, res) => {
   try {
-    const favorites = await userDbService.getUserFavorites(req.user.id);
+    const result = await userDbService.getUserFavorites(req.user.id);
 
-    res.json({
-      success: true,
-      favorites
-    });
+    if (result.success) {
+      res.json({
+        success: true,
+        favorites: result.favorites
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Get favorites error:', error);
     res.status(500).json({
+      success: false,
       error: 'お気に入り取得中にエラーが発生しました。'
     });
   }
@@ -423,28 +400,29 @@ router.post('/favorites', authenticateToken, async (req, res) => {
 
     if (!propertyId) {
       return res.status(400).json({
+        success: false,
         error: '物件IDが必要です。'
       });
     }
 
-    // Check if already in favorites
-    const existing = await userDbService.checkFavorite(req.user.id, propertyId);
-    if (existing) {
-      return res.status(400).json({
-        error: 'この物件は既にお気に入りに追加されています。'
+    const result = await userDbService.addToFavorites(req.user.id, propertyId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
       });
     }
-
-    await userDbService.addToFavorites(req.user.id, propertyId);
-
-    res.json({
-      success: true,
-      message: 'お気に入りに追加しました。'
-    });
 
   } catch (error) {
     console.error('Add to favorites error:', error);
     res.status(500).json({
+      success: false,
       error: 'お気に入り追加中にエラーが発生しました。'
     });
   }
@@ -454,16 +432,24 @@ router.delete('/favorites/:propertyId', authenticateToken, async (req, res) => {
   try {
     const { propertyId } = req.params;
 
-    await userDbService.removeFromFavorites(req.user.id, propertyId);
+    const result = await userDbService.removeFromFavorites(req.user.id, propertyId);
 
-    res.json({
-      success: true,
-      message: 'お気に入りから削除しました。'
-    });
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Remove from favorites error:', error);
     res.status(500).json({
+      success: false,
       error: 'お気に入り削除中にエラーが発生しました。'
     });
   }
@@ -474,16 +460,24 @@ router.delete('/favorites/:propertyId', authenticateToken, async (req, res) => {
 // =======================
 router.get('/search-history', authenticateToken, async (req, res) => {
   try {
-    const searchHistory = await userDbService.getUserSearchHistory(req.user.id);
+    const result = await userDbService.getUserSearchHistory(req.user.id);
 
-    res.json({
-      success: true,
-      searchHistory
-    });
+    if (result.success) {
+      res.json({
+        success: true,
+        searchHistory: result.history
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Get search history error:', error);
     res.status(500).json({
+      success: false,
       error: '検索履歴取得中にエラーが発生しました。'
     });
   }
@@ -493,19 +487,27 @@ router.post('/search-history', authenticateToken, async (req, res) => {
   try {
     const { searchQuery, searchFilters, resultsCount } = req.body;
 
-    await userDbService.saveSearchHistory(req.user.id, {
+    const result = await userDbService.saveSearchHistory(req.user.id, {
       searchQuery,
       searchFilters,
       resultsCount
     });
 
-    res.json({
-      success: true
-    });
+    if (result.success) {
+      res.json({
+        success: true
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Save search history error:', error);
     res.status(500).json({
+      success: false,
       error: '検索履歴保存中にエラーが発生しました。'
     });
   }
@@ -516,18 +518,21 @@ router.post('/search-history', authenticateToken, async (req, res) => {
 // =======================
 router.post('/auth/google', async (req, res) => {
   res.status(501).json({
+    success: false,
     error: 'Google ログインは現在開発中です。'
   });
 });
 
 router.post('/auth/line', async (req, res) => {
   res.status(501).json({
+    success: false,
     error: 'LINE ログインは現在開発中です。'
   });
 });
 
 router.post('/auth/yahoo', async (req, res) => {
   res.status(501).json({
+    success: false,
     error: 'Yahoo ログインは現在開発中です。'
   });
 });
