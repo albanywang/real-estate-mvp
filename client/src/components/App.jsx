@@ -562,7 +562,7 @@ const UserAuthSection = ({ onOpenLogin, phrases }) => {
           onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
           onMouseLeave={(e) => e.target.style.background = 'transparent'}
         >
-          {user.fullName || user.email}
+          {user.full_name || user.email}
           <span style={{ 
             fontSize: '0.8rem',
             transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -611,7 +611,7 @@ const UserAuthSection = ({ onOpenLogin, phrases }) => {
                   color: '#111827',
                   fontSize: '0.875rem'
                 }}>
-                  {user.fullName}
+                  {user.full_name}
                 </div>
                 <div style={{ 
                   color: '#6b7280',

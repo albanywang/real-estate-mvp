@@ -223,7 +223,6 @@ class userDbService {
         .from('users')
         .update({
           last_login: new Date().toISOString(),
-          login_count: this.supabase.sql`login_count + 1`,
           updated_at: new Date().toISOString()
         })
         .eq('id', userId)
