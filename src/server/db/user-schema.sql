@@ -1,5 +1,5 @@
 -- ================================
--- POSTGRESQL SCHEMAS FOR SUPABASE
+-- POSTGRESQL SCHEMAS FOR SUPABASE - SIMPLIFIED
 -- ================================
 -- Enable PostGIS extension (run this once in your database if not already enabled)
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -7,22 +7,23 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Drop existing table and all dependencies
 DROP TABLE IF EXISTS users CASCADE;
 
--- Create ENUM types first
+-- Drop existing ENUM types if they exist and recreate them
+DROP TYPE IF EXISTS account_status_enum CASCADE;
+DROP TYPE IF EXISTS language_enum CASCADE;
+DROP TYPE IF EXISTS gender_enum CASCADE; -- Clean up the old gender enum too
+
+-- Create ENUM types
 CREATE TYPE account_status_enum AS ENUM ('active', 'suspended', 'deleted');
-CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
 CREATE TYPE language_enum AS ENUM ('ja', 'en');
 
 -- ================================
--- USERS TABLE
+-- USERS TABLE - SIMPLIFIED
 -- ================================
 CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   full_name VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  date_of_birth DATE,
-  gender gender_enum,
   profile_image_url VARCHAR(500),
   
   -- Authentication
