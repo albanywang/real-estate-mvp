@@ -167,7 +167,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error('Form submission error:', error);
     }
-  };    
+   
     if (!validateForm()) return;
     
     setIsSubmitting(true);
