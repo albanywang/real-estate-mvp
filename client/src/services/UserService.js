@@ -56,7 +56,7 @@ class UserService {
     try {
 
       console.log('🌐 UserService: Starting login for:', email);
-      console.log('🔗 Login URL:', `${BASE_URL}/users/login`);
+      console.log('🔗 Login URL:', `${this.baseURL}/users/login`);
 
       const response = await fetch(`${this.baseURL}/users/login`, {
         method: 'POST',
