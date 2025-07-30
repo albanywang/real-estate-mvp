@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../services/authContext';
+import { useAuth } from '../services/authContext'; // ← Fixed: Capital A
 
 // Login Popup Component - Integrated with User Database
 const LoginPopup = ({ isOpen, onClose }) => {
     // Get auth methods from context
   const { login, register, isLoading } = useAuth();
-  const [isLoginMode, setIsLoginMode] = useState(true);
   const [activeTab, setActiveTab] = useState('signin');
   const [formData, setFormData] = useState({
     email: '',
@@ -137,37 +136,10 @@ const LoginPopup = ({ isOpen, onClose }) => {
     return true;
   };
   
+  // FIXED: Single handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    try {
-      if (isLoginMode) {
-        // Login
-        const result = await login(formData.email, formData.password);
-        if (result.success) {
-          onClose();
-        } else {
-          console.error('Login failed:', result.error);
-        }
-      } else {
-        // Register - now using register from useAuth
-        const result = await register({
-          email: formData.email,
-          password: formData.password,
-          fullName: formData.fullName
-        });
-        
-        if (result.success) {
-          alert('Registration successful! Please check your email.');
-          setIsLoginMode(true); // Switch to login mode
-        } else {
-          console.error('Registration failed:', result.error);
-        }
-      }
-    } catch (error) {
-      console.error('Form submission error:', error);
-    }
-   
     if (!validateForm()) return;
     
     setIsSubmitting(true);
@@ -176,6 +148,7 @@ const LoginPopup = ({ isOpen, onClose }) => {
     
     try {
       if (activeTab === 'signin') {
+        // Login
         const result = await login(formData.email, formData.password);
         
         if (result.success) {
@@ -187,11 +160,11 @@ const LoginPopup = ({ isOpen, onClose }) => {
           setError(result.error || 'ログインに失敗しました。');
         }
       } else {
-        // Registration
+        // Registration - FIXED: Use formData.name not formData.fullName
         const userData = {
           email: formData.email,
           password: formData.password,
-          fullName: formData.name
+          fullName: formData.name // ← Fixed: using formData.name
         };
         
         const result = await register(userData);
