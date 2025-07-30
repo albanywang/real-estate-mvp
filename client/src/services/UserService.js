@@ -24,7 +24,7 @@ class UserService {
         throw new Error('メールアドレス、パスワード、氏名は必須です。');
       }
 
-      const response = await fetch(`${API_BASE_URL}/users/register`, {
+      const response = await fetch(`${REACT_APP_API_BASE_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
