@@ -1000,3 +1000,14 @@
       font-size: 14px;
     }
   }
+
+  .property-detail-btn.favorite.favorited {
+    background: #dc2626 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+  }
+
+  .property-detail-btn.favorite:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
