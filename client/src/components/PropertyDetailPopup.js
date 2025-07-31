@@ -3,19 +3,11 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { formatPrice, formatTraditionalPrice, formatManagementFee, formatArea, formatBalcony } from '../utils/formatUtils';
 import { getImageUrl } from '../services/api';
 import { formatDate, formatDateCompact, formatDateRelative } from '../utils/formatDate';
-import { useAuth } from '../services/authContext'; 
 
 const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenViewerReady }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageLoadErrors, setImageLoadErrors] = useState(new Set());
-
-  const { user, isLoggedIn } = useAuth();
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-
-  // API base URL
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://real-estate-server-34eu.onrender.com/api';
 
   // Reset image index and errors when property changes
   useEffect(() => {
@@ -117,90 +109,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, nextImage, prevImage, onClose, handleImageClick]);
-
-  useEffect(() => {
-    if (isLoggedIn && user && property) {
-      checkIfFavorite();
-    }
-  }, [checkIfFavorite]);  
-
-  // Add these functions after your existing image functions
-  const checkIfFavorite = useCallback(async () => {
-    if (!isLoggedIn || !user || !property) return;
-    
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${API_BASE_URL}/users/favorites`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.favorites) {
-          const isPropertyFavorited = result.favorites.some(
-            fav => fav.propertyId === property.id || fav.property_id === property.id
-          );
-          setIsFavorite(isPropertyFavorited);
-        }
-      }
-    } catch (error) {
-      console.error('❌ Error checking favorite status:', error);
-    }
-  }, [isLoggedIn, user, property, API_BASE_URL]);
-
-  const toggleFavorite = useCallback(async () => {
-    if (!isLoggedIn) {
-      alert('お気に入りに追加するにはログインが必要です');
-      return;
-    }
-
-    try {
-      setIsFavoriteLoading(true);
-      const token = localStorage.getItem('authToken');
-
-      if (isFavorite) {
-        // Remove from favorites
-        const response = await fetch(`${API_BASE_URL}/users/favorites/${property.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        });
-
-        if (response.ok) {
-          setIsFavorite(false);
-          console.log('✅ Removed from favorites');
-        }
-      } else {
-        // Add to favorites
-        const response = await fetch(`${API_BASE_URL}/users/favorites`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            propertyId: property.id
-          })
-        });
-
-        if (response.ok) {
-          setIsFavorite(true);
-          console.log('✅ Added to favorites');
-        }
-      }
-    } catch (error) {
-      console.error('❌ Error toggling favorite:', error);
-      alert('お気に入りの操作に失敗しました');
-    } finally {
-      setIsFavoriteLoading(false);
-    }
-  }, [isLoggedIn, isFavorite, property, API_BASE_URL]);
 
   // Handle image loading states
   const handleImageLoad = useCallback(() => {
@@ -665,25 +573,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
 
           {/* Action buttons */}
           <div className="property-detail-buttons">
-            {/* Favorites button - only show if user is logged in */}
-            {isLoggedIn && (
-              <button 
-                className={`property-detail-btn favorite ${isFavorite ? 'favorited' : ''}`}
-                onClick={toggleFavorite}
-                disabled={isFavoriteLoading}
-                style={{
-                  background: isFavorite ? '#dc2626' : '#f3f4f6',
-                  color: isFavorite ? 'white' : '#374151',
-                  border: isFavorite ? '2px solid #dc2626' : '2px solid #d1d5db',
-                  opacity: isFavoriteLoading ? 0.7 : 1,
-                  cursor: isFavoriteLoading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                <i className={`fas ${isFavoriteLoading ? 'fa-spinner fa-spin' : isFavorite ? 'fa-heart' : 'fa-heart-o'}`}></i>
-                {isFavoriteLoading ? '処理中...' : isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
-              </button>
-            )}
-            
             <button className="property-detail-btn loan-calculator">
               <i className="fas fa-calculator"></i>
               Loan Calculator
@@ -692,7 +581,7 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
               <i className="fas fa-envelope"></i>
               {japanesePhrases.contactAgent}
             </button>
-          </div>                
+          </div>                  
         </div>
       </div>
     </div>
