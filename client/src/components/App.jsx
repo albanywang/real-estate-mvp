@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from '../services/authContext';
+import UserFavorites from './components/UserFavorites';
 import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
 import PropertyDetailPopup from './PropertyDetailPopup';
 import MapComponent from './MapComponent';
@@ -26,8 +27,19 @@ const App = () => {
   const [error, setError] = useState(null);
   const [apiStats, setApiStats] = useState({ total: 0, count: 0 });
   const [fullscreenViewerReady, setFullscreenViewerReady] = useState(false);
-  
+  const [currentView, setCurrentView] = useState('properties');
+
   console.log('japanesePhrases check:', japanesePhrases);
+
+  // Add this function to handle showing favorites
+  const handleShowFavorites = () => {
+    setCurrentView('favorites');
+  };
+
+  // Add this function to go back to properties
+  const handleShowProperties = () => {
+    setCurrentView('properties');
+  };
 
   // Function to open the login popup
   const handleOpenLogin = (e) => {
@@ -535,203 +547,232 @@ const App = () => {
   };
 
 // Add this component inside your App.jsx file:
-// UserAuthSection component with dropdown
-const UserAuthSection = ({ onOpenLogin, phrases }) => {
-  const { user, isLoggedIn, logout } = useAuth();
-  const [showDropdown, setShowDropdown] = useState(false);
-  
-  if (isLoggedIn && user) {
-    return (
-      <div style={{ position: 'relative' }}>
-        {/* User name - clickable to toggle dropdown */}
-        <button
-          onClick={() => setShowDropdown(!showDropdown)}
-          style={{ 
-            background: 'transparent',
-            border: 'none',
-            color: '#374151', 
-            fontWeight: '500',
-            whiteSpace: 'nowrap',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem',
-            borderRadius: '0.375rem'
-          }}
-          onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
-          onMouseLeave={(e) => e.target.style.background = 'transparent'}
-        >
-          {user.full_name || user.email}
-          <span style={{ 
-            fontSize: '0.8rem',
-            transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s'
-          }}>
-            ▼
-          </span>
-        </button>
-
-        {/* Dropdown menu */}
-        {showDropdown && (
-          <>
-            {/* Backdrop to close dropdown when clicking outside */}
-            <div 
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 998
-              }}
-              onClick={() => setShowDropdown(false)}
-            />
-            
-            {/* Dropdown content */}
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              right: 0,
-              marginTop: '0.5rem',
-              background: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              minWidth: '180px',
-              zIndex: 999
+  const UserAuthSection = ({ onOpenLogin, phrases, onShowFavorites }) => {
+    const { user, isLoggedIn, logout } = useAuth();
+    const [showDropdown, setShowDropdown] = useState(false);
+    
+    if (isLoggedIn && user) {
+      return (
+        <div style={{ position: 'relative' }}>
+          {/* User name - clickable to toggle dropdown */}
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            style={{ 
+              background: 'transparent',
+              border: 'none',
+              color: '#374151', 
+              fontWeight: '500',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem',
+              borderRadius: '0.375rem'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
+          >
+            {user.full_name || user.email}
+            <span style={{ 
+              fontSize: '0.8rem',
+              transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s'
             }}>
-              {/* User info section */}
+              ▼
+            </span>
+          </button>
+
+          {/* Dropdown menu */}
+          {showDropdown && (
+            <>
+              {/* Backdrop to close dropdown when clicking outside */}
+              <div 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 998
+                }}
+                onClick={() => setShowDropdown(false)}
+              />
+              
+              {/* Dropdown content */}
               <div style={{
-                padding: '0.75rem 1rem',
-                borderBottom: '1px solid #f3f4f6'
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '0.5rem',
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '0.5rem',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                minWidth: '180px',
+                zIndex: 999
               }}>
-                <div style={{ 
-                  fontWeight: '600', 
-                  color: '#111827',
-                  fontSize: '0.875rem'
-                }}>
-                  {user.full_name}
-                </div>
-                <div style={{ 
-                  color: '#6b7280',
-                  fontSize: '0.75rem'
-                }}>
-                  {user.email}
-                </div>
-              </div>
-
-              {/* Menu items */}
-              <div style={{ padding: '0.5rem 0' }}>
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    // Add profile functionality later
-                    console.log('Profile clicked');
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '0.75rem 1rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#374151',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
-                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                >
-                  <span>👤</span>
-                  プロフィール
-                </button>
-
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    // Add settings functionality later
-                    console.log('Settings clicked');
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '0.75rem 1rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#374151',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
-                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                >
-                  <span>⚙️</span>
-                  設定
-                </button>
-
-                {/* Divider */}
+                {/* User info section */}
                 <div style={{
-                  height: '1px',
-                  background: '#f3f4f6',
-                  margin: '0.5rem 0'
-                }} />
+                  padding: '0.75rem 1rem',
+                  borderBottom: '1px solid #f3f4f6'
+                }}>
+                  <div style={{ 
+                    fontWeight: '600', 
+                    color: '#111827',
+                    fontSize: '0.875rem'
+                  }}>
+                    {user.full_name}
+                  </div>
+                  <div style={{ 
+                    color: '#6b7280',
+                    fontSize: '0.75rem'
+                  }}>
+                    {user.email}
+                  </div>
+                </div>
 
-                {/* Logout button */}
-                <button
-                  onClick={() => {
-                    setShowDropdown(false);
-                    logout();
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '0.75rem 1rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#dc2626',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#fef2f2'}
-                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                >
-                  <span>🚪</span>
-                  ログアウト
-                </button>
+                {/* Menu items */}
+                <div style={{ padding: '0.5rem 0' }}>
+                  {/* Favorites button - NEW */}
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      if (onShowFavorites) {
+                        onShowFavorites();
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.75rem 1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#374151',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                  >
+                    <span>💝</span>
+                    お気に入り
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      // Add profile functionality later
+                      console.log('Profile clicked');
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.75rem 1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#374151',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                  >
+                    <span>👤</span>
+                    プロフィール
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      // Add settings functionality later
+                      console.log('Settings clicked');
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.75rem 1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#374151',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                  >
+                    <span>⚙️</span>
+                    設定
+                  </button>
+
+                  {/* Divider */}
+                  <div style={{
+                    height: '1px',
+                    background: '#f3f4f6',
+                    margin: '0.5rem 0'
+                  }} />
+
+                  {/* Logout button */}
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      logout();
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.75rem 1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#dc2626',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#fef2f2'}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                  >
+                    <span>🚪</span>
+                    ログアウト
+                  </button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      );
+    }
+    
+    // When not logged in, show login link
+    return (
+      <a
+        href="#"
+        onClick={onOpenLogin}
+        style={{ 
+          textDecoration: 'none', 
+          color: '#6b7280', 
+          fontWeight: '500', 
+          whiteSpace: 'nowrap',
+          cursor: 'pointer'
+        }}
+      >
+        {phrases.signIn}
+      </a>
     );
-  }
+  };
   
-  // When not logged in, show login link
-  return (
-    <a
-      href="#"
-      onClick={onOpenLogin}
-      style={{ 
-        textDecoration: 'none', 
-        color: '#6b7280', 
-        fontWeight: '500', 
-        whiteSpace: 'nowrap',
-        cursor: 'pointer'
-      }}
-    >
-      {phrases.signIn}
-    </a>
-  );
-};
+
 
   // Enhanced debug function
   React.useEffect(() => {
@@ -880,6 +921,7 @@ const UserAuthSection = ({ onOpenLogin, phrases }) => {
             <UserAuthSection 
               onOpenLogin={handleOpenLogin}
               phrases={japanesePhrases}
+              onShowFavorites={handleShowFavorites}
             />
           </div>
         </div>
@@ -910,238 +952,274 @@ const UserAuthSection = ({ onOpenLogin, phrases }) => {
         display: 'flex'
       }}>
         
-        {/* Map Container - Takes up 60% of width */}
-        <div style={{ 
-          flex: '0 0 60%',
-          position: 'relative'
-        }}>
-          {isLoading ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              flexDirection: 'column',
-              gap: '1rem'
+        {/* Show UserFavorites when currentView is 'favorites' */}
+        {currentView === 'favorites' ? (
+          <div style={{ 
+            width: '100%',
+            overflowY: 'auto',
+            background: '#fff'
+          }}>
+            {/* Back button */}
+            <div style={{ 
+              padding: '1rem',
+              borderBottom: '1px solid #e5e7eb',
+              background: '#f9fafb'
             }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                border: '4px solid #f3f4f6',
-                borderTop: '4px solid #3b82f6',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
-            </div>
-          ) : error ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              flexDirection: 'column',
-              gap: '1rem',
-              padding: '2rem'
-            }}>
-              <p style={{ color: '#dc2626', margin: 0, textAlign: 'center' }}>{error}</p>
               <button 
-                onClick={retryLoading}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-              >
-                {japanesePhrases.retry}
-              </button>
-              <small style={{ color: '#6b7280', textAlign: 'center' }}>
-                Debug: Open browser console and run `debugRealEstate.debugAPI()` for more info
-              </small>
-            </div>
-          ) : (
-            <MapComponent 
-              properties={filteredProperties} 
-              selectedProperty={selectedProperty}
-              setSelectedProperty={setSelectedProperty}
-              openPropertyDetail={openPropertyDetail}
-              phrases={japanesePhrases}
-              visible={true}
-            />
-          )}
-        </div>
-
-        {/* Property List Container - Takes up 40% of width */}
-        <div style={{ 
-          flex: '0 0 40%',
-          overflowY: 'auto',
-          borderLeft: '1px solid #e5e7eb',
-          background: '#fff'
-        }}>
-          {isLoading ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '200px',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}>
-              <div style={{
-                width: '30px',
-                height: '30px',
-                border: '3px solid #f3f4f6',
-                borderTop: '3px solid #3b82f6',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
-            </div>
-          ) : error ? (
-            <div style={{
-              padding: '2rem',
-              textAlign: 'center'
-            }}>
-              <p style={{ color: '#dc2626' }}>{error}</p>
-              <button 
-                onClick={retryLoading}
+                onClick={handleShowProperties}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: '#3b82f6',
+                  background: '#6b7280',
                   color: 'white',
                   border: 'none',
                   borderRadius: '0.375rem',
                   cursor: 'pointer',
-                  marginTop: '1rem'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}
               >
-                {japanesePhrases.retry}
+                ← すべての物件に戻る
               </button>
             </div>
-          ) : filteredProperties.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-              {(searchMode === 'all' ? properties : locationProperties).length === 0 ? (
-                <>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏠</div>
-                  <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
-                    {japanesePhrases.noProperties}
-                  </p>
-                  <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                    No properties found {searchMode === 'location' ? 'in selected location' : 'in database'}
-                  </p>
+            <UserFavorites />
+          </div>
+        ) : (
+          <>
+            {/* Map Container - Takes up 60% of width */}
+            <div style={{ 
+              flex: '0 0 60%',
+              position: 'relative'
+            }}>
+              {isLoading ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '4px solid #f3f4f6',
+                    borderTop: '4px solid #3b82f6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
+                </div>
+              ) : error ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  padding: '2rem'
+                }}>
+                  <p style={{ color: '#dc2626', margin: 0, textAlign: 'center' }}>{error}</p>
                   <button 
-                    onClick={retryLoading} 
+                    onClick={retryLoading}
                     style={{
-                      marginTop: '1rem',
+                      padding: '0.75rem 1.5rem',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {japanesePhrases.retry}
+                  </button>
+                  <small style={{ color: '#6b7280', textAlign: 'center' }}>
+                    Debug: Open browser console and run `debugRealEstate.debugAPI()` for more info
+                  </small>
+                </div>
+              ) : (
+                <MapComponent 
+                  properties={filteredProperties} 
+                  selectedProperty={selectedProperty}
+                  setSelectedProperty={setSelectedProperty}
+                  openPropertyDetail={openPropertyDetail}
+                  phrases={japanesePhrases}
+                  visible={true}
+                />
+              )}
+            </div>
+
+            {/* Property List Container - Takes up 40% of width */}
+            <div style={{ 
+              flex: '0 0 40%',
+              overflowY: 'auto',
+              borderLeft: '1px solid #e5e7eb',
+              background: '#fff'
+            }}>
+              {isLoading ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '200px',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  <div style={{
+                    width: '30px',
+                    height: '30px',
+                    border: '3px solid #f3f4f6',
+                    borderTop: '3px solid #3b82f6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
+                </div>
+              ) : error ? (
+                <div style={{
+                  padding: '2rem',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#dc2626' }}>{error}</p>
+                  <button 
+                    onClick={retryLoading}
+                    style={{
                       padding: '0.5rem 1rem',
                       background: '#3b82f6',
                       color: 'white',
                       border: 'none',
                       borderRadius: '0.375rem',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      marginTop: '1rem'
                     }}
                   >
                     {japanesePhrases.retry}
                   </button>
-                </>
+                </div>
+              ) : filteredProperties.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                  {(searchMode === 'all' ? properties : locationProperties).length === 0 ? (
+                    <>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏠</div>
+                      <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
+                        {japanesePhrases.noProperties}
+                      </p>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        No properties found {searchMode === 'location' ? 'in selected location' : 'in database'}
+                      </p>
+                      <button 
+                        onClick={retryLoading} 
+                        style={{
+                          marginTop: '1rem',
+                          padding: '0.5rem 1rem',
+                          background: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.375rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {japanesePhrases.retry}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
+                      <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
+                        No properties match your current filters
+                      </p>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                        Try adjusting your search criteria or clearing some filters
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                        Showing 0 of {searchMode === 'location' ? locationProperties.length : properties.length} properties
+                        {searchMode === 'location' && selectedLocation && (
+                          <span> in {selectedLocation.display_text}</span>
+                        )}
+                      </p>
+                    </>
+                  )}
+                </div>
               ) : (
-                <>
-                  <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
-                  <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
-                    No properties match your current filters
-                  </p>
-                  <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                    Try adjusting your search criteria or clearing some filters
-                  </p>
-                  <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                    Showing 0 of {searchMode === 'location' ? locationProperties.length : properties.length} properties
-                    {searchMode === 'location' && selectedLocation && (
-                      <span> in {selectedLocation.display_text}</span>
-                    )}
-                  </p>
+                <>             
+                  {/* Results Header */}
+                  <div style={{ 
+                    padding: '1rem',
+                    borderBottom: '1px solid #e5e7eb',
+                    background: '#f9fafb',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <p style={{ 
+                        margin: 0, 
+                        fontSize: '1rem', 
+                        fontWeight: '600',
+                        color: '#1f2937'
+                      }}>
+                        {filteredProperties.length} 最新物件
+                      </p>
+                    <select
+                        value={sortOption}
+                        onChange={(e) => setSortOption(e.target.value)}
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          color: '#6b7280',
+                          background: 'white',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {sortOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {/* Property Cards - Two Column Layout */}
+                  <div style={{ 
+                    padding: '1rem',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '1rem'
+                  }}>
+                    {filteredProperties.map(property => (
+                      <div key={property.id} style={{ 
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                      }}>
+                        <PropertyCard
+                          property={property}
+                          isSelected={selectedProperty === property.id}
+                          onClick={() => {
+                            console.log('🏠 Property selected:', property);
+                            setSelectedProperty(property.id);
+                            openPropertyDetail(property);
+                          }}
+                          phrases={japanesePhrases}
+                          compact={true}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </>
               )}
             </div>
-          ) : (
-            <>             
-              {/* Results Header */}
-              <div style={{ 
-                padding: '1rem',
-                borderBottom: '1px solid #e5e7eb',
-                background: '#f9fafb',
-                position: 'sticky',
-                top: 0,
-                zIndex: 10
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '0.5rem'
-                }}>
-                  <p style={{ 
-                    margin: 0, 
-                    fontSize: '1rem', 
-                    fontWeight: '600',
-                    color: '#1f2937'
-                  }}>
-                    {filteredProperties.length} 最新物件
-                  </p>
-                <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      color: '#6b7280',
-                      background: 'white',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {sortOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              {/* Property Cards - Two Column Layout */}
-              <div style={{ 
-                padding: '1rem',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1rem'
-              }}>
-                {filteredProperties.map(property => (
-                  <div key={property.id} style={{ 
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s'
-                  }}>
-                    <PropertyCard
-                      property={property}
-                      isSelected={selectedProperty === property.id}
-                      onClick={() => {
-                        console.log('🏠 Property selected:', property);
-                        setSelectedProperty(property.id);
-                        openPropertyDetail(property);
-                      }}
-                      phrases={japanesePhrases}
-                      compact={true}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <LoginPopup
