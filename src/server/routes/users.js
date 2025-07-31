@@ -34,12 +34,19 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await userDbService.findUserByEmail(email);
-    if (existingUser) {
+    console.log('🔍 Checking if user exists for:', email);
+    const existingUserResult = await userDbService.findUserByEmail(email);
+    console.log('🔍 User check result:', existingUserResult);
+
+    if (existingUserResult.success && existingUserResult.user) {
+      console.log('❌ User already exists');
       return res.status(400).json({
+        success: false,
         error: 'このメールアドレスは既に登録されています。'
       });
     }
+
+    console.log('✅ Email available, proceeding with registration');
 
     // Hash password
     const saltRounds = 12;
@@ -57,16 +64,20 @@ router.post('/register', async (req, res) => {
       preferred_language: 'ja'
     };
 
-    const userId = await userDbService.createUser(userData);
+    const result = await userDbService.createUser(userData);  
 
-    // TODO: Send verification email
-    // await emailService.sendVerificationEmail(email, email_verification_token);
-
-    res.status(201).json({
-      success: true,
-      userId,
-      message: 'アカウントが作成されました。確認メールをご確認ください。'
-    });
+    if (result.success) {
+      res.status(201).json({
+        success: true,
+        user: result.user,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
 
   } catch (error) {
     console.error('Registration error:', error);
