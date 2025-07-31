@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from '../services/authContext';
-import UserFavorites from './components/UserFavorites';
+import UserFavorites from './UserFavorites';
 import { formatPrice, formatArea, formatPriceInMan } from '../utils/formatUtils';
 import PropertyDetailPopup from './PropertyDetailPopup';
 import MapComponent from './MapComponent';
