@@ -212,12 +212,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                   <i className="fas fa-images"></i>
                   {japanesePhrases.photos} ({property.images.length})
                 </h3>
-                {fullscreenViewerReady && (
-                  <div className="fullscreen-hint-header">
-                    <i className="fas fa-expand"></i>
-                    <span>{japanesePhrases.viewFullscreen}</span>
-                  </div>
-                )}
               </div>
 
               {/* Mobile Image Slider */}
