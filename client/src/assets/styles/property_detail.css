@@ -1044,7 +1044,7 @@
     top: 15px;
     right: 15px;
     z-index: 10001;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
     color: white;
     border: none;
     border-radius: 50%;
@@ -1052,6 +1052,9 @@
     height: 40px;
     font-size: 24px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .property-detail-header {
@@ -1142,11 +1145,11 @@
 }
 
 .mobile-nav-prev {
-  left: 10px;
+  left: 15px;
 }
 
 .mobile-nav-next {
-  right: 10px;
+  right: 15px;
 }
 
 .mobile-image-counter {
@@ -1466,6 +1469,9 @@
     font-size: 20px;
     top: 12px;
     right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .property-detail-header {
@@ -1492,6 +1498,14 @@
     width: 35px;
     height: 35px;
     font-size: 16px;
+  }
+
+  .mobile-nav-prev {
+    left: 12px;
+  }
+
+  .mobile-nav-next {
+    right: 12px;
   }
 
   .mobile-image-counter {
