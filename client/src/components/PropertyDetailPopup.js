@@ -8,6 +8,19 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageLoadErrors, setImageLoadErrors] = useState(new Set());
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Reset image index and errors when property changes
   useEffect(() => {
@@ -93,12 +106,9 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
           break;
         case 'Enter':
         case ' ':
-          if (e.target.classList.contains('grid-image') || e.target.classList.contains('thumbnail-small')) {
+          if (e.target.classList.contains('grid-image') || e.target.classList.contains('thumbnail-small') || e.target.classList.contains('mobile-slide-image')) {
             e.preventDefault();
-            // Find the image index from the clicked element
-            const imageElements = document.querySelectorAll('.grid-image, .thumbnail-small img');
-            const clickedIndex = Array.from(imageElements).findIndex(el => el === e.target || el.contains(e.target));
-            handleImageClick(clickedIndex >= 0 ? clickedIndex : 0);
+            handleImageClick(currentImageIndex);
           }
           break;
         default:
@@ -108,7 +118,35 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, nextImage, prevImage, onClose, handleImageClick]);
+  }, [isOpen, nextImage, prevImage, onClose, handleImageClick, currentImageIndex]);
+
+  // Handle touch events for mobile swipe
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && property?.images?.length > 1) {
+      nextImage();
+    }
+    if (isRightSwipe && property?.images?.length > 1) {
+      prevImage();
+    }
+  };
 
   // Handle image loading states
   const handleImageLoad = useCallback(() => {
@@ -147,7 +185,7 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
 
   return (
     <div className="property-detail-overlay" onClick={handleOverlayClick}>
-      <div className="property-detail-content">
+      <div className={`property-detail-content ${isMobile ? 'mobile' : ''}`}>
         <button 
           className="property-detail-close" 
           onClick={onClose}
@@ -182,97 +220,193 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 )}
               </div>
 
-              {/* Images grid */}
-              <div className={`images-grid ${property.images.length === 1 ? 'single-image' : ''}`}>
-                {property.images.slice(0, 6).map((image, index) => (
+              {/* Mobile Image Slider */}
+              {isMobile ? (
+                <div className="mobile-image-slider">
                   <div 
-                    key={index} 
-                    className={`image-item ${index === 0 ? 'main-image' : 'secondary-image'}`}
-                    onClick={() => handleImageClick(index)}
+                    className="mobile-slide-container"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                   >
                     <img
-                      src={getImageUrl(image)}
-                      alt={`${property.title} - image ${index + 1}`}
-                      className="grid-image"
-                      onError={(e) => handleImageError(e, index)}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={`View image ${index + 1} in fullscreen gallery`}
+                      src={getImageUrl(property.images[currentImageIndex])}
+                      alt={`${property.title} - image ${currentImageIndex + 1}`}
+                      className="mobile-slide-image"
+                      onClick={() => handleImageClick(currentImageIndex)}
+                      onError={(e) => handleImageError(e, currentImageIndex)}
+                      onLoad={handleImageLoad}
+                      onLoadStart={handleImageLoadStart}
                       style={{ 
                         cursor: fullscreenViewerReady ? 'pointer' : 'default'
                       }}
                     />
                     
-                    {/* Loading overlay for individual images */}
-                    {isImageLoading && currentImageIndex === index && (
+                    {/* Navigation arrows for mobile */}
+                    {hasMultipleImages && (
+                      <>
+                        <button 
+                          className="mobile-nav-arrow mobile-nav-prev"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            prevImage();
+                          }}
+                          aria-label="Previous image"
+                        >
+                          <i className="fas fa-chevron-left"></i>
+                        </button>
+                        <button 
+                          className="mobile-nav-arrow mobile-nav-next"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            nextImage();
+                          }}
+                          aria-label="Next image"
+                        >
+                          <i className="fas fa-chevron-right"></i>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Image counter */}
+                    {hasMultipleImages && (
+                      <div className="mobile-image-counter">
+                        {currentImageIndex + 1} / {property.images.length}
+                      </div>
+                    )}
+
+                    {/* Loading overlay */}
+                    {isImageLoading && (
                       <div className="image-loading-overlay">
                         <div className="loading-spinner small"></div>
                       </div>
                     )}
 
                     {/* Error overlay */}
-                    {imageLoadErrors.has(index) && (
+                    {imageLoadErrors.has(currentImageIndex) && (
                       <div className="image-error-overlay">
                         <i className="fas fa-exclamation-triangle"></i>
                         <span>{japanesePhrases.failedToLoad}</span>
                       </div>
                     )}
 
-                    {/* Hover overlay with fullscreen icon */}
-                    {fullscreenViewerReady && !imageLoadErrors.has(index) && (
-                      <div className="image-hover-overlay">
+                    {/* Fullscreen icon */}
+                    {fullscreenViewerReady && !imageLoadErrors.has(currentImageIndex) && (
+                      <div className="mobile-fullscreen-icon">
                         <i className="fas fa-expand"></i>
                       </div>
                     )}
                   </div>
-                ))}
 
-                {/* "View more" overlay if there are more than 6 images */}
-                {property.images.length > 6 && (
-                  <div 
-                    className="view-more-overlay"
-                    onClick={() => handleImageClick(0)}
-                  >
-                    <div className="view-more-content">
-                      <i className="fas fa-plus"></i>
-                      <span>+{property.images.length - 6}</span>
-                      <div className="view-more-text">View all photos</div>
+                  {/* Mobile thumbnail dots */}
+                  {hasMultipleImages && (
+                    <div className="mobile-image-dots">
+                      {property.images.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`mobile-dot ${index === currentImageIndex ? 'active' : ''}`}
+                          onClick={() => goToImage(index)}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Show all thumbnails if more than 6 images */}
-              {property.images.length > 6 && (
-                <div className="all-thumbnails">
-                  <div className="thumbnails-header">
-                    <span>All Photos</span>
-                  </div>
-                  <div className="thumbnails-grid">
-                    {property.images.map((image, index) => (
-                      <button
-                        key={index}
-                        className={`thumbnail-small ${imageLoadErrors.has(index) ? 'error' : ''}`}
+                  )}
+                </div>
+              ) : (
+                /* Desktop Images grid */
+                <>
+                  <div className={`images-grid ${property.images.length === 1 ? 'single-image' : ''}`}>
+                    {property.images.slice(0, 6).map((image, index) => (
+                      <div 
+                        key={index} 
+                        className={`image-item ${index === 0 ? 'main-image' : 'secondary-image'}`}
                         onClick={() => handleImageClick(index)}
-                        aria-label={`View image ${index + 1} in fullscreen`}
                       >
                         <img
                           src={getImageUrl(image)}
-                          alt={`Thumbnail ${index + 1}`}
-                          onError={(e) => {
-                            setImageLoadErrors(prev => new Set([...prev, index]));
-                            e.target.src = getImageUrl('/images/placeholder.jpg');
+                          alt={`${property.title} - image ${index + 1}`}
+                          className="grid-image"
+                          onError={(e) => handleImageError(e, index)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`View image ${index + 1} in fullscreen gallery`}
+                          style={{ 
+                            cursor: fullscreenViewerReady ? 'pointer' : 'default'
                           }}
                         />
-                        {imageLoadErrors.has(index) && (
-                          <div className="thumbnail-error-overlay">
-                            <i className="fas fa-exclamation-triangle"></i>
+                        
+                        {/* Loading overlay for individual images */}
+                        {isImageLoading && currentImageIndex === index && (
+                          <div className="image-loading-overlay">
+                            <div className="loading-spinner small"></div>
                           </div>
                         )}
-                      </button>
+
+                        {/* Error overlay */}
+                        {imageLoadErrors.has(index) && (
+                          <div className="image-error-overlay">
+                            <i className="fas fa-exclamation-triangle"></i>
+                            <span>{japanesePhrases.failedToLoad}</span>
+                          </div>
+                        )}
+
+                        {/* Hover overlay with fullscreen icon */}
+                        {fullscreenViewerReady && !imageLoadErrors.has(index) && (
+                          <div className="image-hover-overlay">
+                            <i className="fas fa-expand"></i>
+                          </div>
+                        )}
+                      </div>
                     ))}
+
+                    {/* "View more" overlay if there are more than 6 images */}
+                    {property.images.length > 6 && (
+                      <div 
+                        className="view-more-overlay"
+                        onClick={() => handleImageClick(0)}
+                      >
+                        <div className="view-more-content">
+                          <i className="fas fa-plus"></i>
+                          <span>+{property.images.length - 6}</span>
+                          <div className="view-more-text">View all photos</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {/* Show all thumbnails if more than 6 images */}
+                  {property.images.length > 6 && (
+                    <div className="all-thumbnails">
+                      <div className="thumbnails-header">
+                        <span>All Photos</span>
+                      </div>
+                      <div className="thumbnails-grid">
+                        {property.images.map((image, index) => (
+                          <button
+                            key={index}
+                            className={`thumbnail-small ${imageLoadErrors.has(index) ? 'error' : ''}`}
+                            onClick={() => handleImageClick(index)}
+                            aria-label={`View image ${index + 1} in fullscreen`}
+                          >
+                            <img
+                              src={getImageUrl(image)}
+                              alt={`Thumbnail ${index + 1}`}
+                              onError={(e) => {
+                                setImageLoadErrors(prev => new Set([...prev, index]));
+                                e.target.src = getImageUrl('/images/placeholder.jpg');
+                              }}
+                            />
+                            {imageLoadErrors.has(index) && (
+                              <div className="thumbnail-error-overlay">
+                                <i className="fas fa-exclamation-triangle"></i>
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           ) : (
@@ -293,7 +427,7 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
           </div>
           
           {/* First table - Transportation and Address */}
-          <table className="property-detail-table">
+          <table className={`property-detail-table ${isMobile ? 'mobile-table' : ''}`}>
             <tbody>
               <tr>
                 <th>{phrases?.transportation || japanesePhrases.transportation}</th>
@@ -318,36 +452,76 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
             </div>
           </div>
           
-          <table className="property-detail-table property-detail-table-grid">
+          <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
             <tbody>
               <tr>
                 <th>{phrases?.price || japanesePhrases.price}</th>
                 <td>{formatTraditionalPrice(property.price)}</td>
-                <th>{phrases?.pricePerSquareMeter || japanesePhrases.pricePerSquareMeter}</th>
-                <td>{property.area ? formatTraditionalPrice(Math.round(property.price / property.area)) : '－'}</td>            
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.pricePerSquareMeter || japanesePhrases.pricePerSquareMeter}</th>
+                    <td>{property.area ? formatTraditionalPrice(Math.round(property.price / property.area)) : '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.pricePerSquareMeter || japanesePhrases.pricePerSquareMeter}</th>
+                  <td>{property.area ? formatTraditionalPrice(Math.round(property.price / property.area)) : '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.managementFee || japanesePhrases.managementFee}</th>
                 <td>{formatPrice(property.managementFee)}</td>
-                <th>{phrases?.repairReserveFund || japanesePhrases.repairReserveFund}</th>
-                <td>{formatPrice(property.repairReserveFund)}</td>                
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.repairReserveFund || japanesePhrases.repairReserveFund}</th>
+                    <td>{formatPrice(property.repairReserveFund)}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.repairReserveFund || japanesePhrases.repairReserveFund}</th>
+                  <td>{formatPrice(property.repairReserveFund)}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.landLeaseFee || japanesePhrases.landLeaseFee}</th>
                 <td>{displayFee(property.landLeaseFee)}</td>
-                <th>{phrases?.rightFee || japanesePhrases.rightFee}</th>
-                <td>{displayFee(property.rightFee)}</td>                
-              </tr> 
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.rightFee || japanesePhrases.rightFee}</th>
+                    <td>{displayFee(property.rightFee)}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.rightFee || japanesePhrases.rightFee}</th>
+                  <td>{displayFee(property.rightFee)}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.depositGuarantee || japanesePhrases.depositGuarantee}</th>
                 <td>{displayFee(property.depositGuarantee)}</td>
-                <th>{phrases?.maintenanceFees || japanesePhrases.maintenanceFees}</th>
-                <td>{displayFee(property.maintenanceFees)}</td>                
-              </tr>   
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.maintenanceFees || japanesePhrases.maintenanceFees}</th>
+                    <td>{displayFee(property.maintenanceFees)}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.maintenanceFees || japanesePhrases.maintenanceFees}</th>
+                  <td>{displayFee(property.maintenanceFees)}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.otherFees || japanesePhrases.otherFees}</th>
                 <td>{displayFee(property.otherFees)}</td>
-                <td colSpan="2"></td>              
+                {!isMobile && <td colSpan="2"></td>}
               </tr>                                               
             </tbody>
           </table>        
@@ -360,60 +534,140 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
             </div>
           </div>
           
-          <table className="property-detail-table property-detail-table-grid">
+          <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
             <tbody>
               <tr>
                 <th>{phrases?.layout || japanesePhrases.layout}</th>
                 <td>{property.layout || '－'}</td>
-                <th>{phrases?.area || japanesePhrases.area}</th>
-                <td>{formatArea(property.area)}</td>
-              </tr>          
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.area || japanesePhrases.area}</th>
+                    <td>{formatArea(property.area)}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.area || japanesePhrases.area}</th>
+                  <td>{formatArea(property.area)}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.balcony || japanesePhrases.balcony}</th>
                 <td>{formatBalcony(property.balconyArea)}</td>
-                <th>{phrases?.floorInfo || japanesePhrases.floorInfo}</th>
-                <td>{property.floorInfo || '－'}</td>
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.floorInfo || japanesePhrases.floorInfo}</th>
+                    <td>{property.floorInfo || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.floorInfo || japanesePhrases.floorInfo}</th>
+                  <td>{property.floorInfo || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.structure || japanesePhrases.structure}</th>
                 <td>{property.structure || '－'}</td>
-                <th>{phrases?.yearBuilt || japanesePhrases.yearBuilt}</th>
-                <td>{property.yearBuilt || '－'}</td>
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.yearBuilt || japanesePhrases.yearBuilt}</th>
+                    <td>{property.yearBuilt || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.yearBuilt || japanesePhrases.yearBuilt}</th>
+                  <td>{property.yearBuilt || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.totalUnits || japanesePhrases.totalUnits}</th>
                 <td>{property.totalUnits || '－'}</td>
-                <th>{phrases?.parking || japanesePhrases.parking}</th>
-                <td>{property.parking || '－'}</td>
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.parking || japanesePhrases.parking}</th>
+                    <td>{property.parking || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.parking || japanesePhrases.parking}</th>
+                  <td>{property.parking || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.bikeStorage || japanesePhrases.bikeStorage}</th>
                 <td>{property.bikeStorage || '－'}</td>
-                <th>{phrases?.bicycleParking || japanesePhrases.bicycleParking}</th>
-                <td>{property.bicycleParking || '－'}</td>
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.bicycleParking || japanesePhrases.bicycleParking}</th>
+                    <td>{property.bicycleParking || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.bicycleParking || japanesePhrases.bicycleParking}</th>
+                  <td>{property.bicycleParking || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.pets || japanesePhrases.pets}</th>
                 <td>{property.pets || '－'}</td>
-                <th>{phrases?.landRights || japanesePhrases.landRights}</th>
-                <td>{property.landRights || '－'}</td>
-              </tr> 
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.landRights || japanesePhrases.landRights}</th>
+                    <td>{property.landRights || '－'}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.landRights || japanesePhrases.landRights}</th>
+                  <td>{property.landRights || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.siteArea || japanesePhrases.siteArea}</th>
                 <td>{property.siteArea || '－'}</td>
-                <th>{phrases?.managementForm || japanesePhrases.managementForm}</th>
-                <td>{property.managementForm || '－'}</td>
-              </tr>  
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.managementForm || japanesePhrases.managementForm}</th>
+                    <td>{property.managementForm || '－'}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.managementForm || japanesePhrases.managementForm}</th>
+                  <td>{property.managementForm || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.direction  || japanesePhrases.direction }</th>
-                <td>{property.direction || '－'}</td>                
-                <th>{phrases?.remarks  || japanesePhrases.remarks }</th>
-                <td>{property.remarks || '－'}</td>
-              </tr>                                 
+                <td>{property.direction || '－'}</td>
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.remarks  || japanesePhrases.remarks }</th>
+                    <td>{property.remarks || '－'}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.remarks  || japanesePhrases.remarks }</th>
+                  <td>{property.remarks || '－'}</td>
+                </tr>
+              )}
             </tbody>
           </table>
 
-          {/* NEW: Condominium Details (for condominiums) */}
+          {/* Condominium Details (for condominiums) */}
           {(property.propertyType === '新築マンション' || property.propertyType === '中古マンション') && 
           (property.condominiumSalesCompany || property.managementCompany) && (
             <>
@@ -424,38 +678,74 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 </div>
               </div>
               
-              <table className="property-detail-table property-detail-table-grid">
+              <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
                 <tbody>
                   {property.condominiumSalesCompany && (
-                    <tr>
-                      <th>分譲会社</th>
-                      <td>{property.condominiumSalesCompany}</td>
-                      <th>管理会社</th>
-                      <td>{property.managementCompany || '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>分譲会社</th>
+                        <td>{property.condominiumSalesCompany}</td>
+                        {!isMobile && (
+                          <>
+                            <th>管理会社</th>
+                            <td>{property.managementCompany || '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>管理会社</th>
+                          <td>{property.managementCompany || '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                   {property.constructionCompany && (
-                    <tr>
-                      <th>施工会社</th>
-                      <td>{property.constructionCompany}</td>
-                      <th>設計会社</th>
-                      <td>{property.designCompany || '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>施工会社</th>
+                        <td>{property.constructionCompany}</td>
+                        {!isMobile && (
+                          <>
+                            <th>設計会社</th>
+                            <td>{property.designCompany || '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>設計会社</th>
+                          <td>{property.designCompany || '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                   {property.direction && (
-                    <tr>
-                      <th>向き</th>
-                      <td>{property.direction}</td>
-                      <th>都市計画</th>
-                      <td>{property.urbanPlanning || '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>向き</th>
+                        <td>{property.direction}</td>
+                        {!isMobile && (
+                          <>
+                            <th>都市計画</th>
+                            <td>{property.urbanPlanning || '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>都市計画</th>
+                          <td>{property.urbanPlanning || '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
             </>
           )}
 
-          {/* NEW: Building & Land Details (for houses) */}
+          {/* Building & Land Details (for houses) */}
           {(property.propertyType === '新築戸建' || property.propertyType === '中古戸建') && (
             <>
               <div className="property-detail-info-header">
@@ -465,39 +755,70 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 </div>
               </div>
               
-              <table className="property-detail-table property-detail-table-grid">
+              <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
                 <tbody>
                   <tr>
                     <th>建物面積</th>
                     <td>{property.buildingArea ? `${property.buildingArea}㎡` : '－'}</td>
-                    <th>土地面積</th>
-                    <td>{property.landArea ? `${property.landArea}㎡` : '－'}</td>
+                    {!isMobile && (
+                      <>
+                        <th>土地面積</th>
+                        <td>{property.landArea ? `${property.landArea}㎡` : '－'}</td>
+                      </>
+                    )}
                   </tr>
+                  {isMobile && (
+                    <tr>
+                      <th>土地面積</th>
+                      <td>{property.landArea ? `${property.landArea}㎡` : '－'}</td>
+                    </tr>
+                  )}
                   <tr>
                     <th>建ぺい率</th>
                     <td>{property.buildingCoverageRatio ? `${property.buildingCoverageRatio}%` : '－'}</td>
-                    <th>容積率</th>
-                    <td>{property.floorAreaRatio ? `${property.floorAreaRatio}%` : '－'}</td>
+                    {!isMobile && (
+                      <>
+                        <th>容積率</th>
+                        <td>{property.floorAreaRatio ? `${property.floorAreaRatio}%` : '－'}</td>
+                      </>
+                    )}
                   </tr>
+                  {isMobile && (
+                    <tr>
+                      <th>容積率</th>
+                      <td>{property.floorAreaRatio ? `${property.floorAreaRatio}%` : '－'}</td>
+                    </tr>
+                  )}
                   <tr>
                     <th>接道状況</th>
-                    <td colSpan="3">{property.accessSituation || '－'}</td>
+                    <td colSpan={isMobile ? "1" : "3"}>{property.accessSituation || '－'}</td>
                   </tr>
                   {property.constructionCompany && (
-                    <tr>
-                      <th>施工会社</th>
-                      <td>{property.constructionCompany}</td>
-                      <th>設計会社</th>
-                      <td>{property.designCompany || '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>施工会社</th>
+                        <td>{property.constructionCompany}</td>
+                        {!isMobile && (
+                          <>
+                            <th>設計会社</th>
+                            <td>{property.designCompany || '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>設計会社</th>
+                          <td>{property.designCompany || '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
             </>
           )}
 
-
-          {/* NEW: Investment Analysis (if rental data exists) */}
+          {/* Investment Analysis (if rental data exists) */}
           {(property.estimatedRent || property.currentRent || property.assumedYield) && (
             <>
               <div className="property-detail-info-header">
@@ -507,40 +828,76 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                 </div>
               </div>
               
-              <table className="property-detail-table property-detail-table-grid">
+              <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
                 <tbody>
                   {(property.estimatedRent || property.currentRent) && (
-                    <tr>
-                      <th>想定賃料(年間)</th>
-                      <td>{property.estimatedRent ? `${property.estimatedRent.toLocaleString()}円` : '－'}</td>
-                      <th>現行賃料(年間)</th>
-                      <td>{property.currentRent ? `${property.currentRent.toLocaleString()}円` : '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>想定賃料(年間)</th>
+                        <td>{property.estimatedRent ? `${property.estimatedRent.toLocaleString()}円` : '－'}</td>
+                        {!isMobile && (
+                          <>
+                            <th>現行賃料(年間)</th>
+                            <td>{property.currentRent ? `${property.currentRent.toLocaleString()}円` : '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>現行賃料(年間)</th>
+                          <td>{property.currentRent ? `${property.currentRent.toLocaleString()}円` : '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                   {(property.assumedYield || property.currentYield) && (
-                    <tr>
-                      <th>想定利回り</th>
-                      <td>{property.assumedYield ? `${(property.assumedYield * 100).toFixed(2)}%` : '－'}</td>
-                      <th>現行利回り</th>
-                      <td>{property.currentYield ? `${(property.currentYield * 100).toFixed(2)}%` : '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>想定利回り</th>
+                        <td>{property.assumedYield ? `${(property.assumedYield * 100).toFixed(2)}%` : '－'}</td>
+                        {!isMobile && (
+                          <>
+                            <th>現行利回り</th>
+                            <td>{property.currentYield ? `${(property.currentYield * 100).toFixed(2)}%` : '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>現行利回り</th>
+                          <td>{property.currentYield ? `${(property.currentYield * 100).toFixed(2)}%` : '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                   {property.rentalStatus && (
-                    <tr>
-                      <th>賃貸状況</th>
-                      <td>{property.rentalStatus === 'vacant' ? '空室' : 
-                          property.rentalStatus === 'occupied' ? '賃貸中' : 
-                          property.rentalStatus === 'available' ? '賃貸可能' : property.rentalStatus}</td>
-                      <th>建物内住戸数</th>
-                      <td>{property.numberOfUnitsInTheBuilding || '－'}</td>
-                    </tr>
+                    <>
+                      <tr>
+                        <th>賃貸状況</th>
+                        <td>{property.rentalStatus === 'vacant' ? '空室' : 
+                            property.rentalStatus === 'occupied' ? '賃貸中' : 
+                            property.rentalStatus === 'available' ? '賃貸可能' : property.rentalStatus}</td>
+                        {!isMobile && (
+                          <>
+                            <th>建物内住戸数</th>
+                            <td>{property.numberOfUnitsInTheBuilding || '－'}</td>
+                          </>
+                        )}
+                      </tr>
+                      {isMobile && (
+                        <tr>
+                          <th>建物内住戸数</th>
+                          <td>{property.numberOfUnitsInTheBuilding || '－'}</td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
             </>
           )}
           
-          {/* Seventh table - Transaction info */}
+          {/* Transaction info */}
           <div className="property-detail-info-header">
             <div className="property-detail-icon-container">
               <i className="fas fa-calendar"></i>
@@ -548,26 +905,56 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
             </div>
           </div>
           
-          <table className="property-detail-table property-detail-table-grid">
+          <table className={`property-detail-table ${isMobile ? 'mobile-table mobile-table-2col' : 'property-detail-table-grid'}`}>
             <tbody>
               <tr>
                 <th>{phrases?.propertyNumber || japanesePhrases.propertyNumber}</th>
                 <td>{property.propertyNumber || '－'}</td>
-                <th>{phrases?.currentSituation || japanesePhrases.currentSituation}</th>
-                <td>{property.currentSituation || '－'}</td>            
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.currentSituation || japanesePhrases.currentSituation}</th>
+                    <td>{property.currentSituation || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.currentSituation || japanesePhrases.currentSituation}</th>
+                  <td>{property.currentSituation || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.extraditionPossibleDate || japanesePhrases.extraditionPossibleDate}</th>
                 <td>{formatDate(property.extraditionPossibleDate) || '－'}</td>
-                <th>{phrases?.transactionMode || japanesePhrases.transactionMode}</th>
-                <td>{property.transactionMode || '－'}</td>            
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.transactionMode || japanesePhrases.transactionMode}</th>
+                    <td>{property.transactionMode || '－'}</td>
+                  </>
+                )}
               </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.transactionMode || japanesePhrases.transactionMode}</th>
+                  <td>{property.transactionMode || '－'}</td>
+                </tr>
+              )}
               <tr>
                 <th>{phrases?.informationReleaseDate || japanesePhrases.informationReleaseDate}</th>
                 <td>{formatDate(property.informationReleaseDate) || '－'}</td>
-                <th>{phrases?.nextScheduledUpdateDate || japanesePhrases.nextScheduledUpdateDate}</th>
-                <td>{formatDate(property.nextScheduledUpdateDate) || '－'}</td>            
-              </tr>                                                            
+                {!isMobile && (
+                  <>
+                    <th>{phrases?.nextScheduledUpdateDate || japanesePhrases.nextScheduledUpdateDate}</th>
+                    <td>{formatDate(property.nextScheduledUpdateDate) || '－'}</td>
+                  </>
+                )}
+              </tr>
+              {isMobile && (
+                <tr>
+                  <th>{phrases?.nextScheduledUpdateDate || japanesePhrases.nextScheduledUpdateDate}</th>
+                  <td>{formatDate(property.nextScheduledUpdateDate) || '－'}</td>
+                </tr>
+              )}
             </tbody>
           </table>          
 
