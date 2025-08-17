@@ -206,14 +206,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
         <div className="property-detail-images">
           {hasImages ? (
             <>
-              {/* Image count header */}
-              <div className="images-header">
-                <h3>
-                  <i className="fas fa-images"></i>
-                  {japanesePhrases.photos} ({property.images.length})
-                </h3>
-              </div>
-
               {/* Mobile Image Slider */}
               {isMobile ? (
                 <div className="mobile-image-slider">
