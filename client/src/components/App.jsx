@@ -560,57 +560,7 @@ const App = () => {
     }
   };
 
-  // Search suggestions state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchSuggestions, setSearchSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  // Sample search suggestions - replace with your actual API call
-  const generateSearchSuggestions = (term) => {
-    if (!term || term.length < 2) {
-      setSearchSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    // Mock suggestions - replace with actual API call to your location service
-    const mockSuggestions = [
-      { id: 1, display_text: '新宿駅', type: 'station', property_count: 156 },
-      { id: 2, display_text: '渋谷区', type: 'ward', property_count: 89 },
-      { id: 3, display_text: '池袋駅', type: 'station', property_count: 67 },
-      { id: 4, display_text: '品川区', type: 'ward', property_count: 124 },
-      { id: 5, display_text: '恵比寿駅', type: 'station', property_count: 45 },
-      { id: 6, display_text: '中野区', type: 'ward', property_count: 78 },
-      { id: 7, display_text: '目黒駅', type: 'station', property_count: 34 },
-      { id: 8, display_text: '世田谷区', type: 'ward', property_count: 201 }
-    ];
-
-    const filtered = mockSuggestions.filter(suggestion =>
-      suggestion.display_text.toLowerCase().includes(term.toLowerCase())
-    );
-
-    setSearchSuggestions(filtered);
-    setShowSuggestions(filtered.length > 0);
-  };
-
-  // Handle search input change
-  const handleSearchInputChange = (value) => {
-    setSearchTerm(value);
-    generateSearchSuggestions(value);
-  };
-
-  // Handle search suggestion click
-  const handleSuggestionClick = (suggestion) => {
-    setSearchTerm(suggestion.display_text);
-    setShowSuggestions(false);
-    
-    // Mock location data - replace with actual API call
-    const mockLocationProperties = [
-      // Add mock properties or call actual API
-    ];
-    
-    handleLocationSelect(suggestion, mockLocationProperties);
-  };
+  // Mobile toggle for view switching
   const MobileViewToggle = () => (
     <div style={{
       display: 'flex',
@@ -1069,331 +1019,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* Mobile Search & Filter Bar - Always visible on mobile */}
-      {isMobile && currentView === 'properties' && (
-        <div style={{
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          position: 'sticky',
-          top: '56px',
-          zIndex: 100,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          {/* Search Input Section */}
-          <div style={{
-            padding: '0.75rem 1rem'
-          }}>
-            <div style={{
-              position: 'relative',
-              marginBottom: '0.75rem'
-            }}>
-              <input
-                type="text"
-                placeholder="エリア・駅名・住所で検索..."
-                value={searchTerm}
-                onChange={(e) => handleSearchInputChange(e.target.value)}
-                onFocus={() => {
-                  if (searchSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 3rem 0.75rem 1rem',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                  background: 'white',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e5e7eb';
-                  // Delay hiding suggestions to allow click
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && searchTerm.trim()) {
-                    handleAddressSearch(searchTerm.trim());
-                    setShowSuggestions(false);
-                  }
-                }}
-              />
-              <button
-                onClick={() => {
-                  if (searchTerm.trim()) {
-                    handleAddressSearch(searchTerm.trim());
-                    setShowSuggestions(false);
-                  }
-                }}
-                style={{
-                  position: 'absolute',
-                  right: '0.5rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-              >
-                検索
-              </button>
-
-              {/* Search Suggestions Dropdown */}
-              {showSuggestions && searchSuggestions.length > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  zIndex: 1000,
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}>
-                  {searchSuggestions.map((suggestion, index) => (
-                    <div
-                      key={suggestion.id}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      style={{
-                        padding: '0.75rem 1rem',
-                        cursor: 'pointer',
-                        borderBottom: index < searchSuggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        fontSize: '0.875rem'
-                      }}
-                      onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
-                      onMouseLeave={(e) => e.target.style.background = 'white'}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1rem' }}>
-                          {suggestion.type === 'station' ? '🚉' : '📍'}
-                        </span>
-                        <span style={{ color: '#374151', fontWeight: '500' }}>
-                          {suggestion.display_text}
-                        </span>
-                      </div>
-                      <span style={{ 
-                        color: '#6b7280', 
-                        fontSize: '0.75rem',
-                        background: '#f3f4f6',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '0.75rem'
-                      }}>
-                        {suggestion.property_count}件
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Active Location Search Display */}
-            {selectedLocation && searchMode === 'location' && (
-              <div style={{
-                marginBottom: '0.75rem',
-                padding: '0.5rem 0.75rem',
-                background: '#dbeafe',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '0.875rem'
-              }}>
-                <span style={{ color: '#1e40af' }}>
-                  📍 {selectedLocation.display_text}
-                </span>
-                <button
-                  onClick={handleClearLocationSearch}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#1e40af',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    fontWeight: '500'
-                  }}
-                >
-                  クリア
-                </button>
-              </div>
-            )}
-
-            {/* Quick Filter Chips */}
-            <div style={{
-              display: 'flex',
-              gap: '0.5rem',
-              overflowX: 'auto',
-              paddingBottom: '0.25rem'
-            }}>
-              {/* Property Type Quick Filter */}
-              <select
-                value={filters.propertyType}
-                onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  fontSize: '0.875rem',
-                  background: filters.propertyType ? '#3b82f6' : 'white',
-                  color: filters.propertyType ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  minWidth: '120px',
-                  flexShrink: 0
-                }}
-              >
-                <option value="">物件種別</option>
-                {propertyTypeOptions.slice(1).map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-
-              {/* Price Quick Filter */}
-              <select
-                value={(() => {
-                  if (!filters.minPrice && !filters.maxPrice) return '';
-                  if (filters.minPrice === '1000' && !filters.maxPrice) return '1000plus';
-                  if (filters.minPrice === '2000' && !filters.maxPrice) return '2000';
-                  if (filters.minPrice === '3000' && !filters.maxPrice) return '3000';
-                  if (filters.minPrice === '5000' && !filters.maxPrice) return '5000';
-                  return '';
-                })()}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }));
-                  } else if (value === '1000plus') {
-                    setFilters(prev => ({ ...prev, minPrice: '1000', maxPrice: '' }));
-                  } else {
-                    setFilters(prev => ({ ...prev, minPrice: value, maxPrice: '' }));
-                  }
-                }}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  fontSize: '0.875rem',
-                  background: (filters.minPrice || filters.maxPrice) ? '#3b82f6' : 'white',
-                  color: (filters.minPrice || filters.maxPrice) ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  minWidth: '100px',
-                  flexShrink: 0
-                }}
-              >
-                <option value="">価格帯</option>
-                <option value="1000plus">1,000万+</option>
-                <option value="2000">2,000万+</option>
-                <option value="3000">3,000万+</option>
-                <option value="5000">5,000万+</option>
-              </select>
-
-              {/* Walk Distance Quick Filter */}
-              <select
-                value={filters.walkDistance}
-                onChange={(e) => setFilters(prev => ({ ...prev, walkDistance: e.target.value }))}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  fontSize: '0.875rem',
-                  background: filters.walkDistance ? '#3b82f6' : 'white',
-                  color: filters.walkDistance ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  minWidth: '100px',
-                  flexShrink: 0
-                }}
-              >
-                <option value="">徒歩</option>
-                <option value="5">5分以内</option>
-                <option value="10">10分以内</option>
-                <option value="15">15分以内</option>
-              </select>
-
-              {/* Area Quick Filter */}
-              <select
-                value={(() => {
-                  if (!filters.minArea && !filters.maxArea) return '';
-                  if (filters.minArea === '30' && !filters.maxArea) return '30plus';
-                  if (filters.minArea === '50' && !filters.maxArea) return '50plus';
-                  if (filters.minArea === '70' && !filters.maxArea) return '70plus';
-                  return '';
-                })()}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    setFilters(prev => ({ ...prev, minArea: '', maxArea: '' }));
-                  } else if (value === '30plus') {
-                    setFilters(prev => ({ ...prev, minArea: '30', maxArea: '' }));
-                  } else if (value === '50plus') {
-                    setFilters(prev => ({ ...prev, minArea: '50', maxArea: '' }));
-                  } else if (value === '70plus') {
-                    setFilters(prev => ({ ...prev, minArea: '70', maxArea: '' }));
-                  }
-                }}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  fontSize: '0.875rem',
-                  background: (filters.minArea || filters.maxArea) ? '#3b82f6' : 'white',
-                  color: (filters.minArea || filters.maxArea) ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  minWidth: '90px',
-                  flexShrink: 0
-                }}
-              >
-                <option value="">面積</option>
-                <option value="30plus">30㎡+</option>
-                <option value="50plus">50㎡+</option>
-                <option value="70plus">70㎡+</option>
-              </select>
-
-              {/* More Filters Button */}
-              <button
-                onClick={() => setShowMobileFilters(true)}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  fontSize: '0.875rem',
-                  background: Object.values(filters).some(val => 
-                    (typeof val === 'boolean' && val) || 
-                    (typeof val === 'string' && val !== '')
-                  ) ? '#ef4444' : 'white',
-                  color: Object.values(filters).some(val => 
-                    (typeof val === 'boolean' && val) || 
-                    (typeof val === 'string' && val !== '')
-                  ) ? 'white' : '#374151',
-                  cursor: 'pointer',
-                  minWidth: '80px',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  fontWeight: '500'
-                }}
-              >
-                <span>⚙️</span>
-                詳細
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Filters Overlay */}
       {isMobile && showMobileFilters && (
         <div style={{
@@ -1413,7 +1038,7 @@ const App = () => {
             background: 'white',
             borderTopLeftRadius: '1rem',
             borderTopRightRadius: '1rem',
-            maxHeight: '85vh',
+            maxHeight: '80vh',
             overflowY: 'auto'
           }}>
             <div style={{
@@ -1421,14 +1046,10 @@ const App = () => {
               borderBottom: '1px solid #e5e7eb',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center',
-              position: 'sticky',
-              top: 0,
-              background: 'white',
-              zIndex: 1
+              alignItems: 'center'
             }}>
               <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '600' }}>
-                詳細フィルター
+                フィルター
               </h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
@@ -1437,400 +1058,31 @@ const App = () => {
                   border: 'none',
                   fontSize: '1.5rem',
                   cursor: 'pointer',
-                  color: '#6b7280',
-                  padding: '0.25rem'
+                  color: '#6b7280'
                 }}
               >
                 ×
               </button>
             </div>
-            
-            {/* Mobile Filters Content */}
             <div style={{ padding: '1rem' }}>
-              {/* Location Search Section */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  🔍 エリア検索
-                </h4>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    placeholder="駅名・エリア名・住所で検索"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 2.5rem 0.75rem 1rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem',
-                      background: 'white',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && e.target.value.trim()) {
-                        handleAddressSearch(e.target.value.trim());
-                        setShowMobileFilters(false);
-                      }
-                    }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#9ca3af',
-                    fontSize: '1.25rem'
-                  }}>
-                    🔍
-                  </div>
-                </div>
-                {selectedLocation && (
-                  <div style={{
-                    marginTop: '0.5rem',
-                    padding: '0.5rem 0.75rem',
-                    background: '#f0f9ff',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    color: '#0369a1',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span>現在: {selectedLocation.display_text}</span>
-                    <button
-                      onClick={() => {
-                        handleClearLocationSearch();
-                        setShowMobileFilters(false);
-                      }}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#0369a1',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        textDecoration: 'underline'
-                      }}
-                    >
-                      クリア
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Property Type Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  🏠 物件種別
-                </h4>
-                <select
-                  value={filters.propertyType}
-                  onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    fontSize: '1rem',
-                    background: 'white',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {propertyTypeOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Price Range Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  💰 価格帯
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <input
-                    type="number"
-                    placeholder="最低価格 (万円)"
-                    value={filters.minPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                  <input
-                    type="number"
-                    placeholder="最高価格 (万円)"
-                    value={filters.maxPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Area Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  📐 専有面積
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <input
-                    type="number"
-                    placeholder="最小面積 (㎡)"
-                    value={filters.minArea}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minArea: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                  <input
-                    type="number"
-                    placeholder="最大面積 (㎡)"
-                    value={filters.maxArea}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxArea: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Walk Distance Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  🚶 駅からの徒歩
-                </h4>
-                <select
-                  value={filters.walkDistance}
-                  onChange={(e) => setFilters(prev => ({ ...prev, walkDistance: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    fontSize: '1rem',
-                    background: 'white',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {walkDistanceOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Building Year Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  🗓️ 建築年
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <input
-                    type="number"
-                    placeholder="築年数 (年)"
-                    value={filters.minYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minYear: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                  <input
-                    type="number"
-                    placeholder="築年数まで (年)"
-                    value={filters.maxYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxYear: e.target.value }))}
-                    style={{
-                      padding: '0.75rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '0.5rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Amenities Filter */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ 
-                  margin: '0 0 0.75rem 0', 
-                  fontSize: '1rem', 
-                  fontWeight: '600',
-                  color: '#374151' 
-                }}>
-                  ✨ 設備・条件
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <label style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={filters.hasGarage}
-                      onChange={(e) => setFilters(prev => ({ ...prev, hasGarage: e.target.checked }))}
-                      style={{ 
-                        width: '1.25rem', 
-                        height: '1.25rem',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    🚗 駐車場あり
-                  </label>
-                  <label style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={filters.hasAC}
-                      onChange={(e) => setFilters(prev => ({ ...prev, hasAC: e.target.checked }))}
-                      style={{ 
-                        width: '1.25rem', 
-                        height: '1.25rem',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    ❄️ エアコンあり
-                  </label>
-                  <label style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={filters.hasAutoLock}
-                      onChange={(e) => setFilters(prev => ({ ...prev, hasAutoLock: e.target.checked }))}
-                      style={{ 
-                        width: '1.25rem', 
-                        height: '1.25rem',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    🔒 オートロック
-                  </label>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '0.75rem',
-                marginTop: '2rem',
-                paddingTop: '1rem',
-                borderTop: '1px solid #e5e7eb'
-              }}>
-                <button
-                  onClick={() => {
-                    setFilters({
-                      propertyType: '',
-                      walkDistance: '',
-                      minPrice: '',
-                      maxPrice: '',
-                      layout: '',
-                      structure: '',
-                      minArea: '',
-                      maxArea: '',
-                      minYear: '',
-                      maxYear: '',
-                      minManagementFee: '',
-                      maxManagementFee: '',
-                      hasGarage: false,
-                      hasAC: false,
-                      hasAutoLock: false
-                    });
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    background: '#f3f4f6',
-                    color: '#374151',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    fontSize: '1rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  リセット
-                </button>
-                <button
-                  onClick={() => {
-                    applyFilters();
-                    setShowMobileFilters(false);
-                  }}
-                  style={{
-                    flex: 2,
-                    padding: '0.75rem',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    fontSize: '1rem',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  フィルター適用
-                </button>
-              </div>
+              <TopFiltersPanel
+                filters={filters}
+                setFilters={setFilters}
+                applyFilters={applyFilters}
+                onLocationSelect={handleLocationSelect}
+                onClearLocationSearch={handleClearLocationSearch}
+                selectedLocation={selectedLocation}
+                searchMode={searchMode}
+                priceOptions={priceOptions}
+                areaOptions={areaOptions}
+                walkDistanceOptions={walkDistanceOptions}
+                propertyTypeOptions={propertyTypeOptions}
+                isLoading={isLoading}
+                priceRange={{ min: 0, max: 50000 }}
+                areaRange={{ min: 20, max: 300 }}
+                onAddressSearch={handleAddressSearch}
+                isMobile={true}
+              />
             </div>
           </div>
         </div>
@@ -1866,7 +1118,7 @@ const App = () => {
       {/* Main Content Area */}
       <div style={{ 
         height: isMobile ? 
-          (currentView === 'properties' ? 'calc(100vh - 176px)' : 'calc(100vh - 56px)') : 
+          (currentView === 'properties' ? 'calc(100vh - 120px)' : 'calc(100vh - 56px)') : 
           'calc(100vh - 184px)',
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row'
@@ -2384,7 +1636,13 @@ const App = () => {
             )}
           </>
         )}
-    </div>
+      </div>
+
+      {/* Mobile Filters Button */}
+      {isMobile && currentView === 'properties' && (
+        <MobileFiltersButton />
+      )}
+
       <LoginPopup
         isOpen={isLoginPopupOpen}
         onClose={handleCloseLogin}
