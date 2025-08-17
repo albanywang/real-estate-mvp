@@ -560,7 +560,57 @@ const App = () => {
     }
   };
 
-  // Mobile toggle for view switching
+  // Search suggestions state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Sample search suggestions - replace with your actual API call
+  const generateSearchSuggestions = (term) => {
+    if (!term || term.length < 2) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Mock suggestions - replace with actual API call to your location service
+    const mockSuggestions = [
+      { id: 1, display_text: '新宿駅', type: 'station', property_count: 156 },
+      { id: 2, display_text: '渋谷区', type: 'ward', property_count: 89 },
+      { id: 3, display_text: '池袋駅', type: 'station', property_count: 67 },
+      { id: 4, display_text: '品川区', type: 'ward', property_count: 124 },
+      { id: 5, display_text: '恵比寿駅', type: 'station', property_count: 45 },
+      { id: 6, display_text: '中野区', type: 'ward', property_count: 78 },
+      { id: 7, display_text: '目黒駅', type: 'station', property_count: 34 },
+      { id: 8, display_text: '世田谷区', type: 'ward', property_count: 201 }
+    ];
+
+    const filtered = mockSuggestions.filter(suggestion =>
+      suggestion.display_text.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSearchSuggestions(filtered);
+    setShowSuggestions(filtered.length > 0);
+  };
+
+  // Handle search input change
+  const handleSearchInputChange = (value) => {
+    setSearchTerm(value);
+    generateSearchSuggestions(value);
+  };
+
+  // Handle search suggestion click
+  const handleSuggestionClick = (suggestion) => {
+    setSearchTerm(suggestion.display_text);
+    setShowSuggestions(false);
+    
+    // Mock location data - replace with actual API call
+    const mockLocationProperties = [
+      // Add mock properties or call actual API
+    ];
+    
+    handleLocationSelect(suggestion, mockLocationProperties);
+  };
   const MobileViewToggle = () => (
     <div style={{
       display: 'flex',
@@ -1040,6 +1090,13 @@ const App = () => {
               <input
                 type="text"
                 placeholder="エリア・駅名・住所で検索..."
+                value={searchTerm}
+                onChange={(e) => handleSearchInputChange(e.target.value)}
+                onFocus={() => {
+                  if (searchSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
                 style={{
                   width: '100%',
                   padding: '0.75rem 3rem 0.75rem 1rem',
@@ -1051,19 +1108,23 @@ const App = () => {
                   transition: 'border-color 0.2s',
                   boxSizing: 'border-box'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                  // Delay hiding suggestions to allow click
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && e.target.value.trim()) {
-                    handleAddressSearch(e.target.value.trim());
+                  if (e.key === 'Enter' && searchTerm.trim()) {
+                    handleAddressSearch(searchTerm.trim());
+                    setShowSuggestions(false);
                   }
                 }}
               />
               <button
                 onClick={() => {
-                  const input = document.querySelector('input[placeholder*="エリア"]');
-                  if (input && input.value.trim()) {
-                    handleAddressSearch(input.value.trim());
+                  if (searchTerm.trim()) {
+                    handleAddressSearch(searchTerm.trim());
+                    setShowSuggestions(false);
                   }
                 }}
                 style={{
@@ -1083,6 +1144,59 @@ const App = () => {
               >
                 検索
               </button>
+
+              {/* Search Suggestions Dropdown */}
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  zIndex: 1000,
+                  maxHeight: '200px',
+                  overflowY: 'auto'
+                }}>
+                  {searchSuggestions.map((suggestion, index) => (
+                    <div
+                      key={suggestion.id}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        cursor: 'pointer',
+                        borderBottom: index < searchSuggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        fontSize: '0.875rem'
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.background = 'white'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1rem' }}>
+                          {suggestion.type === 'station' ? '🚉' : '📍'}
+                        </span>
+                        <span style={{ color: '#374151', fontWeight: '500' }}>
+                          {suggestion.display_text}
+                        </span>
+                      </div>
+                      <span style={{ 
+                        color: '#6b7280', 
+                        fontSize: '0.75rem',
+                        background: '#f3f4f6',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '0.75rem'
+                      }}>
+                        {suggestion.property_count}件
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Active Location Search Display */}
@@ -2270,9 +2384,7 @@ const App = () => {
             )}
           </>
         )}
-              </div>
-      )}
-
+    </div>
       <LoginPopup
         isOpen={isLoginPopupOpen}
         onClose={handleCloseLogin}
