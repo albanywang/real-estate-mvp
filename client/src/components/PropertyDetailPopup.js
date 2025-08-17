@@ -283,20 +283,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
                       </div>
                     )}
                   </div>
-
-                  {/* Mobile thumbnail dots */}
-                  {hasMultipleImages && (
-                    <div className="mobile-image-dots">
-                      {property.images.map((_, index) => (
-                        <button
-                          key={index}
-                          className={`mobile-dot ${index === currentImageIndex ? 'active' : ''}`}
-                          onClick={() => goToImage(index)}
-                          aria-label={`Go to image ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               ) : (
                 /* Desktop Images grid */
