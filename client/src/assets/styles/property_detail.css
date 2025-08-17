@@ -1017,7 +1017,7 @@
 /* Mobile-specific modifications */
 @media (max-width: 768px) {
   .property-detail-overlay {
-    padding: 40px 10px 15px; /* Increased top padding from 15px to 40px */
+    padding: 45px 10px 15px; /* Increased top padding from 15px to 40px */
     align-items: flex-start;
     justify-content: center;
   }
