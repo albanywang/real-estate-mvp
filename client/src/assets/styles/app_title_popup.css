@@ -23,27 +23,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  padding: 20px;
-  overflow-y: auto;
+  padding: 0;
 }
 
 /* Popup content - Perfectly centered */
 .app-title-popup-content {
   background-color: white;
   border-radius: 12px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 85vh;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 70vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: popupFadeIn 0.3s ease-out;
-  margin: auto; /* Extra centering insurance */
+  border: 2px solid #ddd;
 }
 
 @keyframes popupFadeIn {
@@ -60,15 +59,15 @@
 /* Close button - Enhanced visibility */
 .app-title-popup-close {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #666;
-  border: 2px solid #e0e0e0;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: #333;
+  border: 2px solid #ddd;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 22px;
+  width: 35px;
+  height: 35px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -83,7 +82,7 @@
   background: #ff4757;
   color: white;
   border-color: #ff4757;
-  transform: rotate(90deg) scale(1.1);
+  transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
 }
 
@@ -240,20 +239,20 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .app-title-popup-overlay {
-    padding: 15px 10px;
-    align-items: flex-start;
+    padding: 0;
+    align-items: center;
     justify-content: center;
   }
 
   .app-title-popup-content.mobile {
-    margin-top: 20px;
-    max-height: calc(100vh - 40px);
+    width: 85vw;
+    max-height: 75vh;
     border-radius: 10px;
   }
 
   .app-title-popup-close {
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
     width: 32px;
     height: 32px;
     font-size: 18px;
@@ -316,11 +315,12 @@
 /* Extra small screens */
 @media (max-width: 480px) {
   .app-title-popup-overlay {
-    padding: 10px 8px;
+    padding: 0;
   }
 
   .app-title-popup-content.mobile {
-    margin-top: 15px;
+    width: 90vw;
+    max-height: 80vh;
     border-radius: 8px;
   }
 
