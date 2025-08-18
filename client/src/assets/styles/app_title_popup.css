@@ -16,7 +16,7 @@
   transform: translateY(1px);
 }
 
-/* Popup overlay */
+/* Popup overlay - Perfect centering */
 .app-title-popup-overlay {
   position: fixed;
   top: 0;
@@ -32,17 +32,18 @@
   overflow-y: auto;
 }
 
-/* Popup content */
+/* Popup content - Perfectly centered */
 .app-title-popup-content {
   background-color: white;
   border-radius: 12px;
   width: 90%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: popupFadeIn 0.3s ease-out;
+  margin: auto; /* Extra centering insurance */
 }
 
 @keyframes popupFadeIn {
@@ -56,30 +57,34 @@
   }
 }
 
-/* Close button */
+/* Close button - Enhanced visibility */
 .app-title-popup-close {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
   color: #666;
-  border: none;
+  border: 2px solid #e0e0e0;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .app-title-popup-close:hover {
-  background: rgba(0, 0, 0, 0.2);
-  color: #333;
-  transform: rotate(90deg);
+  background: #ff4757;
+  color: white;
+  border-color: #ff4757;
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
 }
 
 /* Header */
