@@ -11,6 +11,7 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
+import AppTitlePopup from './AppTitlePopup';
 
 window.japanesePhrases = japanesePhrases;
 
@@ -948,7 +949,10 @@ const App = () => {
               }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
-              {isMobile ? 'Real Estate' : japanesePhrases.appTitle}
+                <AppTitlePopup 
+                  isMobile={isMobile} 
+                  japanesePhrases={japanesePhrases} 
+                />
             </a>
           </div>
 
