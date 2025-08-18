@@ -932,10 +932,6 @@ const PropertyDetailPopup = ({ property, isOpen, onClose, phrases, fullscreenVie
 
           {/* Action buttons */}
           <div className="property-detail-buttons">
-            <button className="property-detail-btn loan-calculator">
-              <i className="fas fa-calculator"></i>
-              Loan Calculator
-            </button>
             <button className="property-detail-btn contact">
               <i className="fas fa-envelope"></i>
               {japanesePhrases.contactAgent}

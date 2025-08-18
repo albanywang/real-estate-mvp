@@ -17,6 +17,7 @@ const MapComponent = (props) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
+  const hasInitializedView = useRef(false);
 
   useEffect(() => {
     if (!mapInstanceRef.current) {
@@ -162,15 +163,37 @@ const MapComponent = (props) => {
         }, 100);
       });
 
-      // REMOVED: popupopen event listener - No longer needed
-
-      // Highlight selected property by centering view
-      if (property.id === selectedProperty) {
-        mapInstanceRef.current.setView(property.location, 15);
-      }
-
       markersRef.current.push(marker);
     });
+
+    // Set map view to show all properties initially or when no property is selected
+    if (!hasInitializedView.current || !selectedProperty) {
+      if (validProperties.length > 0) {
+        // Create a group of all markers to fit bounds
+        const group = new L.featureGroup(markersRef.current);
+        
+        try {
+          // Fit map to show all markers with padding
+          mapInstanceRef.current.fitBounds(group.getBounds(), {
+            padding: [20, 20], // Add padding around the bounds
+            maxZoom: 15 // Don't zoom in too much for single properties
+          });
+          
+          hasInitializedView.current = true;
+        } catch (error) {
+          console.warn("Could not fit bounds, using default view:", error);
+          // Fallback to Tokyo center if bounds fitting fails
+          mapInstanceRef.current.setView([35.6762, 139.6503], 12);
+        }
+      }
+    } 
+    // If a specific property is selected, center on it
+    else if (selectedProperty) {
+      const selectedPropertyData = validProperties.find(p => p.id === selectedProperty);
+      if (selectedPropertyData) {
+        mapInstanceRef.current.setView(selectedPropertyData.location, 15);
+      }
+    }
 
     // Clean up window function if needed
     return () => {
