@@ -4,7 +4,7 @@ import { useAuth } from '../services/authContext'; // ← Fixed: Capital A
 // Login Popup Component - Integrated with User Database
 const LoginPopup = ({ isOpen, onClose }) => {
     // Get auth methods from context
-  const { login, register, isLoading } = useAuth();
+  const { login, register, isLoading, setIsLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('signin');
   const [formData, setFormData] = useState({
     email: '',
@@ -376,34 +376,6 @@ const LoginPopup = ({ isOpen, onClose }) => {
             )}
           </button>
           
-          <div className="login-popup-divider">{japanesePhrases.orConnectWith}</div>
-          
-          <div className="login-popup-social">
-            <button 
-              type="button" 
-              className="login-popup-social-btn google"
-              onClick={() => handleSocialLogin('google')}
-              disabled={isSubmitting}
-            >
-              <i className="fab fa-google"></i> {japanesePhrases.continueWithGoogle}
-            </button>
-            <button 
-              type="button" 
-              className="login-popup-social-btn line"
-              onClick={() => handleSocialLogin('line')}
-              disabled={isSubmitting}
-            >
-              <i className="fab fa-line"></i> {japanesePhrases.continueWithLine}
-            </button>
-            <button 
-              type="button" 
-              className="login-popup-social-btn yahoo"
-              onClick={() => handleSocialLogin('yahoo')}
-              disabled={isSubmitting}
-            >
-              <i className="fab fa-yahoo"></i> {japanesePhrases.continueWithYahoo}
-            </button>
-          </div>
         </form>
       </div>
     </div>
