@@ -949,10 +949,7 @@ const App = () => {
               }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
-                <AppTitlePopup 
-                  isMobile={isMobile} 
-                  japanesePhrases={japanesePhrases} 
-                />
+              {isMobile ? japanesePhrases.appTitle : japanesePhrases.appTitle}
             </a>
           </div>
 
