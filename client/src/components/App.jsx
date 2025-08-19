@@ -940,7 +940,19 @@ const App = () => {
                     setPopup({
                       isOpen: true,
                       title: japanesePhrases.partnership,
-                      message: '日本市場向けの不動産検索プラットフォームを開発いたしました。<br /><br />すべてのデータはデモです!<br /><br />実際にお試しいただき、もしご興味をお持ちいただけましたら：<br />• 技術提携<br />• データ連携<br />• プラットフォーム買取<br /><br />などについてご相談させていただけますでしょうか。<br /><br />王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）<br />E-mail: albanywang2000@gmail.com'
+                      message: `日本市場向けの不動産検索プラットフォームを開発いたしました。
+
+                                デモサイト: https://real-estate-client-i3v9.onrender.com/
+
+                                実際にお試しいただき、もしご興味をお持ちいただけましたら：
+                                - 技術提携
+                                - データ連携  
+                                - プラットフォーム買取
+
+                                などについてご相談させていただけますでしょうか。
+
+                                王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）
+                                E-mail: albanywang2000@gmail.com`
                     });
                   }}
                   style={{ 
