@@ -940,8 +940,7 @@ const App = () => {
                     e.preventDefault();
                     setPopup({
                       isOpen: true,
-                      type: 'coming-soon',
-                      title: japanesePhrases.help,
+                      title: japanesePhrases.partnership,
                       message: 'ご興味がありましたらご連絡ください！ 王雷 [連絡先] 1-917-647-6866 （ニューヨーク米国）E-mail: albanywang2000@gmail.com'
                     });
                   }}

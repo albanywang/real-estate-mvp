@@ -10,6 +10,7 @@ const japanesePhrases = {
     signIn: 'ログイン',
     advertisement: '広告',
     help: 'ヘルプ',
+    partnership: 'パートナーシップ',
 
     // Filters
     findYourPerfectHome: '理想の住まいを探す',
