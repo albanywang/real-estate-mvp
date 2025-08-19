@@ -942,7 +942,7 @@ const App = () => {
                       title: japanesePhrases.partnership,
                       message: `日本市場向けの不動産検索プラットフォームを開発いたしました。
 
-                                デモサイト: https://real-estate-client-i3v9.onrender.com/
+                                すべてのデータはデモです!
 
                                 実際にお試しいただき、もしご興味をお持ちいただけましたら：
                                 - 技術提携
@@ -960,8 +960,7 @@ const App = () => {
                     color: '#6b7280', 
                     fontWeight: '500', 
                     whiteSpace: 'nowrap',
-                    cursor: 'pointer',
-                    whiteSpace: 'pre-line'  // Add this line
+                    cursor: 'pointer'
                   }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
