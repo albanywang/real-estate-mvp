@@ -940,9 +940,7 @@ const App = () => {
                     setPopup({
                       isOpen: true,
                       title: japanesePhrases.partnership,
-                      message: `日本市場向けの不動産検索プラットフォームを開発いたしました。
-
-                                すべてのデータはデモです!
+                      message: `すべてのデータはデモです!
 
                                 実際にお試しいただき、もしご興味をお持ちいただけましたら：
                                 - 技術提携
