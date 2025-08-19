@@ -941,7 +941,7 @@ const App = () => {
                     setPopup({
                       isOpen: true,
                       title: japanesePhrases.partnership,
-                      message: 'ご興味がありましたらご連絡ください！ 王雷 [連絡先] 1-917-647-6866 （ニューヨーク米国）E-mail: albanywang2000@gmail.com'
+                      message: '日本市場向けの不動産検索プラットフォームを開発いたしました。\nデモサイト: https://real-estate-client-i3v9.onrender.com/\n実際にお試しいただき、もしご興味をお持ちいただけましたら：\n技術提携\nデータ連携\nプラットフォーム買取\nなどについてご相談させていただけますでしょうか。\n王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）\nE-mail: albanywang2000@gmail.com'
                     });
                   }}
                   style={{ 
