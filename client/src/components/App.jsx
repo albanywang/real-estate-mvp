@@ -11,7 +11,6 @@ import japanesePhrases from '../utils/japanesePhrases';
 import { fetchProperties, debugAPI } from '../services/api';
 import '../utils/FullscreenImageViewer';
 import UnderConstructionPopup from './UnderConstructionPopup';
-import AppTitlePopup from './AppTitlePopup';
 
 window.japanesePhrases = japanesePhrases;
 
@@ -937,22 +936,25 @@ const App = () => {
             <a
               href="#"
               className="logo"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-                color: '#1f2937',
-                fontSize: isMobile ? '1.25rem' : '1.5rem',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-              }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPopup({
+                      isOpen: true,
+                      type: 'coming-soon',
+                      title: japanesePhrases.help,
+                      message: 'ご興味がありましたらご連絡ください！ 王雷 [連絡先] 1-917-647-6866 （ニューヨーク米国）E-mail: albanywang2000@gmail.com'
+                    });
+                  }}
+                  style={{ 
+                    textDecoration: 'none', 
+                    color: '#6b7280', 
+                    fontWeight: '500', 
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer'
+                  }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
-              <AppTitlePopup 
-                isMobile={isMobile} 
-                japanesePhrases={japanesePhrases} 
-              />
+              {japanesePhrases.appTitle}
             </a>
           </div>
 
