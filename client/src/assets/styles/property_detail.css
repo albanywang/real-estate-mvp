@@ -1534,3 +1534,29 @@
     font-size: 15px;
   }
 }  
+
+/* Force landscape orientation on iPad */
+@media screen and (max-width: 1024px) and (min-width: 768px) and (orientation: portrait) {
+  body::before {
+    content: "Please rotate your device to landscape mode for the best experience";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.2rem;
+    z-index: 10000;
+    padding: 20px;
+  }
+  
+  /* Hide main content in portrait */
+  #root {
+    display: none;
+  }
+}
