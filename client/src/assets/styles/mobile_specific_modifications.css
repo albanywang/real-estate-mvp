@@ -1,6 +1,6 @@
 /* Mobile responsive additions to existing property detail CSS */
 
-/* Mobile-specific modifications */
+/* Mobile-specific modifications (max-width: 768px) */
 @media (max-width: 768px) {
   .property-detail-overlay {
     padding: 40px 10px 15px; /* Increased top padding from 15px to 40px */
@@ -65,20 +65,156 @@
   }
 }
 
+/* iPad-specific modifications (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .property-detail-overlay {
+    padding: 50px 20px 20px; /* Slightly more padding for iPad */
+    align-items: center;
+    justify-content: center;
+  }
+
+  .property-detail-content.mobile {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 90%; /* Slightly narrower for better centering */
+    max-width: 800px; /* Cap width for larger iPads */
+    height: auto;
+    max-height: calc(100vh - 100px); /* Adjusted for iPad padding */
+    border-radius: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .property-detail-close {
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    font-size: 26px;
+  }
+
+  .property-detail-header {
+    padding: 60px 30px 25px; /* More spacious header for iPad */
+    border-bottom: 1px solid #eee;
+  }
+
+  .property-detail-title {
+    font-size: 22px; /* Larger title for iPad */
+    line-height: 1.3;
+  }
+
+  .property-detail-price {
+    font-size: 24px; /* Larger price for iPad */
+    font-weight: 700;
+    color: #FF4D4D;
+  }
+
+  .property-detail-body {
+    padding: 0 30px 30px; /* More padding for content */
+  }
+
+  /* iPad-specific image slider */
+  .mobile-image-slider {
+    display: block; /* Use mobile slider for iPad */
+  }
+
+  .mobile-slide-container {
+    height: 350px; /* Larger image area for iPad */
+    border-radius: 8px;
+  }
+
+  .mobile-nav-arrow {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+  }
+
+  .mobile-nav-prev {
+    left: 20px;
+  }
+
+  .mobile-nav-next {
+    right: 20px;
+  }
+
+  .mobile-image-counter {
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 18px;
+  }
+
+  .mobile-fullscreen-icon {
+    top: 20px;
+    right: 20px;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+
+  /* iPad-specific table styles */
+  .mobile-table {
+    display: table !important;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 25px;
+    border-radius: 10px;
+  }
+
+  .mobile-table th {
+    padding: 15px 20px;
+    font-size: 15px;
+    width: 35%; /* Slightly adjusted column width for iPad */
+  }
+
+  .mobile-table td {
+    padding: 15px 20px;
+    font-size: 15px;
+    width: 65%;
+  }
+
+  /* Buttons for iPad */
+  .property-detail-buttons {
+    flex-direction: row; /* Side-by-side buttons in landscape */
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .property-detail-btn {
+    width: 45%; /* Two buttons per row in landscape */
+    padding: 18px;
+    font-size: 17px;
+  }
+
+  /* Hide desktop layouts */
+  .images-grid:not(.mobile-image-slider),
+  .all-thumbnails,
+  .property-detail-table:not(.mobile-table) {
+    display: none !important;
+  }
+}
+
 /* Mobile Image Slider Styles */
 .mobile-image-slider {
   position: relative;
   width: 100%;
   margin-bottom: 20px;
-  display: none; /* Hidden by default, shown on mobile */
+  display: none; /* Hidden by default, shown on mobile or iPad */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mobile-image-slider {
     display: block;
   }
 
-  /* Hide desktop image grid on mobile */
+  /* Hide desktop image grid on mobile and iPad */
   .images-grid:not(.mobile-image-slider),
   .all-thumbnails {
     display: none !important;
@@ -194,8 +330,8 @@
   background: #FF4D4D;
 }
 
-/* Mobile Table Styles */
-@media (max-width: 768px) {
+/* Mobile and iPad Table Styles */
+@media (max-width: 1024px) {
   .property-detail-info-header {
     margin: 25px 0 15px;
     padding-bottom: 8px;
@@ -217,7 +353,7 @@
     margin-right: 0;
   }
 
-  /* Hide desktop 4-column tables on mobile */
+  /* Hide desktop 4-column tables on mobile and iPad */
   .property-detail-table-grid {
     display: none !important;
   }
@@ -325,7 +461,7 @@
 }
 
 /* Desktop styles - ensure desktop layout is preserved */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .mobile-image-slider,
   .mobile-table {
     display: none !important;
@@ -342,7 +478,7 @@
   }
 }
 
-/* Loading and error states for mobile */
+/* Loading and error states for mobile and iPad */
 .mobile-slide-container .image-loading-overlay {
   position: absolute;
   top: 0;
@@ -377,9 +513,9 @@
   font-size: 24px;
 }
 
-/* Enhance existing mobile responsive styles */
-@media (max-width: 768px) {
-  /* Improve image header for mobile */
+/* Enhance existing mobile and iPad responsive styles */
+@media (max-width: 1024px) {
+  /* Improve image header for mobile and iPad */
   .images-header {
     padding: 15px 20px;
     background: white;
@@ -394,7 +530,7 @@
     font-size: 0.8rem;
   }
 
-  /* Better no-images placeholder for mobile */
+  /* Better no-images placeholder for mobile and iPad */
   .no-images-placeholder {
     height: 250px;
     background-color: #f8f9fa;
@@ -410,7 +546,7 @@
     font-size: 14px;
   }
 
-  /* Improve mobile scrolling */
+  /* Improve scrolling */
   .property-detail-content.mobile {
     scroll-behavior: smooth;
   }
@@ -423,14 +559,14 @@
     min-width: 44px;
   }
 
-  /* Improved typography for mobile */
+  /* Improved typography */
   .mobile-table th,
   .mobile-table td {
     font-size: 13px;
     line-height: 1.3;
   }
 
-  /* Price highlighting in mobile tables */
+  /* Price highlighting in tables */
   .mobile-table td:contains('円'),
   .mobile-table td:contains('万円') {
     font-weight: 600;
@@ -438,7 +574,7 @@
   }
 }
 
-/* Additional mobile enhancements */
+/* Additional mobile enhancements (max-width: 480px) */
 @media (max-width: 480px) {
   .property-detail-overlay {
     padding: 30px 8px 10px; /* Adjusted for smaller screens */
@@ -518,5 +654,52 @@
   .property-detail-btn {
     padding: 12px;
     font-size: 15px;
+  }
+}
+
+/* iPad landscape orientation adjustments */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .property-detail-content.mobile {
+    width: 85%; /* Slightly narrower in landscape */
+    max-width: 900px; /* Allow more width in landscape */
+    max-height: calc(100vh - 120px); /* Adjusted for landscape */
+  }
+
+  .mobile-slide-container {
+    height: 400px; /* Larger images in landscape */
+  }
+
+  .property-detail-buttons {
+    flex-direction: row; /* Ensure side-by-side buttons */
+    gap: 20px;
+  }
+
+  .property-detail-btn {
+    width: 30%; /* Three buttons per row in landscape if space allows */
+    padding: 20px;
+    font-size: 18px;
+  }
+}
+
+/* iPad portrait orientation adjustments */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .property-detail-content.mobile {
+    width: 95%; /* Slightly wider in portrait */
+    max-width: 768px; /* Cap width for portrait */
+  }
+
+  .mobile-slide-container {
+    height: 300px; /* Slightly smaller images in portrait */
+  }
+
+  .property-detail-buttons {
+    flex-direction: column; /* Stack buttons in portrait */
+    gap: 15px;
+  }
+
+  .property-detail-btn {
+    width: 100%; /* Full-width buttons in portrait */
+    padding: 15px;
+    font-size: 16px;
   }
 }
