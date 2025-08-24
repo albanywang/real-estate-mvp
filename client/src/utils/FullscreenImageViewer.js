@@ -1,4 +1,4 @@
-// Fullscreen Image Popup Functionality
+// Enhanced Fullscreen Image Popup Functionality with iPad Support
 class FullscreenImageViewer {
   constructor() {
     this.isOpen = false;
@@ -16,7 +16,7 @@ class FullscreenImageViewer {
   }
 
   createOverlay() {
-    // Create the fullscreen overlay HTML
+    // Create the fullscreen overlay HTML with enhanced iPad support
     const overlayHTML = `
       <div class="fullscreen-image-overlay" id="fullscreenImageOverlay">
         <div class="fullscreen-image-container">
@@ -33,6 +33,8 @@ class FullscreenImageViewer {
           </button>
           
           <img class="fullscreen-image" id="fullscreenImage" alt="Fullscreen view">
+          
+          <div class="image-counter" id="imageCounter">1 / 1</div>
           
           <div class="fullscreen-zoom-controls">
             <button class="zoom-btn" id="zoomOut">
@@ -63,6 +65,256 @@ class FullscreenImageViewer {
     this.zoomOutBtn = document.getElementById('zoomOut');
     this.zoomResetBtn = document.getElementById('zoomReset');
     this.zoomInfo = document.getElementById('zoomInfo');
+    this.imageCounter = document.getElementById('imageCounter');
+
+    // Add enhanced styles for iPad
+    this.addEnhancedStyles();
+  }
+
+  addEnhancedStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Enhanced fullscreen styles for iPad */
+      .fullscreen-image-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: rgba(0, 0, 0, 0.95) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 10000 !important;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .fullscreen-image-overlay.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      .fullscreen-image-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Enhanced close button for iPad */
+      .fullscreen-close {
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #333 !important;
+        border: none !important;
+        border-radius: 50% !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        z-index: 10001 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s ease !important;
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation !important;
+      }
+
+      .fullscreen-close:hover {
+        background: #ff4757 !important;
+        color: white !important;
+        transform: scale(1.1) !important;
+      }
+
+      /* Enhanced navigation buttons for iPad */
+      .fullscreen-nav-btn {
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #333 !important;
+        border: none !important;
+        border-radius: 50% !important;
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 28px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        z-index: 10001 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s ease !important;
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation !important;
+      }
+
+      .fullscreen-prev-btn {
+        left: 30px !important;
+      }
+
+      .fullscreen-next-btn {
+        right: 30px !important;
+      }
+
+      .fullscreen-nav-btn:hover {
+        background: white !important;
+        transform: translateY(-50%) scale(1.1) !important;
+      }
+
+      /* Image counter for iPad */
+      .image-counter {
+        position: absolute !important;
+        top: 30px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        color: white !important;
+        padding: 8px 16px !important;
+        border-radius: 20px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        z-index: 10001 !important;
+      }
+
+      /* Enhanced zoom controls for iPad */
+      .fullscreen-zoom-controls {
+        position: absolute !important;
+        bottom: 30px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        gap: 8px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        padding: 12px 16px !important;
+        border-radius: 25px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        z-index: 10001 !important;
+      }
+
+      .zoom-btn {
+        background: transparent !important;
+        border: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 16px !important;
+        color: #333 !important;
+        transition: background-color 0.2s !important;
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation !important;
+      }
+
+      .zoom-btn:hover {
+        background: rgba(0, 0, 0, 0.1) !important;
+      }
+
+      .zoom-info {
+        display: flex !important;
+        align-items: center !important;
+        font-size: 14px !important;
+        color: #666 !important;
+        margin: 0 12px !important;
+        min-width: 50px !important;
+        justify-content: center !important;
+        font-weight: bold !important;
+      }
+
+      /* Enhanced image styling */
+      .fullscreen-image {
+        max-width: 85vw !important;
+        max-height: 85vh !important;
+        object-fit: contain !important;
+        cursor: grab !important;
+        transition: transform 0.2s ease !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      .fullscreen-image.zoomed {
+        cursor: grab !important;
+      }
+
+      .fullscreen-image:active {
+        cursor: grabbing !important;
+      }
+
+      /* Mobile/Tablet specific adjustments */
+      @media (max-width: 1024px) {
+        .fullscreen-close {
+          top: 15px !important;
+          right: 15px !important;
+          width: 55px !important;
+          height: 55px !important;
+          font-size: 22px !important;
+        }
+
+        .fullscreen-nav-btn {
+          width: 65px !important;
+          height: 65px !important;
+          font-size: 26px !important;
+        }
+
+        .fullscreen-prev-btn {
+          left: 20px !important;
+        }
+
+        .fullscreen-next-btn {
+          right: 20px !important;
+        }
+
+        .image-counter {
+          top: 20px !important;
+          font-size: 14px !important;
+          padding: 6px 12px !important;
+        }
+
+        .fullscreen-zoom-controls {
+          bottom: 20px !important;
+          padding: 10px 14px !important;
+        }
+
+        .zoom-btn {
+          width: 36px !important;
+          height: 36px !important;
+          font-size: 14px !important;
+        }
+
+        .zoom-info {
+          font-size: 12px !important;
+          margin: 0 8px !important;
+          min-width: 40px !important;
+        }
+      }
+
+      /* Prevent text selection and context menus */
+      .fullscreen-image-overlay * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+
+      /* Prevent zoom on double tap for iOS */
+      .fullscreen-image-overlay {
+        touch-action: manipulation !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   bindEvents() {
@@ -73,8 +325,14 @@ class FullscreenImageViewer {
     });
     
     // Navigation events
-    this.prevBtn.addEventListener('click', () => this.previousImage());
-    this.nextBtn.addEventListener('click', () => this.nextImage());
+    this.prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.previousImage();
+    });
+    this.nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.nextImage();
+    });
     
     // Zoom events
     this.zoomInBtn.addEventListener('click', () => this.zoomIn());
@@ -90,6 +348,9 @@ class FullscreenImageViewer {
         this.zoomOut();
       }
     });
+    
+    // Touch events for swipe navigation
+    this.bindTouchEvents();
     
     // Keyboard events
     document.addEventListener('keydown', (e) => {
@@ -122,16 +383,49 @@ class FullscreenImageViewer {
     this.bindDragEvents();
   }
 
+  bindTouchEvents() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    this.overlay.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    });
+
+    this.overlay.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = Math.abs(touchEndY - touchStartY);
+      
+      // Only trigger swipe if horizontal movement is greater than vertical
+      if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+        if (deltaX > 0) {
+          this.previousImage(); // Swipe right = previous
+        } else {
+          this.nextImage(); // Swipe left = next
+        }
+      }
+    });
+  }
+
   bindDragEvents() {
     // Mouse events
     this.image.addEventListener('mousedown', (e) => this.startDrag(e));
     document.addEventListener('mousemove', (e) => this.drag(e));
     document.addEventListener('mouseup', () => this.endDrag());
     
-    // Touch events
-    this.image.addEventListener('touchstart', (e) => this.startDrag(e.touches[0]));
+    // Touch events for panning (separate from swipe)
+    this.image.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1 && this.scale > 1) {
+        this.startDrag(e.touches[0]);
+      }
+    });
     document.addEventListener('touchmove', (e) => {
-      if (this.isDragging) {
+      if (this.isDragging && e.touches.length === 1) {
         e.preventDefault();
         this.drag(e.touches[0]);
       }
@@ -140,7 +434,7 @@ class FullscreenImageViewer {
   }
 
   startDrag(e) {
-    if (this.scale <= 1) return; // Only allow dragging when zoomed in
+    if (this.scale <= 1) return;
     
     this.isDragging = true;
     this.lastX = e.clientX;
@@ -175,16 +469,17 @@ class FullscreenImageViewer {
     
     this.loadCurrentImage();
     this.updateNavigation();
+    this.updateImageCounter();
     this.resetZoom();
     
     this.overlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
   }
 
   close() {
     this.isOpen = false;
     this.overlay.classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
+    document.body.style.overflow = '';
   }
 
   loadCurrentImage() {
@@ -201,11 +496,17 @@ class FullscreenImageViewer {
     this.nextBtn.style.display = hasMultipleImages ? 'flex' : 'none';
   }
 
+  updateImageCounter() {
+    this.imageCounter.textContent = `${this.currentImageIndex + 1} / ${this.images.length}`;
+    this.imageCounter.style.display = this.images.length > 1 ? 'block' : 'none';
+  }
+
   previousImage() {
     if (this.images.length <= 1) return;
     
     this.currentImageIndex = (this.currentImageIndex - 1 + this.images.length) % this.images.length;
     this.loadCurrentImage();
+    this.updateImageCounter();
     this.resetZoom();
   }
 
@@ -214,17 +515,18 @@ class FullscreenImageViewer {
     
     this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
     this.loadCurrentImage();
+    this.updateImageCounter();
     this.resetZoom();
   }
 
   zoomIn() {
-    this.scale = Math.min(this.scale * 1.2, 5); // Max 5x zoom
+    this.scale = Math.min(this.scale * 1.2, 5);
     this.updateImageTransform();
     this.updateZoomInfo();
   }
 
   zoomOut() {
-    this.scale = Math.max(this.scale / 1.2, 0.5); // Min 0.5x zoom
+    this.scale = Math.max(this.scale / 1.2, 0.5);
     this.updateImageTransform();
     this.updateZoomInfo();
   }
@@ -250,7 +552,7 @@ class FullscreenImageViewer {
 // Initialize the fullscreen viewer
 const fullscreenViewer = new FullscreenImageViewer();
 
-// Function to open fullscreen view (to be called from your React component)
+// Function to open fullscreen view
 function openFullscreenImage(images, startIndex = 0) {
   fullscreenViewer.open(images, startIndex);
 }
