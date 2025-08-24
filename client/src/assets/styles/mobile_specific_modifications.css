@@ -65,8 +65,8 @@
   }
 }
 
-/* iPad-specific modifications (769px to 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
+/* iPad-specific modifications (769px to 1024px, landscape only) */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
   .property-detail-overlay {
     padding: 50px 20px 20px; /* Slightly more padding for iPad */
     align-items: center;
@@ -79,10 +79,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    width: 90%; /* Slightly narrower for better centering */
-    max-width: 800px; /* Cap width for larger iPads */
+    width: 85%; /* Slightly narrower for landscape */
+    max-width: 900px; /* Allow more width in landscape */
     height: auto;
-    max-height: calc(100vh - 100px); /* Adjusted for iPad padding */
+    max-height: calc(100vh - 120px); /* Adjusted for landscape */
     border-radius: 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -124,7 +124,7 @@
   }
 
   .mobile-slide-container {
-    height: 350px; /* Larger image area for iPad */
+    height: 400px; /* Larger image area for iPad landscape */
     border-radius: 8px;
   }
 
@@ -179,18 +179,25 @@
     width: 65%;
   }
 
-  /* Buttons for iPad */
+  /* Force single-column layout for buttons on iPad */
   .property-detail-buttons {
-    flex-direction: row; /* Side-by-side buttons in landscape */
-    flex-wrap: wrap;
+    flex-direction: column; /* Stack buttons vertically for single-column layout */
     gap: 20px;
     margin-top: 40px;
   }
 
   .property-detail-btn {
-    width: 45%; /* Two buttons per row in landscape */
-    padding: 18px;
-    font-size: 17px;
+    width: 100%; /* Full-width buttons for single-column layout */
+    padding: 20px;
+    font-size: 18px;
+  }
+
+  /* Force single-column layout for grids on iPad */
+  .images-grid,
+  .property-detail-table-grid {
+    display: flex !important; /* Override grid with flex for single-column */
+    flex-direction: column;
+    gap: 20px;
   }
 
   /* Hide desktop layouts */
@@ -467,7 +474,7 @@
     display: none !important;
   }
 
-  /* Ensure desktop grid is shown */
+  /* Ensure desktop grid is shown with multi-column layout */
   .images-grid,
   .property-detail-table-grid {
     display: grid !important;
@@ -475,6 +482,21 @@
 
   .property-detail-table:not(.mobile-table) {
     display: table !important;
+  }
+
+  /* Desktop buttons in multi-column layout */
+  .property-detail-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .property-detail-btn {
+    width: 45%; /* Two items per row for desktop */
+    padding: 18px;
+    font-size: 17px;
   }
 }
 
@@ -654,52 +676,5 @@
   .property-detail-btn {
     padding: 12px;
     font-size: 15px;
-  }
-}
-
-/* iPad landscape orientation adjustments */
-@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
-  .property-detail-content.mobile {
-    width: 85%; /* Slightly narrower in landscape */
-    max-width: 900px; /* Allow more width in landscape */
-    max-height: calc(100vh - 120px); /* Adjusted for landscape */
-  }
-
-  .mobile-slide-container {
-    height: 400px; /* Larger images in landscape */
-  }
-
-  .property-detail-buttons {
-    flex-direction: row; /* Ensure side-by-side buttons */
-    gap: 20px;
-  }
-
-  .property-detail-btn {
-    width: 30%; /* Three buttons per row in landscape if space allows */
-    padding: 20px;
-    font-size: 18px;
-  }
-}
-
-/* iPad portrait orientation adjustments */
-@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
-  .property-detail-content.mobile {
-    width: 95%; /* Slightly wider in portrait */
-    max-width: 768px; /* Cap width for portrait */
-  }
-
-  .mobile-slide-container {
-    height: 300px; /* Slightly smaller images in portrait */
-  }
-
-  .property-detail-buttons {
-    flex-direction: column; /* Stack buttons in portrait */
-    gap: 15px;
-  }
-
-  .property-detail-btn {
-    width: 100%; /* Full-width buttons in portrait */
-    padding: 15px;
-    font-size: 16px;
   }
 }
