@@ -40,8 +40,6 @@ class FullscreenImageViewer {
           
           <img class="fullscreen-image" id="fullscreenImage" alt="Fullscreen view">
           
-          <div class="image-counter" id="imageCounter">1 / 1</div>
-          
           <div class="fullscreen-zoom-controls">
             <button class="zoom-btn" id="zoomOut">
               <i class="fas fa-minus"></i>
@@ -71,7 +69,6 @@ class FullscreenImageViewer {
     this.zoomOutBtn = document.getElementById('zoomOut');
     this.zoomResetBtn = document.getElementById('zoomReset');
     this.zoomInfo = document.getElementById('zoomInfo');
-    this.imageCounter = document.getElementById('imageCounter');
 
     // Add enhanced styles for iPad
     this.addEnhancedStyles();
@@ -554,14 +551,100 @@ class FullscreenImageViewer {
     
     this.loadCurrentImage();
     this.updateNavigation();
-    this.updateImageCounter();
     this.resetZoom();
     
     this.overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Force hide any conflicting elements when opening
-    this.hideConflictingElements();
+    // Debug and remove the gray overlay
+    this.debugAndRemoveGrayOverlay();
+  }
+
+  debugAndRemoveGrayOverlay() {
+    setTimeout(() => {
+      console.log('🔍 Debugging gray overlay...');
+      
+      // Find all elements that could be creating a gray overlay
+      const allElements = document.querySelectorAll('*');
+      const suspiciousElements = [];
+      
+      allElements.forEach(el => {
+        // Skip our own fullscreen elements
+        if (el.closest('#fullscreenImageOverlay') || el.id === 'fullscreenImageOverlay') {
+          return;
+        }
+        
+        const style = window.getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        
+        // Look for elements with gray backgrounds or large size
+        const hasGrayBackground = style.backgroundColor.includes('128') || 
+                                 style.backgroundColor.includes('gray') ||
+                                 style.backgroundColor.includes('0.5') ||
+                                 style.backgroundColor.includes('0.6') ||
+                                 style.backgroundColor.includes('0.7');
+        
+        const isLarge = rect.width > 200 && rect.height > 200;
+        const isPositioned = style.position === 'fixed' || style.position === 'absolute';
+        const hasHighZIndex = parseInt(style.zIndex) > 100;
+        
+        if ((hasGrayBackground || (isLarge && isPositioned) || hasHighZIndex) && 
+            rect.width > 0 && rect.height > 0) {
+          
+          suspiciousElements.push({
+            element: el,
+            className: el.className,
+            id: el.id,
+            backgroundColor: style.backgroundColor,
+            position: style.position,
+            zIndex: style.zIndex,
+            width: rect.width,
+            height: rect.height
+          });
+          
+          console.log('🚨 Suspicious element:', {
+            element: el,
+            className: el.className,
+            id: el.id,
+            backgroundColor: style.backgroundColor,
+            position: style.position,
+            zIndex: style.zIndex,
+            size: `${rect.width}x${rect.height}`
+          });
+          
+          // Hide the suspicious element
+          el.style.display = 'none !important';
+          el.style.visibility = 'hidden !important';
+          el.style.opacity = '0 !important';
+        }
+      });
+      
+      console.log(`Found ${suspiciousElements.length} suspicious elements`);
+      
+      // Also try to remove common overlay patterns
+      const commonOverlaySelectors = [
+        '[class*="overlay"]',
+        '[class*="modal"]', 
+        '[class*="backdrop"]',
+        '[class*="popup"]',
+        'div[style*="rgba"]',
+        'div[style*="background"]'
+      ];
+      
+      commonOverlaySelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          if (!el.closest('#fullscreenImageOverlay') && el.id !== 'fullscreenImageOverlay') {
+            const style = window.getComputedStyle(el);
+            if (style.position === 'fixed' || style.position === 'absolute') {
+              console.log('🔥 Hiding overlay element:', el);
+              el.style.display = 'none !important';
+            }
+          }
+        });
+      });
+      
+    }, 200);
   }
 
   close() {
@@ -647,17 +730,11 @@ class FullscreenImageViewer {
     this.nextBtn.style.display = hasMultipleImages ? 'flex' : 'none';
   }
 
-  updateImageCounter() {
-    this.imageCounter.textContent = `${this.currentImageIndex + 1} / ${this.images.length}`;
-    this.imageCounter.style.display = this.images.length > 1 ? 'block' : 'none';
-  }
-
   previousImage() {
     if (this.images.length <= 1) return;
     
     this.currentImageIndex = (this.currentImageIndex - 1 + this.images.length) % this.images.length;
     this.loadCurrentImage();
-    this.updateImageCounter();
     this.resetZoom();
   }
 
@@ -666,7 +743,6 @@ class FullscreenImageViewer {
     
     this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
     this.loadCurrentImage();
-    this.updateImageCounter();
     this.resetZoom();
   }
 
