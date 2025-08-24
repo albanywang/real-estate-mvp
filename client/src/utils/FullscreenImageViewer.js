@@ -74,7 +74,7 @@ class FullscreenImageViewer {
   addEnhancedStyles() {
     const style = document.createElement('style');
     style.textContent = `
-      /* Enhanced fullscreen styles for iPad */
+      /* Enhanced fullscreen styles for iPad - Remove gray overlay */
       .fullscreen-image-overlay {
         position: fixed !important;
         top: 0 !important;
@@ -89,6 +89,9 @@ class FullscreenImageViewer {
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
+        /* Remove any potential gray overlay */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
 
       .fullscreen-image-overlay.active {
@@ -103,6 +106,17 @@ class FullscreenImageViewer {
         justify-content: center;
         width: 100%;
         height: 100%;
+        /* Ensure no background or overlay */
+        background: transparent !important;
+      }
+
+      /* Remove any pseudo-elements that might create gray overlays */
+      .fullscreen-image-overlay::before,
+      .fullscreen-image-overlay::after,
+      .fullscreen-image-container::before,
+      .fullscreen-image-container::after {
+        display: none !important;
+        content: none !important;
       }
 
       /* Enhanced close button for iPad */
@@ -110,7 +124,7 @@ class FullscreenImageViewer {
         position: absolute !important;
         top: 20px !important;
         right: 20px !important;
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         color: #333 !important;
         border: none !important;
         border-radius: 50% !important;
@@ -126,6 +140,9 @@ class FullscreenImageViewer {
         transition: all 0.3s ease !important;
         -webkit-tap-highlight-color: transparent !important;
         touch-action: manipulation !important;
+        /* Ensure no additional background */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
 
       .fullscreen-close:hover {
@@ -139,7 +156,7 @@ class FullscreenImageViewer {
         position: absolute !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         color: #333 !important;
         border: none !important;
         border-radius: 50% !important;
@@ -155,6 +172,9 @@ class FullscreenImageViewer {
         transition: all 0.3s ease !important;
         -webkit-tap-highlight-color: transparent !important;
         touch-action: manipulation !important;
+        /* Ensure no additional background */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
 
       .fullscreen-prev-btn {
@@ -176,13 +196,15 @@ class FullscreenImageViewer {
         top: 30px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
-        background: rgba(0, 0, 0, 0.7) !important;
+        background: rgba(0, 0, 0, 0.8) !important;
         color: white !important;
         padding: 8px 16px !important;
         border-radius: 20px !important;
         font-size: 16px !important;
         font-weight: bold !important;
         z-index: 10001 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
 
       /* Enhanced zoom controls for iPad */
@@ -193,11 +215,13 @@ class FullscreenImageViewer {
         transform: translateX(-50%) !important;
         display: flex !important;
         gap: 8px !important;
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         padding: 12px 16px !important;
         border-radius: 25px !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         z-index: 10001 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
 
       .zoom-btn {
@@ -232,7 +256,7 @@ class FullscreenImageViewer {
         font-weight: bold !important;
       }
 
-      /* Enhanced image styling */
+      /* Enhanced image styling - Remove any potential overlays */
       .fullscreen-image {
         max-width: 85vw !important;
         max-height: 85vh !important;
@@ -242,6 +266,10 @@ class FullscreenImageViewer {
         user-select: none !important;
         -webkit-user-select: none !important;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        /* Ensure no background or overlay on image */
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
       }
 
       .fullscreen-image.zoomed {
@@ -298,6 +326,11 @@ class FullscreenImageViewer {
           margin: 0 8px !important;
           min-width: 40px !important;
         }
+
+        /* iPad specific - ensure no gray overlay */
+        .fullscreen-image-overlay {
+          background-color: rgba(0, 0, 0, 0.98) !important;
+        }
       }
 
       /* Prevent text selection and context menus */
@@ -312,6 +345,19 @@ class FullscreenImageViewer {
       /* Prevent zoom on double tap for iOS */
       .fullscreen-image-overlay {
         touch-action: manipulation !important;
+      }
+
+      /* Force remove any potential conflicting styles from other CSS */
+      .fullscreen-image-overlay,
+      .fullscreen-image-overlay *:not(.fullscreen-image) {
+        box-sizing: border-box !important;
+      }
+
+      /* Remove any potential modal or dialog overlays */
+      .fullscreen-image-overlay .modal-backdrop,
+      .fullscreen-image-overlay .overlay,
+      .fullscreen-image-overlay .backdrop {
+        display: none !important;
       }
     `;
     document.head.appendChild(style);
