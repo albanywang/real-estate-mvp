@@ -1,12 +1,6 @@
 /* Mobile responsive additions to existing property detail CSS */
 
-/* Property card grid layout */
-.property-card-grid {
-  display: grid;
-  grid-template-columns: 1fr; /* Default to single-column for mobile */
-  gap: 1rem;
-  padding: 1rem;
-}
+
 
 /* Mobile-specific modifications (max-width: 768px) */
 @media (max-width: 768px) {
