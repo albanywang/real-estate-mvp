@@ -16,6 +16,12 @@ class FullscreenImageViewer {
   }
 
   createOverlay() {
+    // First, remove any existing fullscreen overlays to prevent conflicts
+    const existingOverlay = document.getElementById('fullscreenImageOverlay');
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
+
     // Create the fullscreen overlay HTML with enhanced iPad support
     const overlayHTML = `
       <div class="fullscreen-image-overlay" id="fullscreenImageOverlay">
@@ -69,6 +75,39 @@ class FullscreenImageViewer {
 
     // Add enhanced styles for iPad
     this.addEnhancedStyles();
+
+    // Force remove any conflicting elements after creation
+    this.removeConflictingElements();
+  }
+
+  removeConflictingElements() {
+    // Remove any potential conflicting overlays or modals
+    setTimeout(() => {
+      const conflictingSelectors = [
+        '.modal-backdrop',
+        '.backdrop',
+        '.overlay:not(.fullscreen-image-overlay)',
+        '[class*="popup"]:not(.fullscreen-image-overlay)',
+        '[class*="modal"]:not(.fullscreen-image-overlay)',
+        'div[style*="position: fixed"]:not(.fullscreen-image-overlay)',
+        'div[style*="position: absolute"][style*="background"]'
+      ];
+
+      conflictingSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          if (!el.closest('.fullscreen-image-overlay') && 
+              el.id !== 'fullscreenImageOverlay' &&
+              !el.classList.contains('fullscreen-image-overlay')) {
+            const rect = el.getBoundingClientRect();
+            // If element covers significant screen area, hide it
+            if (rect.width > 200 && rect.height > 200) {
+              el.style.display = 'none';
+            }
+          }
+        });
+      });
+    }, 100);
   }
 
   addEnhancedStyles() {
@@ -520,12 +559,78 @@ class FullscreenImageViewer {
     
     this.overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    // Force hide any conflicting elements when opening
+    this.hideConflictingElements();
   }
 
   close() {
     this.isOpen = false;
     this.overlay.classList.remove('active');
     document.body.style.overflow = '';
+    
+    // Restore any hidden elements when closing
+    this.restoreHiddenElements();
+  }
+
+  hideConflictingElements() {
+    // Store original display values and hide potential conflicting elements
+    this.hiddenElements = [];
+    
+    // Find and hide any elements that might be causing the gray overlay
+    const potentialConflicts = document.querySelectorAll(`
+      div[style*="position: fixed"],
+      div[style*="position: absolute"],
+      .modal,
+      .popup,
+      .overlay:not(#fullscreenImageOverlay),
+      .backdrop,
+      [class*="modal"]:not(#fullscreenImageOverlay),
+      [class*="popup"]:not(#fullscreenImageOverlay),
+      [class*="overlay"]:not(#fullscreenImageOverlay)
+    `);
+
+    potentialConflicts.forEach(el => {
+      // Skip our own fullscreen elements
+      if (el.id === 'fullscreenImageOverlay' || 
+          el.closest('#fullscreenImageOverlay') || 
+          el.classList.contains('fullscreen-image-overlay')) {
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(el);
+      
+      // Hide elements that:
+      // 1. Have significant size and positioned absolutely/fixed
+      // 2. Have background colors that could create overlays
+      // 3. Have high z-index values
+      if ((rect.width > 100 && rect.height > 100) || 
+          (computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+           computedStyle.backgroundColor !== 'transparent') ||
+          parseInt(computedStyle.zIndex) > 1000) {
+        
+        this.hiddenElements.push({
+          element: el,
+          originalDisplay: el.style.display,
+          originalVisibility: el.style.visibility
+        });
+        
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+      }
+    });
+  }
+
+  restoreHiddenElements() {
+    // Restore previously hidden elements
+    if (this.hiddenElements) {
+      this.hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+        element.style.display = originalDisplay;
+        element.style.visibility = originalVisibility;
+      });
+      this.hiddenElements = [];
+    }
   }
 
   loadCurrentImage() {
