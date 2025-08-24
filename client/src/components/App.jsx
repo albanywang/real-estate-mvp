@@ -31,7 +31,6 @@ const App = () => {
   // Mobile-specific state
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [isLandscape, setIsLandscape] = useState(true);
   const [mobileView, setMobileView] = useState('list'); // 'list' or 'map'
 
   console.log('japanesePhrases check:', japanesePhrases);
@@ -47,58 +46,6 @@ const App = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-    useEffect(() => {
-    const checkOrientation = () => {
-      // Check if it's iPad and in portrait mode
-      const isIpad = /iPad|Macintosh/i.test(navigator.userAgent) && 'ontouchend' in document;
-      const isPortrait = window.innerHeight > window.innerWidth;
-      
-      if (isIpad && isPortrait) {
-        setIsLandscape(false);
-      } else {
-        setIsLandscape(true);
-      }
-    };
-
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
-  }, []);
-
-  if (!isLandscape) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '20px',
-        zIndex: 10000
-      }}>
-        <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📱➡️📱</div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>
-          Please rotate your device
-        </h2>
-        <p style={{ fontSize: '1.1rem', opacity: 0.9 }}>
-          This application is optimized for landscape mode
-        </p>
-      </div>
-    );
-  }
 
   // Add this function to handle showing favorites
   const handleShowFavorites = () => {
