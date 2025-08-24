@@ -92,7 +92,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    width: 60%; /* Reduced from 85% to 68% (85% * 0.7) */
+    width: 68%; /* Reduced from 85% to 68% (85% * 0.7) */
     max-width: 900px;
     height: auto;
     max-height: calc(100vh - 120px);
