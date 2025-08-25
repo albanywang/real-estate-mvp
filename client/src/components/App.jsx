@@ -1379,8 +1379,13 @@ const App = () => {
                         </div>
                       </div>
                       
-                      {/* Property Cards - Two Column Layout for desktop, one column for iPad */}
-                      <div className="property-card-grid">
+                      {/* Property Cards - Two Column Layout */}
+                      <div style={{ 
+                        padding: '1rem',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: '1rem'
+                      }}>
                         {filteredProperties.map(property => (
                           <div key={property.id} style={{ 
                             cursor: 'pointer',
