@@ -41,7 +41,7 @@ const App = () => {
     const checkDevice = () => {
       const width = window.innerWidth;
       setIsMobile(width <= 768);
-      setIsTablet(width > 768 && width <= 1024);
+      setIsTablet(width > 768 && width <= 810);
     };
 
     checkDevice();
