@@ -1359,7 +1359,7 @@ const App = () => {
                           }}>
                             {filteredProperties.length} 最新物件
                           </p>
-                        <select
+                          <select
                             value={sortOption}
                             onChange={(e) => setSortOption(e.target.value)}
                             style={{
@@ -1381,7 +1381,7 @@ const App = () => {
                         </div>
                       </div>
                       
-                      {/* Property Cards - Two Column Layout */}
+                      {/* Property Cards - Conditional Column Layout */}
                       <div style={{ 
                         padding: '1rem',
                         display: 'grid',
@@ -1412,6 +1412,7 @@ const App = () => {
                 </div>
               </>
             ) : (
+
               /* Mobile Layout */
               <>
                 {/* Map View for Mobile */}
