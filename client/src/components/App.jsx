@@ -322,6 +322,7 @@ const App = () => {
     }
     const processedProperties = locationBasedProperties.map(p => ({
       ...p,
+      // Ensure we have the right field names (your API should already provide these)
       propertyType: p.propertyType || p.propertytype || '',
       yearBuilt: p.yearBuilt || p.yearbuilt || '',
       transactionMode: p.transactionMode || p.transactionmode || ''
@@ -364,6 +365,7 @@ const App = () => {
     
     let filtered = [...propertiesToFilter];
     
+    // Apply all filters
     if (filters.propertyType) {
       const normalizedFilterType = normalizePropertyType(filters.propertyType);
       filtered = filtered.filter(p => {
@@ -442,6 +444,7 @@ const App = () => {
       filtered = filtered.filter(p => p.facilitiesServices && p.facilitiesServices.includes('オートロック'));
     }
     
+    // Apply sorting
     filtered = sortProperties(filtered);
     setFilteredProperties(filtered);
   };
@@ -574,6 +577,7 @@ const App = () => {
     if (isLoggedIn && user) {
       return (
         <div style={{ position: 'relative' }}>
+          {/* User name - clickable to toggle dropdown */}
           <button
             onClick={() => setShowDropdown(!showDropdown)}
             style={{ 
@@ -603,6 +607,7 @@ const App = () => {
             </span>
           </button>
 
+          {/* Dropdown menu */}
           {showDropdown && (
             <>
               <div 
@@ -617,6 +622,7 @@ const App = () => {
                 onClick={() => setShowDropdown(false)}
               />
               
+              {/* Dropdown content */}
               <div style={{
                 position: 'absolute',
                 top: '100%',
@@ -629,6 +635,7 @@ const App = () => {
                 minWidth: isMobile ? '160px' : '180px',
                 zIndex: 999
               }}>
+                {/* User info section */}
                 <div style={{
                   padding: '0.75rem 1rem',
                   borderBottom: '1px solid #f3f4f6'
@@ -648,6 +655,7 @@ const App = () => {
                   </div>
                 </div>
 
+                {/* Menu items */}
                 <div style={{ padding: '0.5rem 0' }}>
                   <button
                     onClick={() => {
@@ -726,12 +734,14 @@ const App = () => {
                     設定
                   </button>
 
+                  {/* Divider */}
                   <div style={{
                     height: '1px',
                     background: '#f3f4f6',
                     margin: '0.5rem 0'
                   }} />
 
+                  {/* Logout button */}
                   <button
                     onClick={() => {
                       setShowDropdown(false);
@@ -764,6 +774,7 @@ const App = () => {
       );
     }
     
+    // When not logged in, show login link
     return (
       <a
         href="#"
@@ -844,6 +855,8 @@ const App = () => {
             justifyContent: 'space-between',
           }}
         >
+
+          {/* Centered Logo */}
           <div
             className="logo-container"
             style={{
@@ -857,36 +870,37 @@ const App = () => {
             <a
               href="#"
               className="logo"
-              onClick={(e) => {
-                setPopup({
-                  isOpen: true,
-                  title: japanesePhrases.partnership,
-                  message: `すべてのデータはデモです!
+                  onClick={(e) => {
+                    setPopup({
+                      isOpen: true,
+                      title: japanesePhrases.partnership,
+                      message: `すべてのデータはデモです!
 
-                            実際にお試しいただき、もしご興味をお持ちいただけましたら：
-                            - 技術提携
-                            - データ連携
-                            - プラットフォーム買取
+                                実際にお試しいただき、もしご興味をお持ちいただけましたら：
+                                - 技術提携
+                                - データ連携
+                                - プラットフォーム買取
 
-                            などについてご相談させていただけますでしょうか。
+                                などについてご相談させていただけますでしょうか。
 
-                            王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）
-                            E-mail: albanywang2000@gmail.com`
-                });
-              }}
-              style={{ 
-                textDecoration: 'none', 
-                color: '#6b7280', 
-                fontWeight: '500', 
-                whiteSpace: 'nowrap',
-                cursor: 'pointer'
-              }}
+                                王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）
+                                E-mail: albanywang2000@gmail.com`
+                    });
+                  }}
+                  style={{ 
+                    textDecoration: 'none', 
+                    color: '#6b7280', 
+                    fontWeight: '500', 
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer'
+                  }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
               {japanesePhrases.appTitle}
             </a>
           </div>
 
+          {/* Right Side - Development Info */}
           <div
             className="right-nav"
             style={{
@@ -953,6 +967,7 @@ const App = () => {
         </div>
       </header>
 
+      {/* Mobile Filters Overlay */}
       {isMobile && showMobileFilters && (
         <div style={{
           position: 'fixed',
@@ -1021,6 +1036,7 @@ const App = () => {
         </div>
       )}
 
+      {/* Desktop Filters */}
       {!isMobile && (
         <TopFiltersPanel
           filters={filters}
@@ -1042,10 +1058,12 @@ const App = () => {
         />
       )}
 
+      {/* Mobile View Toggle */}
       {isMobile && currentView === 'properties' && (
         <MobileViewToggle />
       )}
 
+      {/* Main Content Area */}
       <div style={{ 
         height: isMobile ? 
           (currentView === 'properties' ? 'calc(100vh - 120px)' : 'calc(100vh - 56px)') : 
@@ -1060,6 +1078,7 @@ const App = () => {
             overflowY: 'auto',
             background: '#fff'
           }}>
+            {/* Back button */}
             <div style={{ 
               padding: '1rem',
               borderBottom: '1px solid #e5e7eb',
@@ -1087,240 +1106,247 @@ const App = () => {
           </div>
         ) : (
           <>
-            {!isMobile ? (
-              <>
-                <div style={{ 
-                  flex: '0 0 60%',
-                  position: 'relative'
+        {/* Desktop Layout */}
+        {!isMobile ? (
+          <>
+            <div style={{ 
+              flex: '0 0 60%',
+              position: 'relative'
+            }}>
+              {isLoading ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  flexDirection: 'column',
+                  gap: '1rem'
                 }}>
-                  {isLoading ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      flexDirection: 'column',
-                      gap: '1rem'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #f3f4f6',
-                        borderTop: '4px solid #3b82f6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                      <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
-                    </div>
-                  ) : error ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      flexDirection: 'column',
-                      gap: '1rem',
-                      padding: '2rem'
-                    }}>
-                      <p style={{ color: '#dc2626', margin: 0, textAlign: 'center' }}>{error}</p>
-                      <button 
-                        onClick={retryLoading}
-                        style={{
-                          padding: '0.75rem 1.5rem',
-                          background: '#3b82f6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          cursor: 'pointer',
-                          fontWeight: '500'
-                        }}
-                      >
-                        {japanesePhrases.retry}
-                      </button>
-                      <small style={{ color: '#6b7280', textAlign: 'center' }}>
-                        Debug: Open browser console and run `debugRealEstate.debugAPI()` for more info
-                      </small>
-                    </div>
-                  ) : (
-                    <MapComponent 
-                      properties={filteredProperties} 
-                      selectedProperty={selectedProperty}
-                      setSelectedProperty={setSelectedProperty}
-                      openPropertyDetail={openPropertyDetail}
-                      phrases={japanesePhrases}
-                      visible={true}
-                    />
-                  )}
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '4px solid #f3f4f6',
+                    borderTop: '4px solid #3b82f6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
                 </div>
-
-                <div style={{ 
-                  flex: '0 0 40%',
-                  overflowY: 'auto',
-                  borderLeft: '1px solid #e5e7eb',
-                  background: '#fff'
+              ) : error ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  padding: '2rem'
                 }}>
-                  {isLoading ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '200px',
-                      flexDirection: 'column',
-                      gap: '1rem'
-                    }}>
-                      <div style={{
-                        width: '30px',
-                        height: '30px',
-                        border: '3px solid #f3f4f6',
-                        borderTop: '3px solid #3b82f6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                      <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
-                    </div>
-                  ) : error ? (
-                    <div style={{
-                      padding: '2rem',
-                      textAlign: 'center'
-                    }}>
-                      <p style={{ color: '#dc2626' }}>{error}</p>
+                  <p style={{ color: '#dc2626', margin: 0, textAlign: 'center' }}>{error}</p>
+                  <button 
+                    onClick={retryLoading}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {japanesePhrases.retry}
+                  </button>
+                  <small style={{ color: '#6b7280', textAlign: 'center' }}>
+                    Debug: Open browser console and run `debugRealEstate.debugAPI()` for more info
+                  </small>
+                </div>
+              ) : (
+                <MapComponent 
+                  properties={filteredProperties} 
+                  selectedProperty={selectedProperty}
+                  setSelectedProperty={setSelectedProperty}
+                  openPropertyDetail={openPropertyDetail}
+                  phrases={japanesePhrases}
+                  visible={true}
+                />
+              )}
+            </div>
+
+            {/* Property List Container - Takes up 40% of width */}
+            <div style={{ 
+              flex: '0 0 40%',
+              overflowY: 'auto',
+              borderLeft: '1px solid #e5e7eb',
+              background: '#fff'
+            }}>
+              {isLoading ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '200px',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  <div style={{
+                    width: '30px',
+                    height: '30px',
+                    border: '3px solid #f3f4f6',
+                    borderTop: '3px solid #3b82f6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <p style={{ color: '#6b7280', margin: 0 }}>{japanesePhrases.loading}</p>
+                </div>
+              ) : error ? (
+                <div style={{
+                  padding: '2rem',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#dc2626' }}>{error}</p>
+                  <button 
+                    onClick={retryLoading}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      cursor: 'pointer',
+                      marginTop: '1rem'
+                    }}
+                  >
+                    {japanesePhrases.retry}
+                  </button>
+                </div>
+              ) : filteredProperties.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                  {(searchMode === 'all' ? properties : locationProperties).length === 0 ? (
+                    <>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏠</div>
+                      <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
+                        {japanesePhrases.noProperties}
+                      </p>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                        No properties found {searchMode === 'location' ? 'in selected location' : 'in database'}
+                      </p>
                       <button 
-                        onClick={retryLoading}
+                        onClick={retryLoading} 
                         style={{
+                          marginTop: '1rem',
                           padding: '0.5rem 1rem',
                           background: '#3b82f6',
                           color: 'white',
                           border: 'none',
                           borderRadius: '0.375rem',
-                          cursor: 'pointer',
-                          marginTop: '1rem'
+                          cursor: 'pointer'
                         }}
                       >
                         {japanesePhrases.retry}
                       </button>
-                    </div>
-                  ) : filteredProperties.length === 0 ? (
-                    <div style={{ padding: '2rem', textAlign: 'center' }}>
-                      {(searchMode === 'all' ? properties : locationProperties).length === 0 ? (
-                        <>
-                          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏠</div>
-                          <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
-                            {japanesePhrases.noProperties}
-                          </p>
-                          <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-                            No properties found {searchMode === 'location' ? 'in selected location' : 'in database'}
-                          </p>
-                          <button 
-                            onClick={retryLoading} 
-                            style={{
-                              marginTop: '1rem',
-                              padding: '0.5rem 1rem',
-                              background: '#3b82f6',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '0.375rem',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {japanesePhrases.retry}
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
-                          <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
-                            No properties match your current filters
-                          </p>
-                          <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                            Try adjusting your search criteria or clearing some filters
-                          </p>
-                          <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                            Showing 0 of {searchMode === 'location' ? locationProperties.length : properties.length} properties
-                            {searchMode === 'location' && selectedLocation && (
-                              <span> in {selectedLocation.display_text}</span>
-                            )}
-                          </p>
-                        </>
-                      )}
-                    </div>
+                    </>
                   ) : (
-                    <>             
-                      <div style={{ 
-                        padding: '1rem',
-                        borderBottom: '1px solid #e5e7eb',
-                        background: '#f9fafb',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 10
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <p style={{ 
-                            margin: 0, 
-                            fontSize: '1rem', 
-                            fontWeight: '600',
-                            color: '#1f2937'
-                          }}>
-                            {filteredProperties.length} 最新物件
-                          </p>
-                          <select
-                            value={sortOption}
-                            onChange={(e) => setSortOption(e.target.value)}
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              border: '1px solid #d1d5db',
-                              borderRadius: '0.375rem',
-                              fontSize: '0.875rem',
-                              color: '#6b7280',
-                              background: 'white',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {sortOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      
-                      <div 
-                        className="property-grid"
-                        style={{ 
-                          padding: '1rem',
-                          display: 'grid',
-                          gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
-                          gap: '1rem'
-                        }}
-                      >
-                        {filteredProperties.map(property => (
-                          <div key={property.id} style={{ 
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                          }}>
-                            <PropertyCard
-                              property={property}
-                              isSelected={selectedProperty === property.id}
-                              onClick={() => {
-                                setSelectedProperty(property.id);
-                                openPropertyDetail(property);
-                              }}
-                              phrases={japanesePhrases}
-                              compact={true}
-                            />
-                          </div>
-                        ))}
-                      </div>
+                    <>
+                      <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
+                      <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>
+                        No properties match your current filters
+                      </p>
+                      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                        Try adjusting your search criteria or clearing some filters
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                        Showing 0 of {searchMode === 'location' ? locationProperties.length : properties.length} properties
+                        {searchMode === 'location' && selectedLocation && (
+                          <span> in {selectedLocation.display_text}</span>
+                        )}
+                      </p>
                     </>
                   )}
                 </div>
-              </>
-            ) : (
+              ) : (
+                <>             
+                  {/* Results Header */}
+                  <div style={{ 
+                    padding: '1rem',
+                    borderBottom: '1px solid #e5e7eb',
+                    background: '#f9fafb',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <p style={{ 
+                        margin: 0, 
+                        fontSize: '1rem', 
+                        fontWeight: '600',
+                        color: '#1f2937'
+                      }}>
+                        {filteredProperties.length} 最新物件
+                      </p>
+                      <select
+                        value={sortOption}
+                        onChange={(e) => setSortOption(e.target.value)}
+                        style={{
+                          padding: '0.25rem 0.5rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          color: '#6b7280',
+                          background: 'white',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {sortOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {/* Property Cards - Conditional Column Layout */}
+                  <div 
+                    className="property-grid"
+                    style={{ 
+                      padding: '1rem',
+                      display: 'grid',
+                      gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
+                      gap: '1rem'
+                    }}
+                  >
+                    {filteredProperties.map(property => (
+                      <div key={property.id} style={{ 
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, box-shadow 0.2s'
+                      }}>
+                        <PropertyCard
+                          property={property}
+                          isSelected={selectedProperty === property.id}
+                          onClick={() => {
+                            setSelectedProperty(property.id);
+                            openPropertyDetail(property);
+                          }}
+                          phrases={japanesePhrases}
+                          compact={true}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+
+
+              /* Mobile Layout */
               <>
                 {mobileView === 'map' && (
                   <div style={{ 
@@ -1386,6 +1412,7 @@ const App = () => {
                   </div>
                 )}
 
+                {/* List View for Mobile */}
                 {mobileView === 'list' && (
                   <div style={{ 
                     flex: 1,
@@ -1478,6 +1505,7 @@ const App = () => {
                       </div>
                     ) : (
                       <>             
+                        {/* Mobile Results Header */}
                         <div style={{ 
                           padding: '0.75rem 1rem',
                           borderBottom: '1px solid #e5e7eb',
@@ -1500,7 +1528,7 @@ const App = () => {
                             }}>
                               {filteredProperties.length} 物件
                             </p>
-                            <select
+                          <select
                               value={sortOption}
                               onChange={(e) => setSortOption(e.target.value)}
                               style={{
@@ -1522,6 +1550,7 @@ const App = () => {
                           </div>
                         </div>
                         
+                        {/* Mobile Property Cards - Single Column Layout */}
                         <div style={{ 
                           padding: '0.75rem',
                           display: 'flex',
@@ -1557,6 +1586,7 @@ const App = () => {
         )}
       </div>
 
+      {/* Mobile Filters Button */}
       {isMobile && currentView === 'properties' && (
         <MobileFiltersButton />
       )}

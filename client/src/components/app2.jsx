@@ -34,8 +34,6 @@ const App = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'list' or 'map'
 
-  console.log('japanesePhrases check:', japanesePhrases);
-
   // Detect mobile device
   useEffect(() => {
     const checkDevice = () => {
@@ -44,16 +42,6 @@ const App = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       const isIPad = /ipad|macintosh/i.test(userAgent) && 'ontouchstart' in window || (width >= 768 && width <= 1366); // Covers iPad Pro 12.9" (1366px)
       const isLandscape = width > height;
-
-      console.log('Device Check:', {
-        width,
-        height,
-        userAgent,
-        isIPad,
-        isLandscape,
-        isMobile: width <= 768,
-      });
-      console.log('Triggering layout:', isIPad ? 'Single column (iPad detected)' : 'Two columns (Desktop)');
 
       setIsMobile(width <= 768);
       setIsTablet(isIPad);
@@ -215,10 +203,8 @@ const App = () => {
   useEffect(() => {
     const initializeFullscreenViewer = () => {
       if (window.openFullscreenImage && window.fullscreenViewer) {
-        console.log('✅ Fullscreen image viewer initialized');
         setFullscreenViewerReady(true);
       } else {
-        console.log('⏳ Waiting for fullscreen viewer to initialize...');
         setTimeout(initializeFullscreenViewer, 100);
       }
     };
@@ -233,13 +219,11 @@ const App = () => {
   }, []);
 
   const openPropertyDetail = (property) => {
-    console.log('🏠 Opening property detail for:', property);
     setDetailProperty(property);
     setIsDetailPopupOpen(true);
   };
 
   const closePropertyDetail = () => {
-    console.log('🏠 Closing property detail');
     setIsDetailPopupOpen(false);
     setDetailProperty(null);
     
@@ -255,23 +239,13 @@ const App = () => {
         setIsLoading(true);
         setError(null);
         
-        console.log('🔄 Loading properties...');
-        
         const result = await fetchProperties();
-        
-        console.log('✅ Properties loaded:', result);
         
         if (result.error) {
           throw new Error(result.error);
         }
         
         const propertiesArray = Array.isArray(result.properties) ? result.properties : [];
-        
-        // Log unique propertyType values for debugging
-        const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
-        console.log('🔍 Unique propertyType values in data:', uniquePropertyTypes);
-        
-        console.log(`📍 Setting ${propertiesArray.length} properties`);
         
         setProperties(propertiesArray);
         
@@ -285,13 +259,10 @@ const App = () => {
         });
         
       } catch (error) {
-        console.error('❌ Error fetching properties:', error);
         setError(error.message || japanesePhrases.errorLoading);
-        
         setProperties([]);
         setFilteredProperties([]);
         setApiStats({ total: 0, count: 0 });
-        
       } finally {
         setIsLoading(false);
       }
@@ -302,14 +273,11 @@ const App = () => {
 
   // Add this function to your App.js
   const handleAddressSearch = async (searchTerm) => {
-    console.log('🔍 Searching database for address:', searchTerm);
-    
     try {
       setIsLoading(true);
       setError(null);
       
       // Call your API to search by address/area code
-      // Replace this URL with your actual API endpoint
       const response = await fetch(`/api/properties/search/address?q=${encodeURIComponent(searchTerm)}`, {
         method: 'GET',
         headers: {
@@ -322,7 +290,6 @@ const App = () => {
       }
       
       const result = await response.json();
-      console.log('✅ Address search results:', result);
       
       // Update state with search results
       setLocationProperties(searchProperties);
@@ -338,16 +305,10 @@ const App = () => {
       // Apply current filters to search results
       applyFiltersToProperties(searchProperties);
       
-      console.log(`📍 Found ${searchProperties.length} properties for "${searchTerm}"`);
-      
     } catch (error) {
-      console.error('❌ Address search failed:', error);
       setError(`Search failed: ${error.message}`);
-      
-      // Clear search results on error
       setLocationProperties([]);
       setFilteredProperties([]);
-      
     } finally {
       setIsLoading(false);
     }
@@ -355,31 +316,16 @@ const App = () => {
 
   // Handle location selection from PropertySearchComponent
   const handleLocationSelect = (location, locationBasedProperties) => {
-    console.log('📍 Location selected:', location);
-    console.log('🏠 Properties for location:', locationBasedProperties);
-    console.log('🏠 Properties count:', locationBasedProperties.length);
-    
-    // Check if we actually received properties
     if (!locationBasedProperties || !Array.isArray(locationBasedProperties)) {
-      console.error('❌ Invalid properties data received:', locationBasedProperties);
       setError('No properties found for this location');
       return;
     }
-    // FIXED: Remove the propertyTypeMapping since your API already returns correct data
-    // Just use the properties as-is since your backend now returns proper field names
     const processedProperties = locationBasedProperties.map(p => ({
       ...p,
-      // Ensure we have the right field names (your API should already provide these)
       propertyType: p.propertyType || p.propertytype || '',
       yearBuilt: p.yearBuilt || p.yearbuilt || '',
       transactionMode: p.transactionMode || p.transactionmode || ''
     }));
-    console.log('🔄 Processed properties:', processedProperties);
-    console.log('🔍 First property after processing:', processedProperties[0]);
-
-    // Log unique propertyType values for location-based properties
-    const uniquePropertyTypes = [...new Set(processedProperties.map(p => p.propertytype))];
-    console.log('🔍 Unique propertyType values in location data:', uniquePropertyTypes);
     
     setSelectedLocation(location);
     setLocationProperties(processedProperties);
@@ -391,8 +337,6 @@ const App = () => {
 
   // Handle clearing location search
   const handleClearLocationSearch = () => {
-    console.log('🧹 Clearing location search');
-    
     setSelectedLocation(null);
     setLocationProperties([]);
     setSearchMode('all');
@@ -409,11 +353,6 @@ const App = () => {
 
   // Apply filters to properties
   const applyFiltersToProperties = (sourceProperties = null) => {
-    console.log('🔍 Applying filters:', filters);
-    console.log('🔍 Search mode:', searchMode);
-    console.log('🔍 Source properties count:', sourceProperties?.length);
-    
-    // Determine which properties to filter
     let propertiesToFilter;
     if (sourceProperties) {
       propertiesToFilter = sourceProperties;
@@ -425,27 +364,18 @@ const App = () => {
     
     let filtered = [...propertiesToFilter];
     
-    // Apply all filters
     if (filters.propertyType) {
-      console.log('🔍 Filtering by propertyType:', filters.propertyType);
-      console.log('🔍 Available properties before filter:', propertiesToFilter.map(p => ({
-        id: p.id,
-        title: p.title,
-        propertyType: p.propertyType
-      })));      
       const normalizedFilterType = normalizePropertyType(filters.propertyType);
       filtered = filtered.filter(p => {
         const normalizedPropertyType = normalizePropertyType(p.propertyType);
-        const match = normalizedPropertyType === normalizedFilterType;
-        console.log(`🔍 PropertyType check: ${normalizedPropertyType} === ${normalizedFilterType} -> ${match}`);
-        return match;
+        return normalizedPropertyType === normalizedFilterType;
       });
     }
     
     if (filters.walkDistance) {
       const maxWalkDistance = parseInt(filters.walkDistance, 10);
       filtered = filtered.filter(p => {
-        const walkDistance = p.walkDistance; // NEW - camelCase
+        const walkDistance = p.walkDistance;
         return walkDistance !== null && walkDistance !== undefined && walkDistance <= maxWalkDistance;
       });
     }
@@ -512,26 +442,17 @@ const App = () => {
       filtered = filtered.filter(p => p.facilitiesServices && p.facilitiesServices.includes('オートロック'));
     }
     
-    // Apply sorting
     filtered = sortProperties(filtered);
-    console.log(`🔍 Filtered ${propertiesToFilter.length} properties down to ${filtered.length}`);
-    console.log('🔍 Setting filteredProperties to:', filtered);
-    
-    // Log the propertyType of filtered properties for debugging
-    console.log('🔍 Filtered properties propertyType values:', filtered.map(p => p.propertytype));
-    
     setFilteredProperties(filtered);
   };
 
   // Apply filters function
   const applyFilters = () => {
-    console.log('🔍 Triggering applyFilters with filters:', filters);
     applyFiltersToProperties();
   };
 
   // Trigger applyFilters when filters change
   useEffect(() => {
-    console.log('🔍 Filters updated, applying filters:', filters);
     applyFilters();
   }, [filters, sortOption]);
 
@@ -544,8 +465,6 @@ const App = () => {
 
   // Retry function for error state
   const retryLoading = async () => {
-    console.log('🔄 Retrying to load properties...');
-    
     setError(null);
     setIsLoading(true);
     
@@ -557,10 +476,6 @@ const App = () => {
       }
       
       const propertiesArray = Array.isArray(result.properties) ? result.properties : [];
-      
-      // Log unique propertyType values for debugging
-      const uniquePropertyTypes = [...new Set(propertiesArray.map(p => p.propertytype))];
-      console.log('🔍 Unique propertyType values in retry data:', uniquePropertyTypes);
       
       setProperties(propertiesArray);
       
@@ -574,7 +489,6 @@ const App = () => {
       });
       
     } catch (error) {
-      console.error('❌ Retry failed:', error);
       setError(error.message || japanesePhrases.errorLoading);
     } finally {
       setIsLoading(false);
@@ -652,7 +566,7 @@ const App = () => {
     </button>
   );
 
-// Add this component inside your App.jsx file:
+  // UserAuthSection Component
   const UserAuthSection = ({ onOpenLogin, phrases, onShowFavorites }) => {
     const { user, isLoggedIn, logout } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
@@ -660,7 +574,6 @@ const App = () => {
     if (isLoggedIn && user) {
       return (
         <div style={{ position: 'relative' }}>
-          {/* User name - clickable to toggle dropdown */}
           <button
             onClick={() => setShowDropdown(!showDropdown)}
             style={{ 
@@ -690,10 +603,8 @@ const App = () => {
             </span>
           </button>
 
-          {/* Dropdown menu */}
           {showDropdown && (
             <>
-              {/* Backdrop to close dropdown when clicking outside */}
               <div 
                 style={{
                   position: 'fixed',
@@ -706,7 +617,6 @@ const App = () => {
                 onClick={() => setShowDropdown(false)}
               />
               
-              {/* Dropdown content */}
               <div style={{
                 position: 'absolute',
                 top: '100%',
@@ -719,7 +629,6 @@ const App = () => {
                 minWidth: isMobile ? '160px' : '180px',
                 zIndex: 999
               }}>
-                {/* User info section */}
                 <div style={{
                   padding: '0.75rem 1rem',
                   borderBottom: '1px solid #f3f4f6'
@@ -739,9 +648,7 @@ const App = () => {
                   </div>
                 </div>
 
-                {/* Menu items */}
                 <div style={{ padding: '0.5rem 0' }}>
-                  {/* Favorites button - NEW */}
                   <button
                     onClick={() => {
                       setShowDropdown(false);
@@ -772,7 +679,6 @@ const App = () => {
                   <button
                     onClick={() => {
                       setShowDropdown(false);
-                      // Add profile functionality later
                       console.log('Profile clicked');
                     }}
                     style={{
@@ -798,7 +704,6 @@ const App = () => {
                   <button
                     onClick={() => {
                       setShowDropdown(false);
-                      // Add settings functionality later
                       console.log('Settings clicked');
                     }}
                     style={{
@@ -821,14 +726,12 @@ const App = () => {
                     設定
                   </button>
 
-                  {/* Divider */}
                   <div style={{
                     height: '1px',
                     background: '#f3f4f6',
                     margin: '0.5rem 0'
                   }} />
 
-                  {/* Logout button */}
                   <button
                     onClick={() => {
                       setShowDropdown(false);
@@ -861,7 +764,6 @@ const App = () => {
       );
     }
     
-    // When not logged in, show login link
     return (
       <a
         href="#"
@@ -942,8 +844,6 @@ const App = () => {
             justifyContent: 'space-between',
           }}
         >
-
-          {/* Centered Logo */}
           <div
             className="logo-container"
             style={{
@@ -957,37 +857,36 @@ const App = () => {
             <a
               href="#"
               className="logo"
-                  onClick={(e) => {
-                    setPopup({
-                      isOpen: true,
-                      title: japanesePhrases.partnership,
-                      message: `すべてのデータはデモです!
+              onClick={(e) => {
+                setPopup({
+                  isOpen: true,
+                  title: japanesePhrases.partnership,
+                  message: `すべてのデータはデモです!
 
-                                実際にお試しいただき、もしご興味をお持ちいただけましたら：
-                                - 技術提携
-                                - データ連携
-                                - プラットフォーム買取
+                            実際にお試しいただき、もしご興味をお持ちいただけましたら：
+                            - 技術提携
+                            - データ連携
+                            - プラットフォーム買取
 
-                                などについてご相談させていただけますでしょうか。
+                            などについてご相談させていただけますでしょうか。
 
-                                王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）
-                                E-mail: albanywang2000@gmail.com`
-                    });
-                  }}
-                  style={{ 
-                    textDecoration: 'none', 
-                    color: '#6b7280', 
-                    fontWeight: '500', 
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer'
-                  }}
+                            王雷[連絡先] 1-917-647-6866 （ニューヨーク米国）
+                            E-mail: albanywang2000@gmail.com`
+                });
+              }}
+              style={{ 
+                textDecoration: 'none', 
+                color: '#6b7280', 
+                fontWeight: '500', 
+                whiteSpace: 'nowrap',
+                cursor: 'pointer'
+              }}
             >
               <span style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>🏠</span>
               {japanesePhrases.appTitle}
             </a>
           </div>
 
-          {/* Right Side - Development Info */}
           <div
             className="right-nav"
             style={{
@@ -1054,7 +953,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* Mobile Filters Overlay */}
       {isMobile && showMobileFilters && (
         <div style={{
           position: 'fixed',
@@ -1123,7 +1021,6 @@ const App = () => {
         </div>
       )}
 
-      {/* Desktop Filters */}
       {!isMobile && (
         <TopFiltersPanel
           filters={filters}
@@ -1145,12 +1042,10 @@ const App = () => {
         />
       )}
 
-      {/* Mobile View Toggle */}
       {isMobile && currentView === 'properties' && (
         <MobileViewToggle />
       )}
 
-      {/* Main Content Area */}
       <div style={{ 
         height: isMobile ? 
           (currentView === 'properties' ? 'calc(100vh - 120px)' : 'calc(100vh - 56px)') : 
@@ -1159,14 +1054,12 @@ const App = () => {
         flexDirection: isMobile ? 'column' : 'row'
       }}>
         
-        {/* Show UserFavorites when currentView is 'favorites' */}
         {currentView === 'favorites' ? (
           <div style={{ 
             width: '100%',
             overflowY: 'auto',
             background: '#fff'
           }}>
-            {/* Back button */}
             <div style={{ 
               padding: '1rem',
               borderBottom: '1px solid #e5e7eb',
@@ -1194,33 +1087,8 @@ const App = () => {
           </div>
         ) : (
           <>
-            {/* Desktop Layout */}
             {!isMobile ? (
               <>
-                {/* Debug Panel */}
-                <div style={{
-                  position: 'fixed',
-                  bottom: '10px',
-                  left: '10px',
-                  background: 'rgba(0, 0, 0, 0.8)',
-                  color: 'white',
-                  padding: '10px',
-                  borderRadius: '5px',
-                  zIndex: 1000,
-                  fontSize: '12px',
-                  maxWidth: '300px'
-                }}>
-                  <p style={{ margin: 0 }}>Debug Info:</p>
-                  <p style={{ margin: 0 }}>Width: {window.innerWidth}px</p>
-                  <p style={{ margin: 0 }}>Height: {window.innerHeight}px</p>
-                  <p style={{ margin: 0 }}>isTablet: {isTablet ? 'true' : 'false'}</p>
-                  <p style={{ margin: 0 }}>isMobile: {isMobile ? 'true' : 'false'}</p>
-                  <p style={{ margin: 0 }}>isLandscape: {window.innerWidth > window.innerHeight ? 'true' : 'false'}</p>
-                  <p style={{ margin: 0 }}>Grid Columns: {isTablet ? '1fr' : 'repeat(2, 1fr)'}</p>
-                  <p style={{ margin: 0 }}>UserAgent: {navigator.userAgent.substring(0, 50)}...</p>
-                </div>
-
-                {/* Map Container - Takes up 60% of width */}
                 <div style={{ 
                   flex: '0 0 60%',
                   position: 'relative'
@@ -1285,7 +1153,6 @@ const App = () => {
                   )}
                 </div>
 
-                {/* Property List Container - Takes up 40% of width */}
                 <div style={{ 
                   flex: '0 0 40%',
                   overflowY: 'auto',
@@ -1378,7 +1245,6 @@ const App = () => {
                     </div>
                   ) : (
                     <>             
-                      {/* Results Header */}
                       <div style={{ 
                         padding: '1rem',
                         borderBottom: '1px solid #e5e7eb',
@@ -1401,7 +1267,7 @@ const App = () => {
                           }}>
                             {filteredProperties.length} 最新物件
                           </p>
-                        <select
+                          <select
                             value={sortOption}
                             onChange={(e) => setSortOption(e.target.value)}
                             style={{
@@ -1423,13 +1289,15 @@ const App = () => {
                         </div>
                       </div>
                       
-                      {/* Property Cards - Conditional Column Layout */}
-                      <div style={{ 
-                        padding: '1rem',
-                        display: 'grid',
-                        gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
-                        gap: '1rem'
-                      }}>
+                      <div 
+                        className="property-grid"
+                        style={{ 
+                          padding: '1rem',
+                          display: 'grid',
+                          gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
+                          gap: '1rem'
+                        }}
+                      >
                         {filteredProperties.map(property => (
                           <div key={property.id} style={{ 
                             cursor: 'pointer',
@@ -1439,7 +1307,6 @@ const App = () => {
                               property={property}
                               isSelected={selectedProperty === property.id}
                               onClick={() => {
-                                console.log('🏠 Property selected:', property);
                                 setSelectedProperty(property.id);
                                 openPropertyDetail(property);
                               }}
@@ -1454,9 +1321,7 @@ const App = () => {
                 </div>
               </>
             ) : (
-              /* Mobile Layout */
               <>
-                {/* Map View for Mobile */}
                 {mobileView === 'map' && (
                   <div style={{ 
                     flex: 1,
@@ -1521,7 +1386,6 @@ const App = () => {
                   </div>
                 )}
 
-                {/* List View for Mobile */}
                 {mobileView === 'list' && (
                   <div style={{ 
                     flex: 1,
@@ -1614,7 +1478,6 @@ const App = () => {
                       </div>
                     ) : (
                       <>             
-                        {/* Mobile Results Header */}
                         <div style={{ 
                           padding: '0.75rem 1rem',
                           borderBottom: '1px solid #e5e7eb',
@@ -1637,7 +1500,7 @@ const App = () => {
                             }}>
                               {filteredProperties.length} 物件
                             </p>
-                          <select
+                            <select
                               value={sortOption}
                               onChange={(e) => setSortOption(e.target.value)}
                               style={{
@@ -1659,7 +1522,6 @@ const App = () => {
                           </div>
                         </div>
                         
-                        {/* Mobile Property Cards - Single Column Layout */}
                         <div style={{ 
                           padding: '0.75rem',
                           display: 'flex',
@@ -1675,7 +1537,6 @@ const App = () => {
                                 property={property}
                                 isSelected={selectedProperty === property.id}
                                 onClick={() => {
-                                  console.log('🏠 Property selected:', property);
                                   setSelectedProperty(property.id);
                                   openPropertyDetail(property);
                                 }}
@@ -1696,7 +1557,6 @@ const App = () => {
         )}
       </div>
 
-      {/* Mobile Filters Button */}
       {isMobile && currentView === 'properties' && (
         <MobileFiltersButton />
       )}
@@ -1763,19 +1623,19 @@ const App = () => {
         }
         
         /* Tablet styles */
-        @media (min-width: 769px) and (max-width: 1024px) {
+        @media (min-width: 769px) and (max-width: 1366px) {
           .header-container {
             padding: 0 1rem;
           }
           
-          /* Adjust grid for tablets */
+          /* Ensure single-column layout for tablets */
           .property-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
+            grid-template-columns: 1fr;
           }
         }
         
         /* Desktop styles */
-        @media (min-width: 1025px) {
+        @media (min-width: 1367px) {
           .property-grid {
             grid-template-columns: repeat(2, 1fr);
           }
@@ -1783,15 +1643,13 @@ const App = () => {
         
         /* High DPI displays */
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-          /* Ensure images and icons look crisp on retina displays */
           img {
             image-rendering: -webkit-optimize-contrast;
           }
         }
         
-        /* Dark mode support (if needed in the future) */
+        /* Dark mode support */
         @media (prefers-color-scheme: dark) {
-          /* Add dark mode styles here if needed */
         }
         
         /* Accessibility improvements */
