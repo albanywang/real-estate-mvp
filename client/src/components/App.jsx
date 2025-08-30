@@ -40,13 +40,29 @@ const App = () => {
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isIPad = /ipad|tablet/i.test(userAgent) || (width >= 769 && width <= 1024);
+      const isLandscape = window.innerWidth > window.innerHeight;
+
+      console.log('Device Check:', {
+        width,
+        userAgent,
+        isIPad,
+        isLandscape,
+        isMobile: width <= 768,
+      });
+
       setIsMobile(width <= 768);
-      setIsTablet(width > 768 && width <= 810);
+      setIsTablet(isIPad);
     };
 
     checkDevice();
     window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
+    window.addEventListener('orientationchange', checkDevice);
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+      window.removeEventListener('orientationchange', checkDevice);
+    };
   }, []);
 
   // Add this function to handle showing favorites
@@ -1382,12 +1398,15 @@ const App = () => {
                       </div>
                       
                       {/* Property Cards - Conditional Column Layout */}
-                      <div style={{ 
-                        padding: '1rem',
-                        display: 'grid',
-                        gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
-                        gap: '1rem'
-                      }}>
+                      <div 
+                        className="property-grid"
+                        style={{ 
+                          padding: '1rem',
+                          display: 'grid',
+                          gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
+                          gap: '1rem'
+                        }}
+                      >
                         {filteredProperties.map(property => (
                           <div key={property.id} style={{ 
                             cursor: 'pointer',
@@ -1412,6 +1431,7 @@ const App = () => {
                 </div>
               </>
             ) : (
+
 
               /* Mobile Layout */
               <>
