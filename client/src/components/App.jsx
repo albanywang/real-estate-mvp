@@ -44,6 +44,14 @@ const App = () => {
       const isIPad = /ipad|tablet/i.test(userAgent) || (width >= 769 && width <= 1024);
       const isLandscape = window.innerWidth > window.innerHeight;
 
+      console.log('Device Check:', {
+        width,
+        userAgent,
+        isIPad,
+        isLandscape,
+        isMobile: width <= 768,
+      });
+
       setIsMobile(width <= 768);
       setIsTablet(isIPad);
     };
