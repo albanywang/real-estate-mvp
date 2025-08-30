@@ -1401,7 +1401,7 @@ const App = () => {
                           }}>
                             {filteredProperties.length} 最新物件
                           </p>
-                          <select
+                        <select
                             value={sortOption}
                             onChange={(e) => setSortOption(e.target.value)}
                             style={{
@@ -1425,10 +1425,10 @@ const App = () => {
                       
                       {/* Property Cards - Conditional Column Layout */}
                       <div style={{ 
-                          padding: '1rem',
-                          display: 'grid',
-                          gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
-                          gap: '1rem'
+                        padding: '1rem',
+                        display: 'grid',
+                        gridTemplateColumns: isTablet ? '1fr' : 'repeat(2, 1fr)',
+                        gap: '1rem'
                       }}>
                         {filteredProperties.map(property => (
                           <div key={property.id} style={{ 
@@ -1454,8 +1454,6 @@ const App = () => {
                 </div>
               </>
             ) : (
-
-
               /* Mobile Layout */
               <>
                 {/* Map View for Mobile */}
